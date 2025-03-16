@@ -1,4 +1,5 @@
-import { Hospital } from "../HospitalManagement";
+// src/app/admin/components/hospitals/HospitalCard.tsx
+import { Hospital } from "@/context/HospitalContext";
 import styles from "../../styles/HospitalManagement.module.css";
 
 type HospitalCardProps = {
@@ -24,7 +25,8 @@ export default function HospitalCard({
                     <div className="media-content">
                         <p className="title is-4 mb-5">{hospital.name}</p>
                         <p className="subtitle is-6">
-                            {hospital.organization.name}
+                            {hospital.organization?.name ||
+                                "Unknown Organization"}
                         </p>
                     </div>
                 </div>
@@ -40,10 +42,10 @@ export default function HospitalCard({
                     </p>
                     <div className="tags">
                         <span className="tag is-success">
-                            {hospital.departments} Departments
+                            {hospital.departments || 0} Departments
                         </span>
                         <span className="tag is-primary">
-                            {hospital.wards} Wards
+                            {hospital.wards || 0} Wards
                         </span>
                         <span
                             className={`tag ${hospital.active ? "is-info" : "is-danger"}`}

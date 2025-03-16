@@ -1,11 +1,11 @@
+// src/app/admin/components/hospitals/HospitalModal.tsx
 import { useEffect, useState } from "react";
-import { Hospital, Organization } from "../HospitalManagement";
+import { Hospital, useHospitals } from "@/context/HospitalContext";
 
 type HospitalModalProps = {
     isOpen: boolean;
     mode: "add" | "edit";
     hospital: Hospital | null;
-    organizations: Organization[];
     onClose: () => void;
     onSave: (hospital: Hospital) => void;
 };
@@ -14,10 +14,11 @@ export default function HospitalModal({
     isOpen,
     mode,
     hospital,
-    organizations,
     onClose,
     onSave,
 }: HospitalModalProps) {
+    const { organizations } = useHospitals();
+
     const emptyHospital: Hospital = {
         id: "",
         name: "",
@@ -36,6 +37,7 @@ export default function HospitalModal({
 
     const [formData, setFormData] = useState<Hospital>(emptyHospital);
     const [formError, setFormError] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (mode === "edit" && hospital) {
@@ -56,6 +58,7 @@ export default function HospitalModal({
             });
         }
         setFormError("");
+        setIsSubmitting(false);
     }, [mode, hospital, organizations, isOpen]);
 
     const handleInputChange = (
@@ -87,17 +90,65 @@ export default function HospitalModal({
         }
     };
 
+    const validateForm = () => {
+        // Validate required fields
+        if (!formData.name.trim()) {
+            setFormError("Hospital name is required");
+            return false;
+        }
+
+        if (!formData.organization.id) {
+            setFormError("Organization is required");
+            return false;
+        }
+
+        if (!formData.address.trim()) {
+            setFormError("Address is required");
+            return false;
+        }
+
+        if (!formData.city.trim()) {
+            setFormError("City is required");
+            return false;
+        }
+
+        if (!formData.postcode.trim()) {
+            setFormError("Postcode is required");
+            return false;
+        }
+
+        // Validate email if provided
+        if (formData.contactEmail && !validateEmail(formData.contactEmail)) {
+            setFormError("Please enter a valid email address");
+            return false;
+        }
+
+        return true;
+    };
+
+    const validateEmail = (email: string) => {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
         // Validate form
-        if (!formData.name || !formData.organization.id) {
-            setFormError("Hospital name and organization are required");
+        if (!validateForm()) {
             return;
         }
 
+        setIsSubmitting(true);
+
         // Save the hospital
-        onSave(formData);
+        try {
+            onSave(formData);
+        } catch (error) {
+            console.error("Error saving hospital:", error);
+            setFormError("An error occurred while saving. Please try again.");
+            setIsSubmitting(false);
+        }
     };
 
     if (!isOpen) return null;
@@ -114,6 +165,7 @@ export default function HospitalModal({
                         className="delete"
                         aria-label="close"
                         onClick={onClose}
+                        disabled={isSubmitting}
                     ></button>
                 </header>
 
@@ -139,6 +191,7 @@ export default function HospitalModal({
                                     value={formData.name}
                                     onChange={handleInputChange}
                                     placeholder="Enter hospital name"
+                                    required
                                 />
                             </div>
                         </div>
@@ -151,6 +204,7 @@ export default function HospitalModal({
                                         name="organizationId"
                                         value={formData.organization.id}
                                         onChange={handleInputChange}
+                                        required
                                     >
                                         <option value="">
                                             Select an organization
@@ -177,6 +231,7 @@ export default function HospitalModal({
                                             value={formData.address}
                                             onChange={handleInputChange}
                                             placeholder="Street address"
+                                            required
                                         />
                                     </div>
                                 </div>
@@ -192,6 +247,7 @@ export default function HospitalModal({
                                             value={formData.city}
                                             onChange={handleInputChange}
                                             placeholder="City"
+                                            required
                                         />
                                     </div>
                                 </div>
@@ -210,6 +266,7 @@ export default function HospitalModal({
                                             value={formData.postcode}
                                             onChange={handleInputChange}
                                             placeholder="Postcode"
+                                            required
                                         />
                                     </div>
                                 </div>
@@ -225,6 +282,7 @@ export default function HospitalModal({
                                             value={formData.beds}
                                             onChange={handleInputChange}
                                             placeholder="Number of beds"
+                                            min="0"
                                         />
                                     </div>
                                 </div>
@@ -275,13 +333,18 @@ export default function HospitalModal({
                     </section>
 
                     <footer className="modal-card-foot">
-                        <button type="submit" className="button is-primary">
+                        <button
+                            type="submit"
+                            className={`button is-primary ${isSubmitting ? "is-loading" : ""}`}
+                            disabled={isSubmitting}
+                        >
                             {mode === "add" ? "Add Hospital" : "Save Changes"}
                         </button>
                         <button
                             type="button"
                             className="button"
                             onClick={onClose}
+                            disabled={isSubmitting}
                         >
                             Cancel
                         </button>

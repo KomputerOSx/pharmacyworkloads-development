@@ -1,4 +1,4 @@
-import { Organization } from "../OrganizationManagement";
+import { Organization } from "@/context/OrganizationContext";
 
 type OrganizationTableProps = {
     organizations: Organization[];

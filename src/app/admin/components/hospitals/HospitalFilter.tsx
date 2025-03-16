@@ -1,4 +1,5 @@
-import { Organization } from "../HospitalManagement";
+// src/app/admin/components/hospitals/HospitalFilter.tsx
+import { useHospitals } from "@/context/HospitalContext";
 
 type FilterProps = {
     filter: {
@@ -13,14 +14,11 @@ type FilterProps = {
             search: string;
         }>
     >;
-    organizations: Organization[];
 };
 
-export default function HospitalFilter({
-    filter,
-    setFilter,
-    organizations,
-}: FilterProps) {
+export default function HospitalFilter({ filter, setFilter }: FilterProps) {
+    const { organizations } = useHospitals();
+
     const handleFilterChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     ) => {
