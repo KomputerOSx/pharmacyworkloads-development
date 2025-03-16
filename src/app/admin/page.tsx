@@ -5,6 +5,8 @@ import TabNavigation from "../admin/components/TabNavigation";
 import Dashboard from "../admin/components/Dashboard";
 import OrganizationManagement from "../admin/components/OrganizationManagement";
 import HospitalManagement from "../admin/components/HospitalManagement";
+import DepartmentManagement from "@/app/admin/components/DepartmentManagement";
+import WardManagement from "@/app/admin/components/WardManagement";
 
 // Tab type definition
 export type TabId =
@@ -31,25 +33,9 @@ export default function AdminPage() {
 
             {activeTab === "hospitals" && <HospitalManagement />}
 
-            {activeTab === "departments" && (
-                <div className="notification is-info">
-                    <p className="title is-4">Departments Management</p>
-                    <p>
-                        This section would contain the CRUD operations for
-                        managing departments (COTE, MEDS, SURG, EMRG)
-                    </p>
-                </div>
-            )}
+            {activeTab === "departments" && <DepartmentManagement />}
 
-            {activeTab === "wards" && (
-                <div className="notification is-info">
-                    <p className="title is-4">Wards Management</p>
-                    <p>
-                        This section would contain the CRUD operations for
-                        managing hospital wards
-                    </p>
-                </div>
-            )}
+            {activeTab === "wards" && <WardManagement />}
 
             {activeTab === "staff" && (
                 <div className="notification is-info">

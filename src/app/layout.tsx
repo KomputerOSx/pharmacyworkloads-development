@@ -1,4 +1,4 @@
-// // app/layout.tsx (Root layout with providers)
+// // src/app/layout.tsx
 // import "bulma/css/bulma.min.css";
 // import "@fortawesome/fontawesome-free/css/all.min.css";
 // import "./globals.css";
@@ -6,6 +6,8 @@
 // import {EditModeProvider} from "@/context/EditModeContext";
 // import {WorkloadProvider} from "@/context/WorkloadContext";
 // import {OrganizationProvider} from "@/context/OrganizationContext";
+// import {HospitalProvider} from "@/context/HospitalContext";
+// import {DepartmentProvider} from "@/context/DepartmentContext";
 // import React from "react";
 //
 // export const metadata: Metadata = {
@@ -23,9 +25,13 @@
 //         <html lang="en" className={"theme-light"}>
 //             <body>
 //                 <OrganizationProvider>
-//                     <WorkloadProvider>
-//                         <EditModeProvider>{children}</EditModeProvider>
-//                     </WorkloadProvider>
+//                     <HospitalProvider>
+//                         <DepartmentProvider>
+//                             <WorkloadProvider>
+//                                 <EditModeProvider>{children}</EditModeProvider>
+//                             </WorkloadProvider>
+//                         </DepartmentProvider>
+//                     </HospitalProvider>
 //                 </OrganizationProvider>
 //             </body>
 //         </html>
@@ -41,6 +47,8 @@ import {EditModeProvider} from "@/context/EditModeContext";
 import {WorkloadProvider} from "@/context/WorkloadContext";
 import {OrganizationProvider} from "@/context/OrganizationContext";
 import {HospitalProvider} from "@/context/HospitalContext";
+import {DepartmentProvider} from "@/context/DepartmentContext";
+import {WardProvider} from "@/context/WardContext";
 import React from "react";
 
 export const metadata: Metadata = {
@@ -59,9 +67,15 @@ export default function RootLayout({
             <body>
                 <OrganizationProvider>
                     <HospitalProvider>
-                        <WorkloadProvider>
-                            <EditModeProvider>{children}</EditModeProvider>
-                        </WorkloadProvider>
+                        <DepartmentProvider>
+                            <WardProvider>
+                                <WorkloadProvider>
+                                    <EditModeProvider>
+                                        {children}
+                                    </EditModeProvider>
+                                </WorkloadProvider>
+                            </WardProvider>
+                        </DepartmentProvider>
                     </HospitalProvider>
                 </OrganizationProvider>
             </body>

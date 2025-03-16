@@ -1,0 +1,88 @@
+/* src/app/admin/styles/DepartmentManagement.module.css */
+.departmentCard {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.departmentCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(10, 10, 10, 0.1);
+}
+
+.departmentCard .card-content {
+    flex-grow: 1;
+}
+
+/* For department hierarchy display */
+.hierarchyList {
+    list-style-type: none;
+    padding: 0;
+}
+
+.hierarchyList li {
+    padding: 0.5rem 0;
+    position: relative;
+}
+
+.hierarchyItem {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.hierarchyItem:hover {
+    background-color: #f5f5f5;
+}
+
+.hierarchyChildren {
+    padding-left: 1.5rem;
+    border-left: 1px solid #dbdbdb;
+    margin-left: 0.75rem;
+}
+
+/* For subdepartment listing */
+.breadcrumb {
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+}
+
+.breadcrumb ol {
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.breadcrumb li {
+    display: flex;
+    align-items: center;
+}
+
+.breadcrumb li:not(:last-child)::after {
+    content: "/";
+    margin: 0 0.5rem;
+    color: #b5b5b5;
+}
+
+.breadcrumb a {
+    color: #3273dc;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+/* Department color display */
+.colorSwatch {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
