@@ -1,0 +1,12 @@
+/* Add this to your globals.css or include in your component styles */
+
+.disabled-tab {
+    pointer-events: none;
+}
+
+/* Optional: Add a small visual indicator to show which tabs are disabled */
+.tabs li.disabled-tab a::before {
+    content: "🔒";
+    font-size: 10px;
+    margin-right: 4px;
+}

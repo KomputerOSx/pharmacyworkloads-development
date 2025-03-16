@@ -1,0 +1,19 @@
+/* OrganizationManagement.module.css */
+.filterSection {
+    margin-bottom: 1.5rem;
+}
+
+.filterLabel {
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.tableContainer {
+    overflow-x: auto;
+}
+
+.actionButton {
+    margin-right: 0.5rem;
+}
