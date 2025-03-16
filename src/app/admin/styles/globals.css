@@ -3,6 +3,30 @@
 /* Import Font Awesome */
 @import 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
 
+
+/* Main layout container - uses flexbox for sticky footer */
+.admin-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Full viewport height */
+}
+
+/* Main content area - grows to fill available space */
+.admin-layout main {
+    flex: 1; /* This makes the main content expand */
+    padding: 1.5rem 0; /* Keep your existing padding */
+}
+
+/* Footer stays at the bottom */
+.admin-layout footer {
+    margin-top: auto; /* Alternative approach if flex:1 on main has issues */
+}
+
+/* If you want to add a bit of spacing before the footer */
+.admin-layout main.container {
+    padding-bottom: 2rem;
+}
+
 /* Custom styles */
 .hero.is-primary {
     background: linear-gradient(to right, #3273dc, #3aa3fa);

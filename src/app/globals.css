@@ -1,5 +1,12 @@
 /* Add this to your globals.css or include in your component styles */
 
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+
 .disabled-tab {
     pointer-events: none;
 }

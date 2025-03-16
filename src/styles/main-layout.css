@@ -1,0 +1,15 @@
+/*app/styles/main-layout.css*/
+.main-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-layout main {
+    flex: 1;
+    padding: 1.5rem 0;
+}
+
+.main-layout footer {
+    margin-top: auto;
+}
