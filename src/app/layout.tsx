@@ -50,6 +50,7 @@ import {HospitalProvider} from "@/context/HospitalContext";
 import {DepartmentProvider} from "@/context/DepartmentContext";
 import {WardProvider} from "@/context/WardContext";
 import React from "react";
+import {StaffProvider} from "@/context/StaffContext";
 
 export const metadata: Metadata = {
     title: "Pharmacy Directorate Workload Tracker",
@@ -69,11 +70,13 @@ export default function RootLayout({
                     <HospitalProvider>
                         <DepartmentProvider>
                             <WardProvider>
-                                <WorkloadProvider>
-                                    <EditModeProvider>
-                                        {children}
-                                    </EditModeProvider>
-                                </WorkloadProvider>
+                                <StaffProvider>
+                                    <WorkloadProvider>
+                                        <EditModeProvider>
+                                            {children}
+                                        </EditModeProvider>
+                                    </WorkloadProvider>
+                                </StaffProvider>
                             </WardProvider>
                         </DepartmentProvider>
                     </HospitalProvider>

@@ -7,6 +7,7 @@ import OrganizationManagement from "../admin/components/OrganizationManagement";
 import HospitalManagement from "../admin/components/HospitalManagement";
 import DepartmentManagement from "@/app/admin/components/DepartmentManagement";
 import WardManagement from "@/app/admin/components/WardManagement";
+import StaffManagement from "@/app/admin/components/StaffManagement";
 
 // Tab type definition
 export type TabId =
@@ -37,15 +38,7 @@ export default function AdminPage() {
 
             {activeTab === "wards" && <WardManagement />}
 
-            {activeTab === "staff" && (
-                <div className="notification is-info">
-                    <p className="title is-4">Staff Management</p>
-                    <p>
-                        This section would contain the CRUD operations for
-                        managing staff (pharmacists, technicians, etc.)
-                    </p>
-                </div>
-            )}
+            {activeTab === "staff" && <StaffManagement />}
 
             {activeTab === "workloads" && (
                 <div className="notification is-info">
