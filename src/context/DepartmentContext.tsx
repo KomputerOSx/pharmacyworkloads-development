@@ -1,4 +1,3 @@
-// // src/context/DepartmentContext.tsx
 // "use client";
 //
 // import React, { createContext, useContext, useEffect, useState } from "react";
@@ -11,7 +10,6 @@
 //     updateDepartment,
 // } from "@/services/departmentService";
 // import { getHospitals } from "@/services/hospitalService";
-//
 // // Define the Department type
 // export type Department = {
 //     id: string;
@@ -82,6 +80,7 @@
 //         department: Partial<Department>,
 //     ) => Promise<Department>;
 //     removeDepartment: (id: string) => Promise<void>;
+//     getAllRootDepartments: () => Department[]; // New method to get all root departments
 // }
 //
 // // Create the context
@@ -110,6 +109,11 @@
 //         search: "",
 //     });
 //
+//     // New state to maintain all root departments regardless of filters
+//     const [allRootDepartments, setAllRootDepartments] = useState<Department[]>(
+//         [],
+//     );
+//
 //     // Load department types
 //     useEffect(() => {
 //         setDepartmentTypes(getDepartmentTypes());
@@ -135,6 +139,32 @@
 //         }
 //
 //         return hierarchy;
+//     };
+//
+//     // Function to load all root departments (not affected by filters)
+//     const loadAllRootDepartments = async () => {
+//         try {
+//             // Get departments with no filter
+//             const allDepts = await getDepartments({
+//                 hospital: "all",
+//                 type: "all",
+//                 parent: "all",
+//                 search: "",
+//             });
+//
+//             // Filter to just root departments (those without a parent)
+//             const rootDepts: Department[] = allDepts.filter(
+//                 (dept) => !dept.parent,
+//             );
+//             setAllRootDepartments(rootDepts);
+//         } catch (err) {
+//             console.error("Error loading all root departments:", err);
+//         }
+//     };
+//
+//     // Method to get all root departments (for filter component)
+//     const getAllRootDepartments = () => {
+//         return allRootDepartments;
 //     };
 //
 //     // Function to fetch departments
@@ -202,6 +232,10 @@
 //         try {
 //             const newDepartment = await addDepartment(department);
 //             await refreshDepartments();
+//             // Refresh all root departments if this is a new root department
+//             if (!department.parent) {
+//                 await loadAllRootDepartments();
+//             }
 //             return newDepartment;
 //         } catch (err) {
 //             console.error("Error adding department:", err);
@@ -218,6 +252,10 @@
 //         try {
 //             const updatedDepartment = await updateDepartment(id, department);
 //             await refreshDepartments();
+//             // Refresh all root departments if parent relationship changed
+//             if ("parent" in department) {
+//                 await loadAllRootDepartments();
+//             }
 //             return updatedDepartment;
 //         } catch (err) {
 //             console.error("Error updating department:", err);
@@ -231,7 +269,9 @@
 //         try {
 //             await deleteDepartment(id);
 //             await refreshDepartments();
-//         } catch (err: any) {
+//             // Refresh all root departments in case a root was deleted
+//             await loadAllRootDepartments();
+//         } catch (err) {
 //             console.error("Error deleting department:", err);
 //             setError(
 //                 err.message || "Failed to delete department. Please try again.",
@@ -239,6 +279,11 @@
 //             throw err;
 //         }
 //     };
+//
+//     // Load all root departments on mount (independent of filters)
+//     useEffect(() => {
+//         loadAllRootDepartments();
+//     }, []);
 //
 //     // Load departments on mount and when filter changes
 //     useEffect(() => {
@@ -266,6 +311,7 @@
 //         addNewDepartment,
 //         updateExistingDepartment,
 //         removeDepartment,
+//         getAllRootDepartments,
 //     };
 //
 //     return (
@@ -285,19 +331,29 @@
 //     }
 //     return context;
 // };
+
 // src/context/DepartmentContext.tsx
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useState,
+} from "react";
 import {
     addDepartment,
     deleteDepartment,
-    getDepartmentChildren,
-    getDepartments,
     getDepartmentTypes,
     updateDepartment,
 } from "@/services/departmentService";
 import { getHospitals } from "@/services/hospitalService";
+import {
+    ensureCompleteDepartment,
+    getDepartmentChildrenSafe,
+    getDepartmentsSafe,
+} from "@/utils/departmentUtils";
 
 // Define the Department type
 export type Department = {
@@ -369,7 +425,7 @@ interface DepartmentContextType {
         department: Partial<Department>,
     ) => Promise<Department>;
     removeDepartment: (id: string) => Promise<void>;
-    getAllRootDepartments: () => Department[]; // New method to get all root departments
+    getAllRootDepartments: () => Department[]; // Method to get all root departments
 }
 
 // Create the context
@@ -398,7 +454,7 @@ export const DepartmentProvider: React.FC<{ children: React.ReactNode }> = ({
         search: "",
     });
 
-    // New state to maintain all root departments regardless of filters
+    // State to maintain all root departments regardless of filters
     const [allRootDepartments, setAllRootDepartments] = useState<Department[]>(
         [],
     );
@@ -417,8 +473,8 @@ export const DepartmentProvider: React.FC<{ children: React.ReactNode }> = ({
 
         // Process each root department
         for (const rootDept of rootDepartments) {
-            // Get children for this department
-            const children = await getDepartmentChildren(rootDept.id);
+            // Get children for this department - ensure type safety
+            const children = await getDepartmentChildrenSafe(rootDept.id);
 
             // Add to hierarchy with children
             hierarchy.push({
@@ -433,8 +489,8 @@ export const DepartmentProvider: React.FC<{ children: React.ReactNode }> = ({
     // Function to load all root departments (not affected by filters)
     const loadAllRootDepartments = async () => {
         try {
-            // Get departments with no filter
-            const allDepts = await getDepartments({
+            // Get departments with no filter but make sure they're type-safe
+            const allDepts = await getDepartmentsSafe({
                 hospital: "all",
                 type: "all",
                 parent: "all",
@@ -455,13 +511,13 @@ export const DepartmentProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     // Function to fetch departments
-    const refreshDepartments = async () => {
+    const refreshDepartments = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
 
-            // Get flat list of departments
-            const data = await getDepartments(filter);
+            // Get flat list of departments using our type-safe utility
+            const data = await getDepartmentsSafe(filter);
             setDepartments(data);
 
             // Build hierarchy if needed
@@ -483,13 +539,17 @@ export const DepartmentProvider: React.FC<{ children: React.ReactNode }> = ({
         } finally {
             setLoading(false);
         }
-    };
+    }, [filter]);
 
     // Function to fetch hospitals (for dropdowns)
     const refreshHospitals = async () => {
         try {
             const data = await getHospitals({ status: "active" });
-            setHospitals(data);
+            const hospitals = data.map((hospital) => ({
+                ...hospital,
+                name: hospital.organization.name,
+            }));
+            setHospitals(hospitals);
         } catch (err) {
             console.error("Error fetching hospitals:", err);
             setError(
@@ -501,7 +561,8 @@ export const DepartmentProvider: React.FC<{ children: React.ReactNode }> = ({
     // Function to get department children
     const getDepartmentChildrenFunc = async (departmentId: string) => {
         try {
-            return await getDepartments({ parent: departmentId });
+            // Use our type-safe utility
+            return await getDepartmentChildrenSafe(departmentId);
         } catch (err) {
             console.error("Error fetching department children:", err);
             setError("Failed to load subdepartments. Please try again.");
@@ -518,12 +579,14 @@ export const DepartmentProvider: React.FC<{ children: React.ReactNode }> = ({
     ) => {
         try {
             const newDepartment = await addDepartment(department);
+            // Ensure the returned department is type-safe
+            const typeSafeDepartment = ensureCompleteDepartment(newDepartment);
             await refreshDepartments();
             // Refresh all root departments if this is a new root department
             if (!department.parent) {
                 await loadAllRootDepartments();
             }
-            return newDepartment;
+            return typeSafeDepartment;
         } catch (err) {
             console.error("Error adding department:", err);
             setError("Failed to add department. Please try again.");
@@ -537,13 +600,16 @@ export const DepartmentProvider: React.FC<{ children: React.ReactNode }> = ({
         department: Partial<Department>,
     ) => {
         try {
-            const updatedDepartment = await updateDepartment(id, department);
+            const rawUpdatedDepartment = await updateDepartment(id, department);
+            // Ensure the returned department is type-safe
+            const typeSafeDepartment =
+                ensureCompleteDepartment(rawUpdatedDepartment);
             await refreshDepartments();
             // Refresh all root departments if parent relationship changed
             if ("parent" in department) {
                 await loadAllRootDepartments();
             }
-            return updatedDepartment;
+            return typeSafeDepartment;
         } catch (err) {
             console.error("Error updating department:", err);
             setError("Failed to update department. Please try again.");
@@ -558,28 +624,26 @@ export const DepartmentProvider: React.FC<{ children: React.ReactNode }> = ({
             await refreshDepartments();
             // Refresh all root departments in case a root was deleted
             await loadAllRootDepartments();
-        } catch (err: any) {
+        } catch (err) {
             console.error("Error deleting department:", err);
-            setError(
-                err.message || "Failed to delete department. Please try again.",
-            );
+            setError("Failed to delete department. Please try again.");
             throw err;
         }
     };
 
     // Load all root departments on mount (independent of filters)
     useEffect(() => {
-        loadAllRootDepartments();
+        loadAllRootDepartments().then((r) => r);
     }, []);
 
     // Load departments on mount and when filter changes
     useEffect(() => {
-        refreshDepartments();
-    }, [filter]);
+        refreshDepartments().then((r) => r);
+    }, [filter, refreshDepartments]);
 
     // Load hospitals on mount
     useEffect(() => {
-        refreshHospitals();
+        refreshHospitals().then((r) => r);
     }, []);
 
     // Context value

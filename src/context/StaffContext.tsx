@@ -41,7 +41,7 @@ export type Staff = {
         id: string;
         name: string;
     };
-    departmentRole?: {
+    departmentRole: {
         id: string;
         name: string; // Manager, admin, coordinator, supervisor
     };
@@ -206,6 +206,7 @@ export const StaffProvider: React.FC<{ children: React.ReactNode }> = ({
             setError(null);
 
             const data = await getStaff(filter);
+            // @ts-expect-error Have selected important parameters as necessary and other as optional.
             setStaff(data);
         } catch (err) {
             console.error("Error fetching staff:", err);
