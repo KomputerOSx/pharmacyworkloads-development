@@ -13,6 +13,24 @@ import { getDepartments } from "@/services/departmentService";
 import { getHospitals } from "@/services/hospitalService";
 import { getOrganizations } from "@/services/organizationService";
 
+export type WorkingDay =
+    | "monday"
+    | "tuesday"
+    | "wednesday"
+    | "thursday"
+    | "friday"
+    | "saturday"
+    | "sunday";
+
+export type WorkHours = {
+    start: string;
+    end: string;
+};
+
+export type WorkingHours = {
+    [key in WorkingDay]?: WorkHours | null;
+};
+
 // Define the Staff type
 export type Staff = {
     id: string;
@@ -46,8 +64,8 @@ export type Staff = {
         wednesday?: { start: string; end: string };
         thursday?: { start: string; end: string };
         friday?: { start: string; end: string };
-        saturday?: { start: string; end: string };
-        sunday?: { start: string; end: string };
+        saturday?: { start: string; end: string } | null;
+        sunday?: { start: string; end: string } | null;
     };
     additionalTraining?: string[]; // Array of training certifications
     startDate?: string; // ISO date string

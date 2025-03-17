@@ -1,11 +1,12 @@
 // src/app/admin/components/staff/StaffModal.tsx
-import { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
     departmentRoles,
     nhsBands,
     Staff,
     trainingOptions,
     useStaff,
+    WorkingDay,
 } from "@/context/StaffContext";
 
 type StaffModalProps = {
@@ -26,30 +27,33 @@ export default function StaffModal({
     const { organizations, hospitals, departments, staffRoles } = useStaff();
 
     // Default empty staff
-    const emptyStaff: Staff = {
-        id: "",
-        name: "",
-        email: "",
-        phone: "",
-        primaryRole: { id: "", name: "" },
-        departmentRole: { id: "staff", name: "Staff" },
-        nhsBand: "",
-        organization: { id: "", name: "" },
-        defaultHospital: { id: "", name: "" },
-        departments: [],
-        usualWorkingHours: {
-            monday: { start: "09:00", end: "17:00" },
-            tuesday: { start: "09:00", end: "17:00" },
-            wednesday: { start: "09:00", end: "17:00" },
-            thursday: { start: "09:00", end: "17:00" },
-            friday: { start: "09:00", end: "17:00" },
-            saturday: null,
-            sunday: null,
-        },
-        additionalTraining: [],
-        startDate: new Date().toISOString().split("T")[0],
-        active: true,
-    };
+    const emptyStaff = useMemo(
+        () => ({
+            id: "",
+            name: "",
+            email: "",
+            phone: "",
+            primaryRole: { id: "", name: "" },
+            departmentRole: { id: "staff", name: "Staff" },
+            nhsBand: "",
+            organization: { id: "", name: "" },
+            defaultHospital: { id: "", name: "" },
+            departments: [],
+            usualWorkingHours: {
+                monday: { start: "09:00", end: "17:00" },
+                tuesday: { start: "09:00", end: "17:00" },
+                wednesday: { start: "09:00", end: "17:00" },
+                thursday: { start: "09:00", end: "17:00" },
+                friday: { start: "09:00", end: "17:00" },
+                saturday: null,
+                sunday: null,
+            },
+            additionalTraining: [],
+            startDate: new Date().toISOString().split("T")[0],
+            active: true,
+        }),
+        [],
+    );
 
     const [formData, setFormData] = useState<Staff>(emptyStaff);
     const [formError, setFormError] = useState("");
@@ -127,7 +131,10 @@ export default function StaffModal({
         departments,
         staffRoles,
         isOpen,
+        emptyStaff,
     ]);
+
+    // Fix for the handleInputChange function in StaffModal.tsx
 
     const handleInputChange = (
         e: React.ChangeEvent<
@@ -182,13 +189,16 @@ export default function StaffModal({
             }
         } else if (name.startsWith("workingHours.")) {
             // Handle working hours updates
-            const [, day, field] = name.split(".");
+            const parts = name.split(".");
+            const day = parts[1] as WorkingDay;
+            const field = parts[2];
+
             setFormData({
                 ...formData,
                 usualWorkingHours: {
                     ...formData.usualWorkingHours,
                     [day]: {
-                        ...formData.usualWorkingHours?.[day],
+                        ...(formData.usualWorkingHours?.[day] || {}),
                         [field]: value,
                     },
                 },
@@ -257,13 +267,15 @@ export default function StaffModal({
 
     // Handle day off toggle
     const handleDayOffToggle = (day: string) => {
-        if (formData.usualWorkingHours?.[day]) {
+        const typedDay = day as WorkingDay;
+
+        if (formData.usualWorkingHours?.[typedDay]) {
             // If the day has hours, set to null (day off)
             setFormData({
                 ...formData,
                 usualWorkingHours: {
                     ...formData.usualWorkingHours,
-                    [day]: null,
+                    [typedDay]: null,
                 },
             });
         } else {
@@ -272,7 +284,7 @@ export default function StaffModal({
                 ...formData,
                 usualWorkingHours: {
                     ...formData.usualWorkingHours,
-                    [day]: { start: "09:00", end: "17:00" },
+                    [typedDay]: { start: "09:00", end: "17:00" },
                 },
             });
         }
@@ -329,7 +341,8 @@ export default function StaffModal({
             "sunday",
         ];
         for (const day of daysOfWeek) {
-            const hours = formData.usualWorkingHours?.[day];
+            const typedDay = day as WorkingDay;
+            const hours = formData.usualWorkingHours?.[typedDay];
             if (hours) {
                 if (!hours.start || !hours.end) {
                     setFormError(
@@ -822,7 +835,7 @@ export default function StaffModal({
                                     Usual Working Hours
                                 </label>
                                 <p className="help mb-3">
-                                    Set the staff member's typical working
+                                    Set the staff member&apos;s typical working
                                     schedule
                                 </p>
 
@@ -853,7 +866,7 @@ export default function StaffModal({
                                                         day.slice(1)}
                                                 </td>
                                                 {formData.usualWorkingHours?.[
-                                                    day
+                                                    day as WorkingDay
                                                 ] ? (
                                                     <>
                                                         <td>
@@ -864,7 +877,7 @@ export default function StaffModal({
                                                                 value={
                                                                     formData
                                                                         .usualWorkingHours[
-                                                                        day
+                                                                        day as WorkingDay
                                                                     ]?.start ||
                                                                     ""
                                                                 }
@@ -881,7 +894,7 @@ export default function StaffModal({
                                                                 value={
                                                                     formData
                                                                         .usualWorkingHours[
-                                                                        day
+                                                                        day as WorkingDay
                                                                     ]?.end || ""
                                                                 }
                                                                 onChange={

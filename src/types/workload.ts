@@ -1,5 +1,13 @@
-export type DirectorateType = 'COTE' | 'MEDS' | 'SURG' | 'EMRG';
-export type ShiftType = 'AM' | 'PM';
+export type DirectorateType = "COTE" | "MEDS" | "SURG" | "EMRG";
+export type ShiftType = "AM" | "PM";
+export type DayOfWeek =
+    | "monday"
+    | "tuesday"
+    | "wednesday"
+    | "thursday"
+    | "friday"
+    | "saturday"
+    | "sunday";
 
 export interface WorkloadEntry {
     id: number;
@@ -42,13 +50,19 @@ export interface PharmacistSummary {
 
 export interface WorkloadState {
     entries: WorkloadEntry[];
-    addEntry: (entry: Omit<WorkloadEntry, 'id'>) => void;
+    addEntry: (entry: Omit<WorkloadEntry, "id">) => void;
     updateEntry: (id: number, entry: Partial<WorkloadEntry>) => void;
     deleteEntry: (id: number) => void;
     deleteWardEntries: (directorate: DirectorateType, ward: string) => void;
     getDirectorateSummary: (directorate: DirectorateType) => DirectorateSummary;
     getPharmacistSummary: (pharmacist: string) => PharmacistSummary;
-    getWardSummary: (directorate: DirectorateType, ward: string) => WardWorkload | null;
+    getWardSummary: (
+        directorate: DirectorateType,
+        ward: string,
+    ) => WardWorkload | null;
     getAllEntries: () => WorkloadEntry[];
-    getFilteredEntries: (directorate?: DirectorateType, search?: string) => WorkloadEntry[];
+    getFilteredEntries: (
+        directorate?: DirectorateType,
+        search?: string,
+    ) => WorkloadEntry[];
 }
