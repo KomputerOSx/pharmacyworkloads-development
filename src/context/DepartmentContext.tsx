@@ -184,7 +184,7 @@ export const DepartmentProvider: React.FC<{ children: React.ReactNode }> = ({
     // Function to get department children
     const getDepartmentChildrenFunc = async (departmentId: string) => {
         try {
-            return await getDepartmentChildren(departmentId);
+            return await getDepartments({ parent: departmentId });
         } catch (err) {
             console.error("Error fetching department children:", err);
             setError("Failed to load subdepartments. Please try again.");

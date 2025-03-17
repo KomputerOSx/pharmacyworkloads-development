@@ -86,7 +86,7 @@ export const getDepartments = async (filters = {}) => {
         const querySnapshot = await getDocs(q);
 
         // Convert to array of data objects with IDs
-        const departments = [];
+        let departments = [];
 
         // Process each department and resolve references
         for (const docSnapshot of querySnapshot.docs) {
