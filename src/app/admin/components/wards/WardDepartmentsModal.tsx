@@ -507,7 +507,8 @@
 import React, {useEffect, useState} from "react";
 import {useWards, Ward} from "@/context/WardContext";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
-import {useOrganizations} from "@/context/OrganizationContext";
+import {Hospital} from "@/context/HospitalContext";
+// import {useOrganizations} from "@/context/OrganizationContext";
 
 type WardDepartmentsModalProps = {
     isOpen: boolean;
@@ -546,7 +547,7 @@ export default function WardDepartmentsModal({
         removeWardDepartmentAssignment,
     } = useWards();
 
-    const { organizations } = useOrganizations();
+    // const { organizations } = useOrganizations();
 
     const [selectedDepartmentId, setSelectedDepartmentId] =
         useState<string>("");
@@ -576,14 +577,14 @@ export default function WardDepartmentsModal({
     const [hospitalsByOrganization, setHospitalsByOrganization] = useState<{
         [orgId: string]: {
             organization: { id: string; name: string };
-            hospitals: any[];
+            hospitals: Hospital[];
         };
     }>({});
 
     // Load ward's departments when modal opens
     useEffect(() => {
         if (isOpen && ward) {
-            loadWardDepartments();
+            loadWardDepartments().then();
             prepareEnhancedDepartments();
             organizeHospitalsByOrganization();
         } else {

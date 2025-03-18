@@ -122,3 +122,23 @@ export const isWardAssignedToDepartment = (
 
     return false;
 };
+
+/**
+ * Ensures a ward department assignment object conforms to the WardDepartmentAssignment type
+ * by providing default values for required fields if they're missing
+ */
+export const ensureCompleteWardDepartmentAssignment = (
+    assignment: Partial<WardDepartmentAssignment>,
+): WardDepartmentAssignment => {
+    return {
+        id: assignment.id || "",
+        department: assignment.department || {
+            id: "",
+            name: "Unknown Department",
+            code: "UNK",
+        },
+        isPrimary: assignment.isPrimary || false,
+        startDate: assignment.startDate,
+        endDate: assignment.endDate,
+    };
+};
