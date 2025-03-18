@@ -711,7 +711,6 @@ export default function DepartmentModal({
     parentDepartment = null,
 }: DepartmentModalProps) {
     const { departmentTypes, departments } = useDepartments();
-
     const { organizations } = useHospitals();
     const hospitals = useHospitals().hospitals;
     // Default empty department
@@ -720,7 +719,7 @@ export default function DepartmentModal({
         name: "",
         code: "",
         description: "",
-        type: "pharmacy",
+        type: "",
         color: "#3273dc",
         // @ts-expect-error small hospital component just for department creation and connect. Full hospital attributes not required here
         hospital: { id: "", name: "" },
@@ -820,22 +819,29 @@ export default function DepartmentModal({
         const { name, value, type } = e.target;
 
         if (name === "organizationId") {
+            // Find the selected organization from the organizations array
             const selectedOrg = organizations.find((org) => org.id === value);
 
-            // Update organization and filter hospitals
-            setFormData({
+            // Update the form data with the selected organization
+            const updatedFormData = {
                 ...formData,
-                organization: selectedOrg
-                    ? {
-                          id: selectedOrg.id,
-                          name: selectedOrg.name,
-                      }
-                    : { id: "", name: "" },
-                // Reset hospital selection when organization changes
-                hospital: { id: "", name: "" },
-            });
+                hospital: {
+                    ...formData.hospital,
+                    organization: selectedOrg
+                        ? {
+                              id: selectedOrg.id,
+                              name: selectedOrg.name,
+                          }
+                        : { id: "", name: "" },
+                    // Reset hospital ID when organization changes
+                    id: "",
+                    name: "",
+                },
+            };
+            // @ts-expect-error small hospital component just for department creation and connect
+            setFormData(updatedFormData);
 
-            // Filter hospitals by selected organization
+            // Filter hospitals based on selected organization
             if (value) {
                 setFilteredHospitals(
                     hospitals.filter((h) => h.organization?.id === value),
@@ -848,8 +854,8 @@ export default function DepartmentModal({
             if (selectedHospital) {
                 setFormData({
                     ...formData,
-                    // @ts-expect-error small hospital component just for department creation and connect
                     hospital: {
+                        ...formData.hospital, // Preserve existing hospital properties, including organization
                         id: selectedHospital.id,
                         name: selectedHospital.name,
                     },

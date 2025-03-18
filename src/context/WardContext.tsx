@@ -17,19 +17,39 @@ export type Ward = {
     id: string;
     name: string;
     code: string;
+    hospital: {
+        id: string;
+        name: string;
+    };
+    // No longer a direct department reference
+    // department: {
+    //     id: string;
+    //     name: string;
+    // };
+    bedCount: number;
+    active: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+
+    // New properties for department assignments
+    departmentAssignments?: WardDepartmentAssignment[];
+    primaryDepartment?: {
+        id: string;
+        name: string;
+        color?: string;
+    } | null;
+};
+
+export type WardDepartmentAssignment = {
+    id: string;
     department: {
         id: string;
         name: string;
         color?: string;
     };
-    hospital: {
-        id: string;
-        name: string;
-    };
-    bedCount: number;
-    active: boolean;
-    createdAt?: string;
-    updatedAt?: string;
+    isPrimary: boolean;
+    startDate?: string;
+    endDate?: string | null;
 };
 
 // Define the Department type (simplified for the context)
