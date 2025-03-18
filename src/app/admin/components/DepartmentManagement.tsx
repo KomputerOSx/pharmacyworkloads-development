@@ -117,6 +117,7 @@ export default function DepartmentManagement() {
             if (modalMode === "add") {
                 const { id, children, createdAt, updatedAt, ...newDepartment } =
                     department;
+                console.log("Adding department:", newDepartment);
                 await addNewDepartment(newDepartment);
 
                 setActionResult({
@@ -190,10 +191,12 @@ export default function DepartmentManagement() {
         }, 5000);
     }
 
+    const topLevelDepartments = departments.filter((dept) => !dept.parent);
+
     // Determine which departments to display
     const departmentsToDisplay = selectedDepartment
         ? subDepartments
-        : departments;
+        : topLevelDepartments;
 
     return (
         <div className="columns">

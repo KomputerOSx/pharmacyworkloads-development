@@ -251,6 +251,8 @@
 
 // src/app/admin/components/departments/DepartmentFilter.tsx
 import {useDepartments} from "@/context/DepartmentContext";
+import {useHospitals} from "@/context/HospitalContext";
+import React from "react";
 
 type FilterProps = {
     filter: {
@@ -270,11 +272,11 @@ type FilterProps = {
 };
 
 export default function DepartmentFilter({ filter, setFilter }: FilterProps) {
-    const { hospitals, departmentTypes, getAllRootDepartments } =
-        useDepartments();
-
+    const { departmentTypes, getAllRootDepartments } = useDepartments();
+    const hospitals = useHospitals().hospitals;
+    const { organizations } = useHospitals();
     // Get all root departments using the new context method
-    const rootDepartments = getAllRootDepartments();
+    // const rootDepartments = getAllRootDepartments();
 
     const handleFilterChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -289,6 +291,25 @@ export default function DepartmentFilter({ filter, setFilter }: FilterProps) {
     return (
         <aside className="menu">
             <p className="menu-label">Filters</p>
+            <div className="field">
+                <label className="label is-small">Organization</label>
+                <div className="control">
+                    <div className="select is-small is-fullwidth">
+                        <select
+                            name="hospital"
+                            value={filter.hospital}
+                            onChange={handleFilterChange}
+                        >
+                            <option value="all">All Organizations</option>
+                            {organizations.map((hospital) => (
+                                <option key={hospital.id} value={hospital.id}>
+                                    {hospital.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+            </div>
             <div className="field">
                 <label className="label is-small">Hospital</label>
                 <div className="control">
@@ -329,26 +350,26 @@ export default function DepartmentFilter({ filter, setFilter }: FilterProps) {
                 </div>
             </div>
 
-            <div className="field">
-                <label className="label is-small">Parent Department</label>
-                <div className="control">
-                    <div className="select is-small is-fullwidth">
-                        <select
-                            name="parent"
-                            value={filter.parent}
-                            onChange={handleFilterChange}
-                        >
-                            <option value="all">All Departments</option>
-                            <option value="root">Top Level Only</option>
-                            {rootDepartments.map((dept) => (
-                                <option key={dept.id} value={dept.id}>
-                                    {dept.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-            </div>
+            {/*<div className="field">*/}
+            {/*    <label className="label is-small">Parent Department</label>*/}
+            {/*    <div className="control">*/}
+            {/*        <div className="select is-small is-fullwidth">*/}
+            {/*            <select*/}
+            {/*                name="parent"*/}
+            {/*                value={filter.parent}*/}
+            {/*                onChange={handleFilterChange}*/}
+            {/*            >*/}
+            {/*                <option value="all">All Departments</option>*/}
+            {/*                <option value="root">Top Level Only</option>*/}
+            {/*                {rootDepartments.map((dept) => (*/}
+            {/*                    <option key={dept.id} value={dept.id}>*/}
+            {/*                        {dept.name}*/}
+            {/*                    </option>*/}
+            {/*                ))}*/}
+            {/*            </select>*/}
+            {/*        </div>*/}
+            {/*    </div>*/}
+            {/*</div>*/}
 
             <div className="field">
                 <label className="label is-small">Search</label>

@@ -1,7 +1,13 @@
 // src/context/HospitalContext.tsx
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useState,
+} from "react";
 import {
     addHospital,
     deleteHospital,
@@ -9,15 +15,13 @@ import {
     updateHospital,
 } from "@/services/hospitalService";
 import { getOrganizations } from "@/services/organizationService";
+import { Organization } from "@/context/OrganizationContext";
 
 // Define the Hospital type
 export type Hospital = {
     id: string;
     name: string;
-    organization: {
-        id: string;
-        name: string;
-    };
+    organization: Organization;
     address: string;
     city: string;
     postcode: string;
@@ -33,10 +37,10 @@ export type Hospital = {
 };
 
 // Define the Organization type (simplified version for the context)
-export type Organization = {
-    id: string;
-    name: string;
-};
+// export type Organization = {
+//     id: string;
+//     name: string;
+// };
 
 // Define the filter type
 export type HospitalFilter = {
@@ -85,7 +89,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({
     });
 
     // Function to fetch hospitals
-    const refreshHospitals = async () => {
+    const refreshHospitals = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -97,7 +101,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({
         } finally {
             setLoading(false);
         }
-    };
+    }, [filter]);
 
     // Function to fetch organizations (for dropdowns)
     const refreshOrganizations = async () => {
@@ -157,12 +161,12 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // Load hospitals on mount and when filter changes
     useEffect(() => {
-        refreshHospitals();
-    }, [filter]);
+        refreshHospitals().then((r) => r);
+    }, [filter, refreshHospitals]);
 
     // Load organizations on mount
     useEffect(() => {
-        refreshOrganizations();
+        refreshOrganizations().then((r) => r);
     }, []);
 
     // Context value
