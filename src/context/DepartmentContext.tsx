@@ -31,10 +31,6 @@ export type Department = {
     type: string;
     color?: string;
     hospital: Hospital;
-    // organization: {
-    //     id: string;
-    //     name: string;
-    // };
     parent?: {
         id: string;
         name: string;
