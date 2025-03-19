@@ -20,7 +20,6 @@ export default function HospitalModal({
     const { organizations } = useHospitals();
 
     const emptyHospital: Hospital = {
-        id: "",
         name: "",
         // @ts-expect-error small hospital component just for department creation and connect
         organization: { id: "", name: "" },
@@ -31,9 +30,6 @@ export default function HospitalModal({
         contactEmail: "",
         beds: 0,
         active: true,
-        departments: 0,
-        wards: 0,
-        staff: 0,
     };
 
     const [formData, setFormData] = useState<Hospital>(emptyHospital);
