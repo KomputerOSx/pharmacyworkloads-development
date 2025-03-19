@@ -6,9 +6,15 @@ type StaffListProps = {
     staff: Staff[];
     onEdit: (staff: Staff) => void;
     onDelete: (id: string, name: string) => void;
+    onManageAssignments: (staff: Staff) => void;
 };
 
-export default function StaffList({ staff, onEdit, onDelete }: StaffListProps) {
+export default function StaffList({
+    staff,
+    onEdit,
+    onDelete,
+    onManageAssignments,
+}: StaffListProps) {
     // Helper to format the date in a readable format
     const formatDate = (dateString?: string) => {
         if (!dateString) return "N/A";
@@ -162,6 +168,17 @@ export default function StaffList({ staff, onEdit, onDelete }: StaffListProps) {
                                     >
                                         <span className="icon is-small">
                                             <i className="fas fa-edit"></i>
+                                        </span>
+                                    </button>
+                                    <button
+                                        className="button is-small is-info mr-1"
+                                        title="Manage Assignments"
+                                        onClick={() =>
+                                            onManageAssignments(staffMember)
+                                        }
+                                    >
+                                        <span className="icon is-small">
+                                            <i className="fas fa-tasks"></i>
                                         </span>
                                     </button>
                                     <button

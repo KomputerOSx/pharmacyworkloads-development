@@ -9,9 +9,26 @@ import {
     getStaffByDepartment,
     updateStaff,
 } from "@/services/staffService";
+import {
+    assignStaffToOrganization,
+    assignStaffToHospital,
+    assignStaffToDepartment,
+    getStaffOrganizationAssignments,
+    getStaffHospitalAssignments,
+    getStaffDepartmentAssignments,
+    getStaffAssignments,
+    setPrimaryHospital,
+    removeStaffOrganizationAssignment,
+    removeStaffHospitalAssignment,
+    removeStaffDepartmentAssignment,
+    removeStaffAssignments,
+} from "@/services/staffAssignmentService";
 import { getDepartments } from "@/services/departmentService";
 import { getHospitals } from "@/services/hospitalService";
 import { getOrganizations } from "@/services/organizationService";
+import { Organization } from "@/context/OrganizationContext";
+import { Hospital } from "./HospitalContext";
+import { Department } from "@/context/DepartmentContext";
 
 export type WorkingDay =
     | "monday"
@@ -74,21 +91,43 @@ export type Staff = {
     updatedAt?: string;
 };
 
-// Define simplified types for related entities
-export type Organization = {
+// Using your existing type definitions
+export type StaffOrganizationAssignment = {
     id: string;
-    name: string;
+    organization: Organization;
+    isPrimary: boolean;
+    startDate?: string;
+    endDate?: string | null;
 };
 
-export type Hospital = {
+export type StaffHospitalAssignment = {
     id: string;
-    name: string;
+    hospital: Hospital;
+    isPrimary: boolean;
+    startDate?: string;
+    endDate?: string | null;
 };
 
-export type Department = {
+export type StaffDepartmentAssignment = {
     id: string;
-    name: string;
-    color?: string;
+    department: Department;
+    role: string; // e.g., "Pharmacist", "Doctor"
+    departmentRole: string; // e.g., "Manager", "Staff"
+    isPrimary: boolean;
+    startDate?: string;
+    endDate?: string | null;
+};
+
+export type StaffAssignments = {
+    id: string;
+    organization: Organization;
+    hospital: Hospital;
+    department: Department;
+    role: string; // e.g., "Pharmacist", "Doctor"
+    departmentRole: string; // e.g., "Manager", "Staff"
+    isPrimary: boolean;
+    startDate?: string;
+    endDate?: string | null;
 };
 
 export type StaffRole = {
@@ -175,6 +214,70 @@ interface StaffContextType {
     ) => Promise<Staff>;
     updateExistingStaff: (id: string, staff: Partial<Staff>) => Promise<Staff>;
     removeStaff: (id: string) => Promise<void>;
+
+    // Staff Assignment Serivce Functions
+    assignStaffToOrganization: (
+        staffId: string,
+        organizationId: string,
+        isPrimary?: boolean,
+    ) => Promise<{ id: string; isPrimary: boolean }>;
+
+    assignStaffToHospital: (
+        staffId: string,
+        hospitalId: string,
+        isPrimary?: boolean,
+    ) => Promise<{ id: string; isPrimary: boolean }>;
+
+    assignStaffToDepartment: (
+        staffId: string,
+        departmentId: string,
+        role?: string,
+        departmentRole?: string,
+        isPrimary?: boolean,
+    ) => Promise<{ id: string; isPrimary: boolean }>;
+
+    // Retrieval functions
+    getStaffOrganizationAssignments: (
+        staffId: string,
+    ) => Promise<StaffOrganizationAssignment[]>;
+    getStaffHospitalAssignments: (
+        staffId: string,
+    ) => Promise<StaffHospitalAssignment[]>;
+    getStaffDepartmentAssignments: (
+        staffId: string,
+    ) => Promise<StaffDepartmentAssignment[]>;
+    getStaffAssignments: (staffId: string) => Promise<{
+        organizationAssignments: StaffOrganizationAssignment[];
+        hospitalAssignments: StaffHospitalAssignment[];
+        departmentAssignments: StaffDepartmentAssignment[];
+    }>;
+
+    // Primary setting function
+    setPrimaryHospital: (
+        staffId: string,
+        assignmentId: string,
+    ) => Promise<void>;
+
+    // Removal functions
+    removeStaffOrganizationAssignment: (assignmentId: string) => Promise<void>;
+    removeStaffHospitalAssignment: (assignmentId: string) => Promise<void>;
+    removeStaffDepartmentAssignment: (assignmentId: string) => Promise<void>;
+    removeStaffAssignments: (staffId: string) => Promise<void>;
+
+    // Optional - current assignments state if needed in UI
+    currentAssignments?: {
+        organizationAssignments: StaffOrganizationAssignment[];
+        hospitalAssignments: StaffHospitalAssignment[];
+        departmentAssignments: StaffDepartmentAssignment[];
+    } | null;
+
+    setCurrentAssignments?: React.Dispatch<
+        React.SetStateAction<{
+            organizationAssignments: StaffOrganizationAssignment[];
+            hospitalAssignments: StaffHospitalAssignment[];
+            departmentAssignments: StaffDepartmentAssignment[];
+        } | null>
+    >;
 }
 
 // Create the context
@@ -185,6 +288,8 @@ export const StaffProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
     const [staff, setStaff] = useState<Staff[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [currentAssignments, setCurrentAssignments] = useState(null);
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [hospitals, setHospitals] = useState<Hospital[]>([]);
     const [departments, setDepartments] = useState<Department[]>([]);
@@ -387,6 +492,89 @@ export const StaffProvider: React.FC<{ children: React.ReactNode }> = ({
         addNewStaff,
         updateExistingStaff,
         removeStaff,
+
+        // Add implementations for all the new methods:
+        assignStaffToOrganization: async (
+            staffId,
+            organizationId,
+            isPrimary = false,
+        ) => {
+            return await assignStaffToOrganization(
+                staffId,
+                organizationId,
+                isPrimary,
+            );
+        },
+
+        assignStaffToHospital: async (
+            staffId,
+            hospitalId,
+            isPrimary = false,
+        ) => {
+            return await assignStaffToHospital(staffId, hospitalId, isPrimary);
+        },
+
+        assignStaffToDepartment: async (
+            staffId,
+            departmentId,
+            role = "staff",
+            departmentRole = "staff",
+            isPrimary = false,
+        ) => {
+            return await assignStaffToDepartment(
+                staffId,
+                departmentId,
+                role,
+                departmentRole,
+                isPrimary,
+            );
+        },
+
+        getStaffOrganizationAssignments: async (staffId) => {
+            const result = await getStaffOrganizationAssignments(staffId);
+            return result as unknown as StaffOrganizationAssignment[];
+        },
+
+        getStaffHospitalAssignments: async (staffId) => {
+            const result = await getStaffHospitalAssignments(staffId);
+            return result as unknown as StaffHospitalAssignment[];
+        },
+
+        getStaffDepartmentAssignments: async (staffId) => {
+            const result = await getStaffDepartmentAssignments(staffId);
+            return result as unknown as StaffDepartmentAssignment[];
+        },
+
+        getStaffAssignments: async (staffId) => {
+            return (await getStaffAssignments(staffId)) as {
+                organizationAssignments: StaffOrganizationAssignment[];
+                hospitalAssignments: StaffHospitalAssignment[];
+                departmentAssignments: StaffDepartmentAssignment[];
+            };
+        },
+
+        setPrimaryHospital: async (staffId, assignmentId) => {
+            await setPrimaryHospital(staffId, assignmentId);
+        },
+
+        removeStaffOrganizationAssignment: async (assignmentId) => {
+            await removeStaffOrganizationAssignment(assignmentId);
+        },
+
+        removeStaffHospitalAssignment: async (assignmentId) => {
+            await removeStaffHospitalAssignment(assignmentId);
+        },
+
+        removeStaffDepartmentAssignment: async (assignmentId) => {
+            await removeStaffDepartmentAssignment(assignmentId);
+        },
+
+        removeStaffAssignments: async (staffId) => {
+            await removeStaffAssignments(staffId);
+        },
+
+        // If you use the state for current assignments
+        currentAssignments,
     };
 
     return (

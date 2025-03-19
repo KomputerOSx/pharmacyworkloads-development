@@ -437,24 +437,24 @@ export default function StaffModal({
                                         <span>Basic Info</span>
                                     </a>
                                 </li>
-                                <li
-                                    className={
-                                        activeTab === "departments"
-                                            ? "is-active"
-                                            : ""
-                                    }
-                                >
-                                    <a
-                                        onClick={() =>
-                                            setActiveTab("departments")
-                                        }
-                                    >
-                                        <span className="icon is-small">
-                                            <i className="fas fa-hospital"></i>
-                                        </span>
-                                        <span>Departments</span>
-                                    </a>
-                                </li>
+                                {/*<li*/}
+                                {/*    className={*/}
+                                {/*        activeTab === "departments"*/}
+                                {/*            ? "is-active"*/}
+                                {/*            : ""*/}
+                                {/*    }*/}
+                                {/*>*/}
+                                {/*    <a*/}
+                                {/*        onClick={() =>*/}
+                                {/*            setActiveTab("departments")*/}
+                                {/*        }*/}
+                                {/*    >*/}
+                                {/*        <span className="icon is-small">*/}
+                                {/*            <i className="fas fa-hospital"></i>*/}
+                                {/*        </span>*/}
+                                {/*        <span>Departments</span>*/}
+                                {/*    </a>*/}
+                                {/*</li>*/}
                                 <li
                                     className={
                                         activeTab === "schedule"

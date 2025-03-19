@@ -9,6 +9,7 @@ import StaffModal from "./staff/StaffModal";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import AlertMessage from "@/components/common/AlertMessage";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
+import StaffAssignmentManager from "@/app/admin/components/staff/StaffAssignmentManager";
 
 export default function StaffManagement() {
     const {
@@ -25,6 +26,8 @@ export default function StaffManagement() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentStaff, setCurrentStaff] = useState<Staff | null>(null);
     const [modalMode, setModalMode] = useState<"add" | "edit">("add");
+    const [isAssignmentManagerOpen, setIsAssignmentManagerOpen] =
+        useState(false);
 
     const [actionResult, setActionResult] = useState<{
         success: boolean;
@@ -121,6 +124,11 @@ export default function StaffManagement() {
         }
     };
 
+    const handleManageAssignments = (staff: Staff) => {
+        setCurrentStaff(staff);
+        setIsAssignmentManagerOpen(true);
+    };
+
     // Clear action result after 5 seconds
     if (actionResult) {
         setTimeout(() => {
@@ -188,6 +196,7 @@ export default function StaffManagement() {
                                 staff={staff}
                                 onEdit={handleEditStaff}
                                 onDelete={handleDeleteConfirm}
+                                onManageAssignments={handleManageAssignments}
                             />
                         )}
                     </div>
@@ -220,6 +229,26 @@ export default function StaffManagement() {
                 }
                 confirmButtonClass="is-danger"
             />
+            {isAssignmentManagerOpen && currentStaff && (
+                <div className="modal is-active">
+                    <div
+                        className="modal-background"
+                        onClick={() => setIsAssignmentManagerOpen(false)}
+                    ></div>
+                    <div className="modal-content" style={{ width: "80%" }}>
+                        <StaffAssignmentManager
+                            staffId={currentStaff.id}
+                            staffName={currentStaff.name}
+                            onClose={() => setIsAssignmentManagerOpen(false)}
+                        />
+                    </div>
+                    <button
+                        className="modal-close is-large"
+                        aria-label="close"
+                        onClick={() => setIsAssignmentManagerOpen(false)}
+                    ></button>
+                </div>
+            )}
         </div>
     );
 }

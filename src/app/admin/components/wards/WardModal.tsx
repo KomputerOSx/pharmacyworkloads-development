@@ -536,10 +536,10 @@
 // }
 
 // src/app/admin/components/wards/WardModal.tsx
-import React, {useEffect, useState} from "react";
-import {useWards, Ward} from "@/context/WardContext";
-import {useOrganizations} from "@/context/OrganizationContext";
-import {Hospital} from "@/context/HospitalContext";
+import React, { useEffect, useState } from "react";
+import { useWards, Ward } from "@/context/WardContext";
+import { useOrganizations } from "@/context/OrganizationContext";
+import { Hospital } from "@/context/HospitalContext";
 
 type WardModalProps = {
     isOpen: boolean;
@@ -584,6 +584,7 @@ export default function WardModal({
         id: "",
         name: "",
         code: "",
+        // @ts-expect-error only id and name required here
         department: { id: "", name: "" },
         // @ts-expect-error only id and name required here
         hospital: { id: "", name: "" },
@@ -706,7 +707,6 @@ export default function WardModal({
             const selectedDept = departments.find((d) => d.id === departmentId);
             if (selectedDept && selectedDept.hospital) {
                 const hospitalId = selectedDept.hospital.id;
-                // @ts-expect-error organization is part of hospital type
                 const orgId = selectedDept.hospital.organization?.id;
 
                 if (orgId) setSelectedOrganizationId(orgId);
@@ -741,6 +741,7 @@ export default function WardModal({
                     );
                     if (selectedDept) {
                         // For backward compatibility, still set the department field
+                        // @ts-expect-error only id and name required here
                         initialWard.department = {
                             id: selectedDept.id,
                             name: selectedDept.name,
@@ -749,7 +750,6 @@ export default function WardModal({
 
                         // If department has a hospital, also pre-select that
                         if (selectedDept.hospital) {
-                            // @ts-expect-error missing properties for small check
                             initialWard.hospital = selectedDept.hospital;
                         }
                     }
@@ -815,6 +815,7 @@ export default function WardModal({
         if (deptId) {
             const selectedDept = departments.find((d) => d.id === deptId);
             if (selectedDept) {
+                // @ts-expect-error only id and name required here
                 setFormData((prev) => ({
                     ...prev,
                     department: {
@@ -826,6 +827,7 @@ export default function WardModal({
             }
         } else {
             // Reset department if none selected
+            // @ts-expect-error only id and name required here
             setFormData((prev) => ({
                 ...prev,
                 department: { id: "", name: "" },

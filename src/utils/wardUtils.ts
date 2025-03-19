@@ -1,5 +1,5 @@
 // In src/utils/wardUtils.ts
-import {Ward} from "@/context/WardContext";
+import { Ward } from "@/context/WardContext";
 
 /**
  * Ensures a ward object conforms to the Ward type
@@ -10,6 +10,7 @@ export const ensureCompleteWard = (ward: Partial<Ward>): Ward => {
         id: ward.id || "",
         name: ward.name || "",
         code: ward.code || "",
+        // @ts-expect-error only id and name required here
         department: ward.department || { id: "", name: "" },
         // @ts-expect-error missing properties
         hospital: ward.hospital || { id: "", name: "" },

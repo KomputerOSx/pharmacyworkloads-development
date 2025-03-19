@@ -280,6 +280,7 @@ import { ensureCompleteHospital } from "@/utils/hospitalUtils";
 import { getHospitals } from "@/services/hospitalService";
 import { ensureCompleteWardDepartmentAssignment } from "@/utils/wardDepartmentUtils";
 import { Hospital } from "@/context/HospitalContext";
+import { Department } from "@/context/DepartmentContext";
 
 // Define the Ward type
 export type Ward = {
@@ -318,15 +319,15 @@ export type WardDepartmentAssignment = {
 };
 
 // Define the Department type (simplified for the context)
-export type Department = {
-    id: string;
-    name: string;
-    color?: string;
-    hospital?: {
-        id: string;
-        name: string;
-    };
-};
+// export type Department = {
+//     id: string;
+//     name: string;
+//     color?: string;
+//     hospital?: {
+//         id: string;
+//         name: string;
+//     };
+// };
 
 // Define the Hospital type (simplified for the context)
 // export type Hospital = {

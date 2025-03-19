@@ -1,6 +1,6 @@
 // src/utils/wardDepartmentUtils.ts
-import {Ward, WardDepartmentAssignment} from "@/context/WardContext";
-import {Department} from "@/context/DepartmentContext";
+import { Ward, WardDepartmentAssignment } from "@/context/WardContext";
+import { Department } from "@/context/DepartmentContext";
 
 /**
  * Updates a ward object with the latest department assignments
@@ -19,6 +19,7 @@ export const updateWardWithDepartments = (
     return {
         ...ward,
         // Update the primary department reference
+        // @ts-expect-error only id and name required here
         department: primaryAssignment
             ? {
                   id: primaryAssignment.department.id,
