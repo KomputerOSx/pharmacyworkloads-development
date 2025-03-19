@@ -364,7 +364,7 @@
 
 import { useEffect, useState } from "react";
 import { useWards, Ward } from "@/context/WardContext";
-import { Department, useDepartments } from "@/context/DepartmentContext";
+import { Department } from "@/context/DepartmentContext";
 import { useOrganizations } from "@/context/OrganizationContext"; // Add this import
 import WardFilter from "./wards/WardFilter";
 import WardCard from "./wards/WardCard";
@@ -373,6 +373,7 @@ import WardDepartmentsModal from "./wards/WardDepartmentsModal";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import AlertMessage from "@/components/common/AlertMessage";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
+import { Hospital } from "@/context/HospitalContext";
 
 export default function WardManagement() {
     const {
@@ -390,8 +391,6 @@ export default function WardManagement() {
     } = useWards();
 
     // We also use departments context to get the hierarchical department structure
-    const { departmentHierarchy } = useDepartments();
-
     // Get organizations directly
     const { organizations } = useOrganizations();
 
@@ -444,7 +443,7 @@ export default function WardManagement() {
             organization: { id: string; name: string };
             hospitals: {
                 [hospitalId: string]: {
-                    hospital: any;
+                    hospital: Hospital;
                     departments: Department[];
                 };
             };
@@ -477,8 +476,7 @@ export default function WardManagement() {
             // Try to extract organization IDs from hospitals
             hospitals.forEach((hospital) => {
                 // This assumes hospital might have organizationId property instead
-                const orgId =
-                    hospital.organizationId || hospital.organization_id;
+                const orgId = hospital.organization.id;
                 if (orgId && orgLookup[orgId]) {
                     mapping[hospital.id] = {
                         id: orgId,
@@ -563,7 +561,7 @@ export default function WardManagement() {
         } catch (err) {
             setActionResult({
                 success: false,
-                message: "Failed to load department assignments",
+                message: "Failed to load department",
             });
         }
     };

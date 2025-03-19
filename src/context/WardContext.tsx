@@ -286,15 +286,17 @@ export type Ward = {
     id: string;
     name: string;
     code: string;
-    department: {
-        id: string;
-        name: string;
-        color?: string;
-    };
-    hospital: {
-        id: string;
-        name: string;
-    };
+    // department: {
+    //     id: string;
+    //     name: string;
+    //     color?: string;
+    // };
+    // hospital: {
+    //     id: string;
+    //     name: string;
+    // };
+    department: Department;
+    hospital: Hospital;
     bedCount: number;
     active: boolean;
     createdAt?: string;
