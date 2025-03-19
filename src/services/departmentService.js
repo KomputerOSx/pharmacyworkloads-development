@@ -228,6 +228,7 @@ export const addDepartment = async (departmentData, userId = "system") => {
         }
 
         // Format data for Firestore
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { hospital, parent, ...otherData } = departmentData;
 
         // Add timestamps and audit fields
@@ -275,6 +276,7 @@ export const updateDepartment = async (
         }
 
         // Format data for Firestore
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { hospital, parent, ...otherData } = departmentData;
 
         // Add update timestamp and audit field

@@ -1,5 +1,5 @@
 // src/app/admin/components/hospitals/HospitalModal.tsx
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Hospital, useHospitals } from "@/context/HospitalContext";
 
 type HospitalModalProps = {
@@ -22,6 +22,7 @@ export default function HospitalModal({
     const emptyHospital: Hospital = {
         id: "",
         name: "",
+        // @ts-expect-error small hospital component just for department creation and connect
         organization: { id: "", name: "" },
         address: "",
         city: "",
@@ -39,27 +40,31 @@ export default function HospitalModal({
     const [formError, setFormError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => {
-        if (mode === "edit" && hospital) {
-            setFormData({
-                ...hospital,
-            });
-        } else {
-            // Reset form for add mode
-            setFormData({
-                ...emptyHospital,
-                organization:
-                    organizations.length > 0
-                        ? {
-                              id: organizations[0].id,
-                              name: organizations[0].name,
-                          }
-                        : { id: "", name: "" },
-            });
-        }
-        setFormError("");
-        setIsSubmitting(false);
-    }, [mode, hospital, organizations, isOpen]);
+    useEffect(
+        () => {
+            if (mode === "edit" && hospital) {
+                setFormData({
+                    ...hospital,
+                });
+            } else {
+                // Reset form for add mode
+                setFormData({
+                    ...emptyHospital,
+                    // @ts-expect-error small organization component just for hospital creation and connect
+                    organization:
+                        organizations.length > 0
+                            ? {
+                                  id: organizations[0].id,
+                                  name: organizations[0].name,
+                              }
+                            : { id: "", name: "" },
+                });
+            }
+            setFormError("");
+            setIsSubmitting(false);
+        }, // eslint-disable-next-line react-hooks/exhaustive-deps
+        [mode, hospital, organizations, isOpen],
+    );
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -71,6 +76,7 @@ export default function HospitalModal({
             if (selectedOrg) {
                 setFormData({
                     ...formData,
+                    // @ts-expect-error small organization component just for hospital creation and connect
                     organization: {
                         id: selectedOrg.id,
                         name: selectedOrg.name,

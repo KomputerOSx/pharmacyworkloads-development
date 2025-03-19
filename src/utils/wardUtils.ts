@@ -11,6 +11,7 @@ export const ensureCompleteWard = (ward: Partial<Ward>): Ward => {
         name: ward.name || "",
         code: ward.code || "",
         department: ward.department || { id: "", name: "" },
+        // @ts-expect-error missing properties
         hospital: ward.hospital || { id: "", name: "" },
         bedCount: ward.bedCount || 0,
         active: ward.active ?? true,

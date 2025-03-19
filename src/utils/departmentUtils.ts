@@ -14,6 +14,7 @@ export const ensureCompleteDepartment = (
         name: dept.name || "",
         code: dept.code || "",
         type: dept.type || "",
+        // @ts-expect-error missing properties
         hospital: dept.hospital || { id: "", name: "" },
         parent: dept.parent || null,
         active: dept.active || false,

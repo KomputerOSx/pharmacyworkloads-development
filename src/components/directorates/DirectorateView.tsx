@@ -155,21 +155,24 @@ function DirectorateView({
 
     // Check if any ward is in edit mode
     const isAnyWardInEditMode = () => {
-        return Object.values(editMode).some((mode) => mode === true);
+        return Object.values(editMode).some((mode) => mode);
     };
 
     // Use a ref to track previous edit mode state to avoid unnecessary context updates
     const prevEditModeState = useRef(false);
 
     // Update the context whenever the edit mode changes
-    useEffect(() => {
-        const currentEditMode = isAnyWardInEditMode();
-        // Only update context if the edit state actually changed
-        if (prevEditModeState.current !== currentEditMode) {
-            setDirectorateEditMode(directorateName, currentEditMode);
-            prevEditModeState.current = currentEditMode;
-        }
-    }, [editMode, directorateName, setDirectorateEditMode]);
+    useEffect(
+        () => {
+            const currentEditMode = isAnyWardInEditMode();
+            // Only update context if the edit state actually changed
+            if (prevEditModeState.current !== currentEditMode) {
+                setDirectorateEditMode(directorateName, currentEditMode);
+                prevEditModeState.current = currentEditMode;
+            }
+        }, // eslint-disable-next-line react-hooks/exhaustive-deps
+        [editMode, directorateName, setDirectorateEditMode],
+    );
 
     // Filter wards based on search term
     const filteredWards = wards.filter((ward) => {

@@ -50,6 +50,7 @@ export default function OrganizationManagement() {
                     success: true,
                     message: "Organization deleted successfully",
                 });
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
             } catch (err) {
                 setActionResult({
                     success: false,
@@ -63,6 +64,7 @@ export default function OrganizationManagement() {
         try {
             if (modalMode === "add") {
                 // Strip id and other fields that shouldn't be in new record
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const { id, hospitalCount, createdAt, updatedAt, ...newOrg } =
                     org;
                 await addNewOrganization(newOrg);
@@ -80,6 +82,7 @@ export default function OrganizationManagement() {
                 });
             }
             setIsModalOpen(false);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
             setActionResult({
                 success: false,

@@ -130,9 +130,12 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     // Load organizations on mount and when filter changes
-    useEffect(() => {
-        refreshOrganizations();
-    }, [filter]);
+    useEffect(
+        () => {
+            refreshOrganizations().then((r) => r);
+        }, // eslint-disable-next-line react-hooks/exhaustive-deps
+        [filter],
+    );
 
     // Context value
     const value: OrganizationContextType = {

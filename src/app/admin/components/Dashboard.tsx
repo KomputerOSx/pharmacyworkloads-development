@@ -8,7 +8,7 @@ export default function Dashboard() {
         <div className="columns">
             <div className="column is-8">
                 <div className="box">
-                    <h3 className="title is-4">Today's Overview</h3>
+                    <h3 className="title is-4">Today&apos;s Overview</h3>
                     <DashboardSummary />
 
                     <h4 className="title is-5 mt-5">Department Workload</h4>

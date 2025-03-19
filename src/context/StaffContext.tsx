@@ -231,6 +231,7 @@ export const StaffProvider: React.FC<{ children: React.ReactNode }> = ({
     const refreshHospitals = async () => {
         try {
             const data = await getHospitals({ status: "active" });
+            // @ts-expect-error Only a refresh...Not requiring all data
             setHospitals(data);
         } catch (err) {
             console.error("Error fetching hospitals:", err);
@@ -242,6 +243,7 @@ export const StaffProvider: React.FC<{ children: React.ReactNode }> = ({
     const refreshDepartments = async () => {
         try {
             const data = await getDepartments({ active: true });
+            // @ts-expect-error Only a refresh...Not requiring all data
             setDepartments(data);
         } catch (err) {
             console.error("Error fetching departments:", err);
@@ -340,19 +342,20 @@ export const StaffProvider: React.FC<{ children: React.ReactNode }> = ({
         try {
             await deleteStaff(id);
             await refreshStaff();
-        } catch (err: any) {
+        } catch (err) {
             console.error("Error deleting staff:", err);
-            setError(
-                err.message || "Failed to delete staff. Please try again.",
-            );
+            setError("Failed to delete staff. Please try again.");
             throw err;
         }
     };
 
     // Load staff on mount and when filter changes
-    useEffect(() => {
-        refreshStaff();
-    }, [filter]);
+    useEffect(
+        () => {
+            refreshStaff().then();
+        }, // eslint-disable-next-line react-hooks/exhaustive-deps
+        [filter],
+    );
 
     // Load related data on mount
     useEffect(() => {

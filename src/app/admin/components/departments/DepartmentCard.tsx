@@ -92,10 +92,6 @@ export default function DepartmentCard({
                         <p className="mb-3">{department.description}</p>
                     )}
                     <p className="is-size-7 mb-2">
-                        <strong>Organization:</strong>{" "}
-                        {department.organization?.name || "N/A"}
-                    </p>
-                    <p className="is-size-7 mb-2">
                         <strong>Hospital:</strong>{" "}
                         {department.hospital?.name || "N/A"}
                     </p>

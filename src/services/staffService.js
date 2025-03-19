@@ -385,8 +385,11 @@ export const addStaff = async (staffData, userId = "system") => {
 
         // Format data for Firestore (remove references and complex objects)
         const {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             organization,
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             defaultHospital,
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             primaryRole,
             departments,
             usualWorkingHours,
@@ -481,8 +484,11 @@ export const updateStaff = async (id, staffData, userId = "system") => {
 
         // Format data for Firestore update
         const {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             organization,
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             defaultHospital,
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             primaryRole,
             departments,
             ...otherData
@@ -557,6 +563,7 @@ export const updateStaff = async (id, staffData, userId = "system") => {
             }
 
             // Deactivate assignments for departments that were removed
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             for (const [deptId, assignmentId] of currentDeptIds.entries()) {
                 const assignmentRef = doc(
                     db,

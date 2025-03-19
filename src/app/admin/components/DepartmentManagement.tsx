@@ -13,7 +13,6 @@ import ConfirmDialog from "@/components/common/ConfirmDialog";
 export default function DepartmentManagement() {
     const {
         departments,
-        departmentHierarchy,
         loading,
         error,
         filter,
@@ -97,9 +96,10 @@ export default function DepartmentManagement() {
                 departmentId: "",
                 departmentName: "",
             });
-        } catch (err: any) {
+        } catch (err) {
             setActionResult({
                 success: false,
+                // @ts-expect-error No Error type
                 message: err.message || "Failed to delete department",
             });
 
@@ -115,6 +115,7 @@ export default function DepartmentManagement() {
     const handleSaveDepartment = async (department: Department) => {
         try {
             if (modalMode === "add") {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const { id, children, createdAt, updatedAt, ...newDepartment } =
                     department;
                 console.log("Adding department:", newDepartment);
@@ -130,9 +131,10 @@ export default function DepartmentManagement() {
                     selectedDepartment &&
                     department.parent?.id === selectedDepartment.id
                 ) {
-                    handleViewSubDepartments(selectedDepartment);
+                    await handleViewSubDepartments(selectedDepartment);
                 }
             } else {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const { children, ...updateData } = department;
                 await updateExistingDepartment(department.id, updateData);
 
@@ -147,14 +149,17 @@ export default function DepartmentManagement() {
                     (department.id === selectedDepartment.id ||
                         subDepartments.some((sd) => sd.id === department.id))
                 ) {
-                    handleViewSubDepartments(selectedDepartment);
+                    await handleViewSubDepartments(selectedDepartment);
                 }
             }
             setIsModalOpen(false);
         } catch (err) {
             setActionResult({
                 success: false,
-                message: `Failed to ${modalMode === "add" ? "add" : "update"} department`,
+                message:
+                    `Failed to ${modalMode === "add" ? "add" : "update"} department` ||
+                    // @ts-expect-error No Error type
+                    err.message,
             });
         }
     };

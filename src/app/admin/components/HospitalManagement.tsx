@@ -78,6 +78,7 @@ export default function HospitalManagement() {
                 hospitalId: "",
                 hospitalName: "",
             });
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
             setActionResult({
                 success: false,
@@ -90,12 +91,12 @@ export default function HospitalManagement() {
         try {
             if (modalMode === "add") {
                 const {
-                    id,
-                    departments,
-                    wards,
-                    staff,
-                    createdAt,
-                    updatedAt,
+                    // id,
+                    // departments,
+                    // wards,
+                    // staff,
+                    // createdAt,
+                    // updatedAt,
                     ...newHospital
                 } = hospital;
                 await addNewHospital(newHospital);
@@ -113,6 +114,7 @@ export default function HospitalManagement() {
                 });
             }
             setIsModalOpen(false);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
             setActionResult({
                 success: false,

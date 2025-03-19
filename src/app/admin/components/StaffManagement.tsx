@@ -76,10 +76,11 @@ export default function StaffManagement() {
                 staffId: "",
                 staffName: "",
             });
-        } catch (err: any) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (err) {
             setActionResult({
                 success: false,
-                message: err.message || "Failed to remove staff member",
+                message: "Failed to remove staff member",
             });
 
             // Close the confirm dialog
@@ -94,6 +95,7 @@ export default function StaffManagement() {
     const handleSaveStaff = async (staff: Staff) => {
         try {
             if (modalMode === "add") {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const { id, createdAt, updatedAt, ...newStaff } = staff;
                 await addNewStaff(newStaff);
 
@@ -110,6 +112,7 @@ export default function StaffManagement() {
                 });
             }
             setIsModalOpen(false);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
             setActionResult({
                 success: false,

@@ -491,6 +491,7 @@ export default function WardManagement() {
 
     // Organize departments by organization and hospital
     useEffect(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const grouped: any = {};
 
         departments.forEach((dept) => {
@@ -558,6 +559,7 @@ export default function WardManagement() {
             await getWardDepartments(ward.id);
             setWardForDepartments(ward);
             setIsDepartmentsModalOpen(true);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
             setActionResult({
                 success: false,
@@ -589,10 +591,11 @@ export default function WardManagement() {
                 wardId: "",
                 wardName: "",
             });
-        } catch (err: any) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (err) {
             setActionResult({
                 success: false,
-                message: err.message || "Failed to delete ward",
+                message: "Failed to delete ward",
             });
 
             // Close the confirm dialog
@@ -607,6 +610,7 @@ export default function WardManagement() {
     const handleSaveWard = async (ward: Ward) => {
         try {
             if (modalMode === "add") {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const { id, createdAt, updatedAt, ...newWard } = ward;
                 await addNewWard(newWard);
 
@@ -623,6 +627,7 @@ export default function WardManagement() {
                 });
             }
             setIsModalOpen(false);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
             setActionResult({
                 success: false,
