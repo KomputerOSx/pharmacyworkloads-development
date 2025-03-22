@@ -3,7 +3,6 @@
 import { useState } from "react";
 import TabNavigation from "../admin/components/TabNavigation";
 import Dashboard from "../admin/components/Dashboard";
-import OrganisationManagement from "./components/OrganisationManagement";
 import HospitalManagement from "../admin/components/HospitalManagement";
 import DepartmentManagement from "@/app/admin/components/DepartmentManagement";
 import WardManagement from "@/app/admin/components/WardManagement";
