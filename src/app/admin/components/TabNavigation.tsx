@@ -12,8 +12,8 @@ export default function TabNavigation({
     const tabs = [
         { id: "dashboard", label: "Dashboard", icon: "fas fa-tachometer-alt" },
         {
-            id: "organizations",
-            label: "Organizations",
+            id: "organisations",
+            label: "Organisations",
             icon: "fas fa-building",
         },
         { id: "hospitals", label: "Hospitals", icon: "fas fa-hospital" },
