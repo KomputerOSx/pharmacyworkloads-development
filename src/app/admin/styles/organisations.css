@@ -1,0 +1,66 @@
+/* Organisation Card Styles */
+.organisation-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    height: 100%;
+}
+
+.organisation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.icon-bg {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    color: white;
+}
+
+.icon-bg.is-primary {
+    background-color: hsl(171, 100%, 41%);
+}
+
+.icon-bg.is-link {
+    background-color: hsl(217, 71%, 53%);
+}
+
+.icon-bg.is-info {
+    background-color: hsl(204, 86%, 53%);
+}
+
+.icon-bg.is-success {
+    background-color: hsl(141, 53%, 53%);
+}
+
+.icon-bg.is-warning {
+    background-color: hsl(48, 100%, 67%);
+}
+
+.icon-bg.is-danger {
+    background-color: hsl(348, 100%, 61%);
+}
+
+.org-details p {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.org-stats {
+    margin-top: 1rem;
+}
+
+.card-footer-item {
+    justify-content: space-between;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+    .column.is-4 {
+        width: 100%;
+    }
+}

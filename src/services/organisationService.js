@@ -80,29 +80,6 @@ export const getOrganisations = async (filters = {}) => {
     }
 };
 
-// Get a single Organisation by ID
-// export const getOrganisation = async (id) => {
-//     try {
-//         const docRef = doc(db, "organisations", id);
-//         const docSnap = await getDoc(docRef);
-//
-//         if (docSnap.exists()) {
-//             const data = docSnap.data();
-//             return {
-//                 id: docSnap.id,
-//                 ...data,
-//                 createdAt: formatFirestoreTimestamp(data.createdAt),
-//                 updatedAt: formatFirestoreTimestamp(data.updatedAt),
-//             };
-//         } else {
-//             return null;
-//         }
-//     } catch (error) {
-//         console.error("Error getting Organisation:", error);
-//         throw error;
-//     }
-// };
-
 export const getOrganisation = async (id) => {
     if (!id) {
         console.error("Organisation ID is required");

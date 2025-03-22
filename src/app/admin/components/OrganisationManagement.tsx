@@ -59,14 +59,12 @@ export default function OrganisationManagement() {
             }
         }
     };
-
     const handleSaveOrganisation = async (org: Organisation) => {
         try {
             if (modalMode === "add") {
                 // Strip id and other fields that shouldn't be in new record
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                const { id, hospitalCount, createdAt, updatedAt, ...newOrg } =
-                    org;
+                const { id, createdAt, updatedAt, ...newOrg } = org;
                 await addNewOrganisation(newOrg);
 
                 setActionResult({

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "../admin/styles/globals.css";
 import Header from "../admin/components/Header";
 import Footer from "../admin/components/Footer";
-import OrganisationSwitcher from "@/app/admin/components/organisations/OrganisationSwitcher";
+import React from "react";
 
 export const metadata: Metadata = {
     title: "Pharmacy Workload Tracker - Admin",
@@ -17,7 +17,6 @@ export default function AdminLayout({
     return (
         <div className="admin-layout">
             <Header />
-            <OrganisationSwitcher />
             <main className="container is-fluid mt-4 mb-6">{children}</main>
             <Footer />
         </div>

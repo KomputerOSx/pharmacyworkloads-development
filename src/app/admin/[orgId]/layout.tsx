@@ -7,11 +7,6 @@ import {
     Organisation,
     OrganisationProvider,
 } from "@/context/OrganisationContext";
-import { DepartmentProvider } from "@/context/DepartmentContext";
-import { WardProvider } from "@/context/WardContext";
-import { StaffProvider } from "@/context/StaffContext";
-import { WorkloadProvider } from "@/context/WorkloadContext";
-import { EditModeProvider } from "@/context/EditModeContext";
 
 export default function OrganisationLayout({
     children,
@@ -21,14 +16,14 @@ export default function OrganisationLayout({
     params: { orgId: string };
 }) {
     const [loading, setLoading] = useState(true);
-    const [organisation, setOrganisation] = useState(null);
+    const [organisation, setOrganisation] = useState<Organisation | null>(null);
     const orgId = params.orgId;
 
     useEffect(() => {
         const loadOrg = async () => {
             try {
                 const org = await getOrganisation(orgId);
-                setOrganisation(org as Organisation);
+                setOrganisation(org);
             } catch (error) {
                 console.error("Error loading organisation:", error);
             } finally {
@@ -51,17 +46,7 @@ export default function OrganisationLayout({
             {/* All child components will have access to hospital data for this org */}
             <OrganisationProvider>
                 <HospitalProvider organisationId={orgId}>
-                    <DepartmentProvider>
-                        <WardProvider>
-                            <StaffProvider>
-                                <WorkloadProvider>
-                                    <EditModeProvider>
-                                        {children}
-                                    </EditModeProvider>
-                                </WorkloadProvider>
-                            </StaffProvider>
-                        </WardProvider>
-                    </DepartmentProvider>
+                    {children}
                 </HospitalProvider>
             </OrganisationProvider>
         </div>
