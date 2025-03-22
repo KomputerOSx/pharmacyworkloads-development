@@ -2,9 +2,10 @@
 //
 // import React, { useState, useEffect } from "react";
 // import Sidebar from "@/components/common/Sidebar";
-// import { getOrganisation } from "@/services/organisationService";
-// import "../../styles/sidebar.css";
 // import { Organisation } from "@/context/OrganisationContext";
+// import { getOrganisation } from "@/services/organisationService";
+// import "../styles/sidebar.css";
+// import "../styles/dashboard.css";
 //
 // export default function DashboardLayout({
 //     children,
@@ -16,7 +17,8 @@
 //     const [sidebarExpanded, setSidebarExpanded] = useState(true);
 //     const [organisation, setOrganisation] = useState<Organisation | null>();
 //     const [loading, setLoading] = useState(true);
-//     const orgId = params.orgId;
+//     // @ts-expect-error Using react use to unwrap regular javascript object
+//     const orgId = React.use(params).orgId;
 //
 //     // Load organisation data
 //     useEffect(() => {
@@ -31,7 +33,7 @@
 //             }
 //         };
 //
-//         loadOrg();
+//         React.use(loadOrg());
 //     }, [orgId]);
 //
 //     const toggleSidebar = () => {
@@ -92,10 +94,9 @@
 
 import React, { useState, useEffect } from "react";
 import Sidebar from "@/components/common/Sidebar";
-import { Organisation } from "@/context/OrganisationContext";
-import { getOrganisation } from "@/services/organisationService";
-import "../../styles/sidebar.css";
-import "../../styles/dashboard.css";
+import { Organisation, useOrganisations } from "@/context/OrganisationContext";
+import "../styles/sidebar.css";
+import "../styles/dashboard.css";
 
 export default function DashboardLayout({
     children,
@@ -105,29 +106,23 @@ export default function DashboardLayout({
     params: { orgId: string };
 }) {
     const [sidebarExpanded, setSidebarExpanded] = useState(true);
-    const [organisation, setOrganisation] = useState<Organisation | null>();
+    // @ts-expect-error Using react use to unwrap regular javascript object
+    const orgId = React.use(params).orgId;
+    const { organisations } = useOrganisations();
+    const [currentOrganisation, setCurrentOrganisation] =
+        useState<Organisation | null>(null);
     const [loading, setLoading] = useState(true);
-    const orgId = params.orgId;
 
-    // Load organisation data
+    // Find the current organisation in the context
     useEffect(() => {
-        const loadOrg = async () => {
-            try {
-                const org = await getOrganisation(orgId);
-                setOrganisation(org);
-            } catch (error) {
-                console.error("Error loading organisation:", error);
-            } finally {
-                setLoading(false);
+        if (organisations && organisations.length > 0) {
+            const org = organisations.find((org) => org.id === orgId);
+            if (org) {
+                setCurrentOrganisation(org);
             }
-        };
-
-        loadOrg();
-    }, [orgId]);
-
-    const toggleSidebar = () => {
-        setSidebarExpanded(!sidebarExpanded);
-    };
+            setLoading(false);
+        }
+    }, [orgId, organisations]);
 
     // Sidebar should be expanded by default on larger screens and collapsed on smaller screens
     useEffect(() => {
@@ -149,27 +144,35 @@ export default function DashboardLayout({
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
+    const toggleSidebar = () => {
+        setSidebarExpanded(!sidebarExpanded);
+    };
+
     if (loading) {
         return <div className="loading">Loading organisation...</div>;
     }
 
-    if (!organisation) {
+    if (!currentOrganisation) {
         return <div className="error">Organisation not found</div>;
     }
 
     return (
         <div className="dashboard-layout">
-            <Sidebar expanded={sidebarExpanded} onToggle={toggleSidebar} />
+            <Sidebar
+                expanded={sidebarExpanded}
+                onToggle={toggleSidebar}
+                orgId={orgId}
+            />
 
             <main
                 className={`main-content ${sidebarExpanded ? "" : "sidebar-collapsed"}`}
             >
                 <div className="org-header">
-                    <h1 className="title is-4">{organisation.name}</h1>
+                    <h1 className="title is-4">{currentOrganisation.name}</h1>
                     <span
-                        className={`tag ${organisation.active ? "is-success" : "is-danger"}`}
+                        className={`tag ${currentOrganisation.active ? "is-success" : "is-danger"}`}
                     >
-                        {organisation.active ? "Active" : "Inactive"}
+                        {currentOrganisation.active ? "Active" : "Inactive"}
                     </span>
                 </div>
 

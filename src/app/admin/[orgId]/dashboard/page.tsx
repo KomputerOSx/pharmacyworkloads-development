@@ -1,13 +1,16 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
 import { getOrganisation } from "@/services/organisationService";
 import { Organisation } from "@/context/OrganisationContext";
 
-export default function DashboardPage() {
-    const params = useParams();
-    const orgId = params.orgId as string;
+export default function DashboardPage({
+    params,
+}: {
+    params: { orgId: string };
+}) {
+    // @ts-expect-error Using react use to unwrap regular javascript object
+    const orgId = React.use(params).orgId;
     const [organisation, setOrganisation] = useState<Organisation | null>();
     const [loading, setLoading] = useState(true);
 
@@ -23,7 +26,7 @@ export default function DashboardPage() {
             }
         };
 
-        loadOrg();
+        React.use(loadOrg());
     }, [orgId]);
 
     if (loading) return <div>Loading...</div>;

@@ -6,7 +6,7 @@ import { Organisation, useOrganisations } from "@/context/OrganisationContext";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import AlertMessage from "@/components/common/AlertMessage";
 import OrganisationCard from "./componenets/OrganisationCard";
-import OrganisationModal from "../components/organisations/OrganisationModal";
+import OrganisationModal from "../organisations/componenets/OrganisationModal";
 
 export default function OrganisationsPage() {
     const router = useRouter();

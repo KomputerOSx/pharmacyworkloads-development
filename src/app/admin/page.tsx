@@ -29,8 +29,6 @@ export default function AdminPage() {
 
             {activeTab === "dashboard" && <Dashboard />}
 
-            {activeTab === "organizations" && <OrganisationManagement />}
-
             {activeTab === "hospitals" && <HospitalManagement />}
 
             {activeTab === "departments" && <DepartmentManagement />}
