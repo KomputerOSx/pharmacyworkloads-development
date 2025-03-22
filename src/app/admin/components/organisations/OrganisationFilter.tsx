@@ -13,7 +13,7 @@ type FilterProps = {
     >;
 };
 
-export default function OrganizationFilter({ filter, setFilter }: FilterProps) {
+export default function OrganisationFilter({ filter, setFilter }: FilterProps) {
     const handleFilterChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     ) => {

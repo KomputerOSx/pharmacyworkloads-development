@@ -1,16 +1,16 @@
-import { Organization } from "@/context/OrganizationContext";
+import { Organisation } from "@/context/OrganisationContext";
 
-type OrganizationTableProps = {
-    organizations: Organization[];
-    onEdit: (org: Organization) => void;
+type OrganisationTableProps = {
+    organisations: Organisation[];
+    onEdit: (org: Organisation) => void;
     onDelete: (id: string) => void;
 };
 
-export default function OrganizationTable({
-    organizations,
+export default function OrganisationTable({
+    organisations,
     onEdit,
     onDelete,
-}: OrganizationTableProps) {
+}: OrganisationTableProps) {
     return (
         <div className="table-container">
             <table className="table is-fullwidth is-hoverable">
@@ -25,15 +25,15 @@ export default function OrganizationTable({
                     </tr>
                 </thead>
                 <tbody>
-                    {organizations.length === 0 ? (
+                    {organisations.length === 0 ? (
                         <tr>
                             <td colSpan={6} className="has-text-centered py-4">
-                                No organizations found. Try adjusting your
-                                filters or add a new organization.
+                                No organisations found. Try adjusting your
+                                filters or add a new organisation.
                             </td>
                         </tr>
                     ) : (
-                        organizations.map((org) => (
+                        organisations.map((org) => (
                             <tr key={org.id}>
                                 <td>
                                     <div className="is-flex is-align-items-center">

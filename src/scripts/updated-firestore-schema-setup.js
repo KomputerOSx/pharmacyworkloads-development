@@ -18,8 +18,8 @@ async function createSchema() {
     try {
         console.log("Starting enhanced database setup...");
 
-        // Create organizations (new top-level entity)
-        console.log("Creating organizations...");
+        // Create organisations (new top-level entity)
+        console.log("Creating organisations...");
         const organizations = [
             {
                 id: "nhs_trust_1",

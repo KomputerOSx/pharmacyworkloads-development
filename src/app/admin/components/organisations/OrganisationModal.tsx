@@ -1,24 +1,24 @@
-// src/app/admin/components/organizations/OrganizationModal.tsx
+// src/app/admin/components/organisations/OrganisationModal.tsx
 import { useEffect, useState } from "react";
-import { Organization } from "@/context/OrganizationContext";
-import { getOrganizationTypes } from "@/services/organizationService";
+import { Organisation } from "@/context/OrganisationContext";
+import { getOrganisationTypes } from "@/services/organisationService";
 
-type OrganizationModalProps = {
+type OrganisationModalProps = {
     isOpen: boolean;
     mode: "add" | "edit";
-    organization: Organization | null;
+    organisation: Organisation | null;
     onClose: () => void;
-    onSave: (org: Organization) => void;
+    onSave: (org: Organisation) => void;
 };
 
-export default function OrganizationModal({
+export default function OrganisationModal({
     isOpen,
     mode,
-    organization,
+    organisation,
     onClose,
     onSave,
-}: OrganizationModalProps) {
-    const [formData, setFormData] = useState<Organization>({
+}: OrganisationModalProps) {
+    const [formData, setFormData] = useState<Organisation>({
         id: "",
         name: "",
         type: "NHS Trust",
@@ -28,18 +28,18 @@ export default function OrganizationModal({
         hospitalCount: 0,
     });
     const [formError, setFormError] = useState("");
-    const [organizationTypes, setOrganizationTypes] = useState<
+    const [organisationTypes, setOrganisationTypes] = useState<
         { id: string; name: string }[]
     >([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
-        // Load organization types
-        setOrganizationTypes(getOrganizationTypes());
+        // Load organisation types
+        setOrganisationTypes(getOrganisationTypes());
 
-        if (mode === "edit" && organization) {
+        if (mode === "edit" && organisation) {
             setFormData({
-                ...organization,
+                ...organisation,
             });
         } else {
             // Reset form for add mode
@@ -55,7 +55,7 @@ export default function OrganizationModal({
         }
         setFormError("");
         setIsSubmitting(false);
-    }, [mode, organization, isOpen]);
+    }, [mode, organisation, isOpen]);
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -74,7 +74,7 @@ export default function OrganizationModal({
     const validateForm = (): boolean => {
         // Name validation
         if (!formData.name.trim()) {
-            setFormError("Organization name is required");
+            setFormError("Organisation name is required");
             return false;
         }
 
@@ -93,7 +93,7 @@ export default function OrganizationModal({
 
         // Type validation
         if (!formData.type) {
-            setFormError("Organization type is required");
+            setFormError("Organisation type is required");
             return false;
         }
 
@@ -111,10 +111,10 @@ export default function OrganizationModal({
         setIsSubmitting(true);
 
         try {
-            // Save the organization
+            // Save the organisation
             await onSave(formData);
         } catch (error) {
-            console.error("Error saving organization:", error);
+            console.error("Error saving organisation:", error);
             setFormError("An error occurred while saving. Please try again.");
             setIsSubmitting(false);
         }
@@ -129,8 +129,8 @@ export default function OrganizationModal({
                 <header className="modal-card-head">
                     <p className="modal-card-title">
                         {mode === "add"
-                            ? "Add New Organization"
-                            : "Edit Organization"}
+                            ? "Add New Organisation"
+                            : "Edit Organisation"}
                     </p>
                     <button
                         className="delete"
@@ -154,7 +154,7 @@ export default function OrganizationModal({
                         )}
 
                         <div className="field">
-                            <label className="label">Organization Name</label>
+                            <label className="label">Organisation Name</label>
                             <div className="control">
                                 <input
                                     className="input"
@@ -162,7 +162,7 @@ export default function OrganizationModal({
                                     name="name"
                                     value={formData.name}
                                     onChange={handleInputChange}
-                                    placeholder="Enter organization name"
+                                    placeholder="Enter organisation name"
                                     required
                                 />
                             </div>
@@ -179,7 +179,7 @@ export default function OrganizationModal({
                                         required
                                     >
                                         <option value="">Select type</option>
-                                        {organizationTypes.map((type) => (
+                                        {organisationTypes.map((type) => (
                                             <option
                                                 key={type.id}
                                                 value={type.id}
@@ -243,7 +243,7 @@ export default function OrganizationModal({
                             disabled={isSubmitting}
                         >
                             {mode === "add"
-                                ? "Add Organization"
+                                ? "Add Organisation"
                                 : "Save Changes"}
                         </button>
                         <button

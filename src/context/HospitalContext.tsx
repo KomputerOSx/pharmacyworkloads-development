@@ -11,40 +11,37 @@ import React, {
 import {
     addHospital,
     deleteHospital,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     getHospitals,
     updateHospital,
 } from "@/services/hospitalService";
-import { getOrganizations } from "@/services/organizationService";
-import { Organization } from "@/context/OrganizationContext";
+import { getOrganisation } from "@/services/organisationService";
+import { Organisation } from "@/context/OrganisationContext";
+import { getHospitalsByOrganisation } from "@/services/hospitalAssignmentService";
 
 // Define the Hospital type
 export type Hospital = {
     id: string;
     name: string;
-    organization: Organization;
     address: string;
     city: string;
     postcode: string;
     contactNumber: string;
     contactEmail: string;
-    beds: number;
+    beds?: number;
     active: boolean;
-    departments?: number;
-    wards?: number;
-    staff?: number;
     createdAt?: string;
     updatedAt?: string;
 };
 
-// Define the Organization type (simplified version for the context)
-// export type Organization = {
-//     id: string;
-//     name: string;
-// };
+export type HospitalOrganisationAssignment = {
+    id: string;
+    hospitalId: string;
+    organisationId: string;
+};
 
 // Define the filter type
 export type HospitalFilter = {
-    organization: string;
     status: string;
     search: string;
 };
@@ -52,13 +49,12 @@ export type HospitalFilter = {
 // Define the context type
 interface HospitalContextType {
     hospitals: Hospital[];
-    organizations: Organization[];
+    organisation: Organisation | null;
     loading: boolean;
     error: string | null;
     filter: HospitalFilter;
     setFilter: React.Dispatch<React.SetStateAction<HospitalFilter>>;
     refreshHospitals: () => Promise<void>;
-    refreshOrganizations: () => Promise<void>;
     addNewHospital: (
         hospital: Omit<Hospital, "id" | "createdAt" | "updatedAt">,
     ) => Promise<Hospital>;
@@ -74,54 +70,77 @@ const HospitalContext = createContext<HospitalContextType | undefined>(
     undefined,
 );
 
-// Provider component
-export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({
-    children,
-}) => {
+// Provider component that takes the organisation ID as a prop
+export const HospitalProvider: React.FC<{
+    children: React.ReactNode;
+    organisationId: string;
+}> = ({ children, organisationId }) => {
     const [hospitals, setHospitals] = useState<Hospital[]>([]);
-    const [organizations, setOrganizations] = useState<Organization[]>([]);
+    const [organisation, setOrganisation] = useState<Organisation | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [filter, setFilter] = useState<HospitalFilter>({
-        organization: "all",
         status: "all",
         search: "",
     });
 
-    // Function to fetch hospitals
+    // Function to load the current organisation
+    const loadOrganisation = async () => {
+        if (!organisationId) return;
+
+        try {
+            const org = await getOrganisation(organisationId);
+            setOrganisation(org as Organisation);
+        } catch (err) {
+            console.error("Error fetching organisation:", err);
+            setError("Failed to load organisation details. Please try again.");
+        }
+    };
+
+    // Function to fetch hospitals for the current organisation
     const refreshHospitals = useCallback(async () => {
+        if (!organisationId) {
+            setHospitals([]);
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
-            const data = await getHospitals(filter);
-            setHospitals(data as Hospital[]);
+
+            // Get hospitals for this organisation
+            const hospitalData = await getHospitalsByOrganisation(
+                organisationId,
+                filter,
+            );
+            setHospitals(hospitalData);
         } catch (err) {
             console.error("Error fetching hospitals:", err);
             setError("Failed to load hospitals. Please try again.");
         } finally {
             setLoading(false);
         }
-    }, [filter]);
+    }, [organisationId, filter]);
 
-    // Function to fetch organizations (for dropdowns)
-    const refreshOrganizations = async () => {
-        try {
-            const data = await getOrganizations();
-            setOrganizations(data);
-        } catch (err) {
-            console.error("Error fetching organizations:", err);
-            setError(
-                "Failed to load organizations for dropdown. Please try again.",
-            );
-        }
-    };
-
-    // Add a new hospital
+    // Add a new hospital within the current organisation
     const addNewHospital = async (
         hospital: Omit<Hospital, "id" | "createdAt" | "updatedAt">,
     ) => {
+        if (!organisationId || !organisation) {
+            throw new Error("Cannot add hospital: No organisation selected");
+        }
+
         try {
-            const newHospital = await addHospital(hospital);
+            // Add the organisation to the hospital data
+            const hospitalWithOrg = {
+                ...hospital,
+                organisation: {
+                    id: organisationId,
+                    name: organisation.name,
+                },
+            };
+
+            const newHospital = await addHospital(hospitalWithOrg);
             await refreshHospitals();
             return newHospital;
         } catch (err) {
@@ -136,8 +155,21 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({
         id: string,
         hospital: Partial<Hospital>,
     ) => {
+        if (!organisationId || !organisation) {
+            throw new Error("Cannot update hospital: No organisation selected");
+        }
+
         try {
-            const updatedHospital = await updateHospital(id, hospital);
+            // Include the organisation in the update
+            const updateData = {
+                ...hospital,
+                organisation: {
+                    id: organisationId,
+                    name: organisation.name,
+                },
+            };
+
+            const updatedHospital = await updateHospital(id, updateData);
             await refreshHospitals();
             return updatedHospital;
         } catch (err) {
@@ -159,26 +191,25 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({
         }
     };
 
-    // Load hospitals on mount and when filter changes
+    // Load organisation on mount or when organisationId changes
+    useEffect(() => {
+        loadOrganisation().then((r) => r);
+    }, [organisationId]);
+
+    // Load hospitals on mount and when filter or organisationId changes
     useEffect(() => {
         refreshHospitals().then((r) => r);
-    }, [filter, refreshHospitals]);
-
-    // Load organizations on mount
-    useEffect(() => {
-        refreshOrganizations().then((r) => r);
-    }, []);
+    }, [filter, organisationId, refreshHospitals]);
 
     // Context value
     const value: HospitalContextType = {
         hospitals,
-        organizations,
+        organisation,
         loading,
         error,
         filter,
         setFilter,
         refreshHospitals,
-        refreshOrganizations,
         addNewHospital,
         updateExistingHospital,
         removeHospital,

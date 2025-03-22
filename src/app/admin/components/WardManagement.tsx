@@ -365,7 +365,7 @@
 import { useEffect, useState } from "react";
 import { useWards, Ward } from "@/context/WardContext";
 import { Department } from "@/context/DepartmentContext";
-import { useOrganizations } from "@/context/OrganizationContext"; // Add this import
+import { useOrganisations } from "@/context/OrganisationContext"; // Add this import
 import WardFilter from "./wards/WardFilter";
 import WardCard from "./wards/WardCard";
 import WardModal from "./wards/WardModal";
@@ -391,8 +391,8 @@ export default function WardManagement() {
     } = useWards();
 
     // We also use departments context to get the hierarchical department structure
-    // Get organizations directly
-    const { organizations } = useOrganizations();
+    // Get organisations directly
+    const { organisations } = useOrganisations();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentWard, setCurrentWard] = useState<Ward | null>(null);
@@ -425,14 +425,14 @@ export default function WardManagement() {
     // Enhanced department selector states
     const [isDepartmentSelectorOpen, setIsDepartmentSelectorOpen] =
         useState(false);
-    const [selectedOrganizationFilter, setSelectedOrganizationFilter] =
+    const [selectedOrganisationFilter, setSelectedOrganisationFilter] =
         useState<string>("all");
     const [selectedHospitalFilter, setSelectedHospitalFilter] =
         useState<string>("all");
     const [departmentSearchQuery, setDepartmentSearchQuery] =
         useState<string>("");
 
-    // Create a mapping of hospitals to organizations
+    // Create a mapping of hospitals to organisations
     const [hospitalOrgMap, setHospitalOrgMap] = useState<{
         [hospitalId: string]: { id: string; name: string };
     }>({});
@@ -440,7 +440,7 @@ export default function WardManagement() {
     // Grouped departments state
     const [groupedDepartments, setGroupedDepartments] = useState<{
         [orgId: string]: {
-            organization: { id: string; name: string };
+            organisation: { id: string; name: string };
             hospitals: {
                 [hospitalId: string]: {
                     hospital: Hospital;
@@ -450,33 +450,33 @@ export default function WardManagement() {
         };
     }>({});
 
-    // Build hospital to organization mapping
+    // Build hospital to organisation mapping
     useEffect(() => {
         const mapping: { [hospitalId: string]: { id: string; name: string } } =
             {};
 
-        // First try to get organization data directly from hospitals
+        // First try to get organisation data directly from hospitals
         hospitals.forEach((hospital) => {
-            if (hospital.organization) {
+            if (hospital.organisation) {
                 mapping[hospital.id] = {
-                    id: hospital.organization.id,
-                    name: hospital.organization.name,
+                    id: hospital.organisation.id,
+                    name: hospital.organisation.name,
                 };
             }
         });
 
-        // If that didn't work, try to determine organizations from their IDs
-        if (Object.keys(mapping).length === 0 && organizations.length > 0) {
-            // Create a lookup table for organizations
+        // If that didn't work, try to determine organisations from their IDs
+        if (Object.keys(mapping).length === 0 && organisations.length > 0) {
+            // Create a lookup table for organisations
             const orgLookup: { [id: string]: string } = {};
-            organizations.forEach((org) => {
+            organisations.forEach((org) => {
                 orgLookup[org.id] = org.name;
             });
 
-            // Try to extract organization IDs from hospitals
+            // Try to extract organisation IDs from hospitals
             hospitals.forEach((hospital) => {
-                // This assumes hospital might have organizationId property instead
-                const orgId = hospital.organization.id;
+                // This assumes hospital might have organisationId property instead
+                const orgId = hospital.organisation.id;
                 if (orgId && orgLookup[orgId]) {
                     mapping[hospital.id] = {
                         id: orgId,
@@ -487,9 +487,9 @@ export default function WardManagement() {
         }
 
         setHospitalOrgMap(mapping);
-    }, [hospitals, organizations]);
+    }, [hospitals, organisations]);
 
-    // Organize departments by organization and hospital
+    // Organize departments by organisation and hospital
     useEffect(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const grouped: any = {};
@@ -499,17 +499,17 @@ export default function WardManagement() {
 
             const hospitalId = dept.hospital.id;
 
-            // Get organization from our mapping
+            // Get organisation from our mapping
             const orgInfo = hospitalOrgMap[hospitalId] || {
                 id: "unknown",
-                name: "Unknown Organization",
+                name: "Unknown Organisation",
             };
             const orgId = orgInfo.id;
             const orgName = orgInfo.name;
 
             if (!grouped[orgId]) {
                 grouped[orgId] = {
-                    organization: { id: orgId, name: orgName },
+                    organisation: { id: orgId, name: orgName },
                     hospitals: {},
                 };
             }
@@ -518,7 +518,7 @@ export default function WardManagement() {
                 grouped[orgId].hospitals[hospitalId] = {
                     hospital: {
                         ...dept.hospital,
-                        organization: orgInfo,
+                        organisation: orgInfo,
                     },
                     departments: [],
                 };
@@ -529,7 +529,7 @@ export default function WardManagement() {
                 ...dept,
                 hospital: {
                     ...dept.hospital,
-                    organization: orgInfo,
+                    organisation: orgInfo,
                 },
             });
         });
@@ -638,7 +638,7 @@ export default function WardManagement() {
 
     // Enhanced department selector handlers
     const handleOrgFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setSelectedOrganizationFilter(e.target.value);
+        setSelectedOrganisationFilter(e.target.value);
         setSelectedHospitalFilter("all"); // Reset hospital filter when org changes
     };
 
@@ -652,13 +652,13 @@ export default function WardManagement() {
         setDepartmentSearchQuery(e.target.value);
     };
 
-    // Get hospitals for a specific organization
-    const getHospitalsByOrganization = (organizationId: string) => {
-        if (organizationId === "all") return hospitals;
+    // Get hospitals for a specific organisation
+    const getHospitalsByOrganisation = (organisationId: string) => {
+        if (organisationId === "all") return hospitals;
 
         return hospitals.filter((hospital) => {
             const orgInfo = hospitalOrgMap[hospital.id];
-            return orgInfo && orgInfo.id === organizationId;
+            return orgInfo && orgInfo.id === organisationId;
         });
     };
 
@@ -667,7 +667,7 @@ export default function WardManagement() {
         setIsDepartmentSelectorOpen(!isDepartmentSelectorOpen);
         // Reset filters when opening
         if (!isDepartmentSelectorOpen) {
-            setSelectedOrganizationFilter("all");
+            setSelectedOrganisationFilter("all");
             setSelectedHospitalFilter("all");
             setDepartmentSearchQuery("");
         }
@@ -723,25 +723,25 @@ export default function WardManagement() {
                                             Add Ward to Department
                                         </p>
 
-                                        {/* Organization Filter */}
+                                        {/* Organisation Filter */}
                                         <div className="field">
                                             <label className="label is-small">
-                                                Organization
+                                                Organisation
                                             </label>
                                             <div className="control">
                                                 <div className="select is-small is-fullwidth">
                                                     <select
                                                         value={
-                                                            selectedOrganizationFilter
+                                                            selectedOrganisationFilter
                                                         }
                                                         onChange={
                                                             handleOrgFilterChange
                                                         }
                                                     >
                                                         <option value="all">
-                                                            All Organizations
+                                                            All Organisations
                                                         </option>
-                                                        {organizations.map(
+                                                        {organisations.map(
                                                             (org) => (
                                                                 <option
                                                                     key={org.id}
@@ -773,18 +773,18 @@ export default function WardManagement() {
                                                             handleHospitalFilterChange
                                                         }
                                                         disabled={
-                                                            selectedOrganizationFilter ===
+                                                            selectedOrganisationFilter ===
                                                             "all"
                                                         }
                                                     >
                                                         <option value="all">
-                                                            {selectedOrganizationFilter ===
+                                                            {selectedOrganisationFilter ===
                                                             "all"
-                                                                ? "Select organization first"
+                                                                ? "Select organisation first"
                                                                 : "All Hospitals"}
                                                         </option>
-                                                        {getHospitalsByOrganization(
-                                                            selectedOrganizationFilter,
+                                                        {getHospitalsByOrganisation(
+                                                            selectedOrganisationFilter,
                                                         ).map((hospital) => (
                                                             <option
                                                                 key={
@@ -839,10 +839,10 @@ export default function WardManagement() {
                                         {Object.entries(groupedDepartments)
                                             .filter(
                                                 ([orgId]) =>
-                                                    selectedOrganizationFilter ===
+                                                    selectedOrganisationFilter ===
                                                         "all" ||
                                                     orgId ===
-                                                        selectedOrganizationFilter,
+                                                        selectedOrganisationFilter,
                                             )
                                             .map(([orgId, orgGroup]) => (
                                                 <div
@@ -852,7 +852,7 @@ export default function WardManagement() {
                                                     <p className="is-size-6 has-text-weight-bold has-background-light p-2">
                                                         {
                                                             orgGroup
-                                                                .organization
+                                                                .organisation
                                                                 .name
                                                         }
                                                     </p>
@@ -990,10 +990,10 @@ export default function WardManagement() {
                                                 groupedDepartments,
                                             ).filter(
                                                 ([orgId]) =>
-                                                    selectedOrganizationFilter ===
+                                                    selectedOrganisationFilter ===
                                                         "all" ||
                                                     orgId ===
-                                                        selectedOrganizationFilter,
+                                                        selectedOrganisationFilter,
                                             ).length === 0) && (
                                             <div className="has-text-centered my-4">
                                                 <p className="has-text-grey">

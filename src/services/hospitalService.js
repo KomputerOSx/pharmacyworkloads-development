@@ -1,4 +1,6 @@
 // src/services/hospitalService.js
+// noinspection ExceptionCaughtLocallyJS
+
 import {
     addDoc,
     collection,
@@ -13,6 +15,11 @@ import {
     where,
 } from "firebase/firestore";
 import { db } from "./firebase";
+import {
+    assignHospitalToOrganisation,
+    getHospitalOrganisationAssignment,
+    removeHospitalAssignment,
+} from "./hospitalAssignmentService";
 
 const hospitalsCollection = collection(db, "hospitals");
 
@@ -24,91 +31,21 @@ const formatFirestoreTimestamp = (timestamp) => {
     return timestamp || null;
 };
 
-// Helper function to format reference fields to usable data
-const formatReferenceField = async (reference) => {
-    if (!reference) return null;
-
-    try {
-        const docSnap = await getDoc(reference);
-        if (docSnap.exists()) {
-            return {
-                id: docSnap.id,
-                ...docSnap.data(),
-            };
-        }
-        return null;
-    } catch (error) {
-        console.error("Error getting reference document:", error);
-        return null;
-    }
-};
-
 // Get all hospitals with optional filters
-export const getHospitals = async (filters = {}) => {
+export const getHospitals = async (organisationId) => {
     try {
-        // Start with a basic query
-        let q = hospitalsCollection;
+        const assignedHospitals = await getDocs(
+            query(
+                collection(db, "hospital_organisation_assignments"),
+                where("organisation", "==", organisationId),
+                orderBy("name"),
+            ),
+        );
 
-        // Apply filters if provided
-        const constraints = [];
-
-        if (filters.organization && filters.organization !== "all") {
-            const orgRef = doc(db, "organizations", filters.organization);
-            constraints.push(where("organization", "==", orgRef));
-        }
-
-        if (filters.status === "active") {
-            constraints.push(where("active", "==", true));
-        } else if (filters.status === "inactive") {
-            constraints.push(where("active", "==", false));
-        }
-
-        // Add sorting
-        constraints.push(orderBy("name"));
-
-        // Apply all constraints
-        if (constraints.length > 0) {
-            q = query(hospitalsCollection, ...constraints);
-        }
-
-        const querySnapshot = await getDocs(q);
-
-        // Convert to array of data objects with IDs
-        const hospitals = [];
-
-        // Process each hospital and resolve organization references
-        for (const docSnapshot of querySnapshot.docs) {
-            const data = docSnapshot.data();
-
-            // Get organization data from reference
-            let organizationData = null;
-            if (data.organization) {
-                organizationData = await formatReferenceField(
-                    data.organization,
-                );
-            }
-
-            hospitals.push({
-                id: docSnapshot.id,
-                ...data,
-                organization: organizationData || { id: "", name: "Unknown" },
-                createdAt: formatFirestoreTimestamp(data.createdAt),
-                updatedAt: formatFirestoreTimestamp(data.updatedAt),
-            });
-        }
-
-        // Apply search filter (client-side) if provided
-        if (filters.search) {
-            const searchLower = filters.search.toLowerCase();
-            return hospitals.filter(
-                (hospital) =>
-                    hospital.name?.toLowerCase().includes(searchLower) ||
-                    hospital.city?.toLowerCase().includes(searchLower) ||
-                    hospital.postcode?.toLowerCase().includes(searchLower),
-            );
-        }
-
-        return hospitals;
+        return assignedHospitals.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
     } catch (error) {
         console.error("Error getting hospitals:", error);
         throw error;
@@ -124,18 +61,9 @@ export const getHospital = async (id) => {
         if (docSnap.exists()) {
             const data = docSnap.data();
 
-            // Get organization data
-            let organizationData = null;
-            if (data.organization) {
-                organizationData = await formatReferenceField(
-                    data.organization,
-                );
-            }
-
             return {
                 id: docSnap.id,
                 ...data,
-                organization: organizationData || { id: "", name: "Unknown" },
                 createdAt: formatFirestoreTimestamp(data.createdAt),
                 updatedAt: formatFirestoreTimestamp(data.updatedAt),
             };
@@ -149,37 +77,53 @@ export const getHospital = async (id) => {
 };
 
 // Add a new hospital
+// create the hospital
+// create a new organisation assignment
 export const addHospital = async (hospitalData, userId = "system") => {
     try {
-        // Convert organization to reference if needed
-        let organizationRef = null;
-        if (hospitalData.organization && hospitalData.organization.id) {
-            organizationRef = doc(
-                db,
-                "organizations",
-                hospitalData.organization.id,
-            );
+        // Validate organization is provided
+        if (!hospitalData.organization || !hospitalData.organization.id) {
+            throw new Error("Organization is required to create a hospital");
         }
 
-        // Format data for Firestore
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // Extract organization from hospital data
         const { organization, ...otherData } = hospitalData;
 
-        // Add timestamps and audit fields
+        // Add timestamps and audit fields for the hospital
         const dataToAdd = {
             ...otherData,
-            organization: organizationRef,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
             createdById: userId,
             updatedById: userId,
         };
 
+        // Add the hospital to the collection (without organization reference)
         const docRef = await addDoc(hospitalsCollection, dataToAdd);
+        const hospitalId = docRef.id;
+
+        // Create the organization assignment
+        try {
+            await assignHospitalToOrganisation(
+                hospitalId,
+                organization.id,
+                userId,
+            );
+        } catch (assignmentError) {
+            // If assignment fails, delete the hospital and throw error
+            console.error(
+                "Error creating hospital-organization assignment:",
+                assignmentError,
+            );
+            await deleteDoc(doc(db, "hospitals", hospitalId));
+            throw new Error(
+                "Failed to assign hospital to organization. Hospital creation aborted.",
+            );
+        }
 
         // Return the created hospital with its new ID
         return {
-            id: docRef.id,
+            id: hospitalId,
             ...hospitalData,
         };
     } catch (error) {
@@ -193,29 +137,49 @@ export const updateHospital = async (id, hospitalData, userId = "system") => {
     try {
         const hospitalRef = doc(db, "hospitals", id);
 
-        // Convert organization to reference if needed
-        let organizationRef = null;
-        if (hospitalData.organization && hospitalData.organization.id) {
-            organizationRef = doc(
-                db,
-                "organizations",
-                hospitalData.organization.id,
-            );
-        }
-
-        // Format data for Firestore
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { organization, ...otherData } = hospitalData;
+        // Extract organisation from hospital data
+        const { organisation, ...otherData } = hospitalData;
 
         // Add update timestamp and audit field
         const dataToUpdate = {
             ...otherData,
-            organization: organizationRef,
             updatedAt: serverTimestamp(),
             updatedById: userId,
         };
 
+        // Update the hospital document (without organisation reference)
         await updateDoc(hospitalRef, dataToUpdate);
+
+        // Handle organisation assignment if organisation is provided
+        if (organisation && organisation.id) {
+            // Get current organisation assignment
+            const currentAssignments =
+                await getHospitalOrganisationAssignment(id);
+
+            // If there's a current assignment, and it's different from the new one
+            if (currentAssignments.length > 0) {
+                const currentAssignment = currentAssignments[0];
+                const currentOrgRef = currentAssignment.organisation;
+                const currentOrgId = currentOrgRef.path.split("/").pop();
+
+                // If organisation has changed
+                if (currentOrgId !== organisation.id) {
+                    // Remove old assignment
+                    await removeHospitalAssignment(currentAssignment.id);
+
+                    // Create new assignment
+                    await assignHospitalToOrganisation(
+                        id,
+                        organisation.id,
+                        userId,
+                    );
+                }
+                // If same organisation, no need to update assignment
+            } else {
+                // No current assignment, create a new one
+                await assignHospitalToOrganisation(id, organisation.id, userId);
+            }
+        }
 
         // Return the updated hospital
         return {
@@ -228,12 +192,20 @@ export const updateHospital = async (id, hospitalData, userId = "system") => {
     }
 };
 
-// Delete a hospital
 export const deleteHospital = async (id) => {
     try {
         // TODO: Consider checking if there are any departments/wards linked to this hospital
         // and prevent deletion if there are (or implement cascading delete)
 
+        // First, get and delete any organisation assignments
+        const assignments = await getHospitalOrganisationAssignment(id);
+
+        // Delete each organisation assignment
+        for (const assignment of assignments) {
+            await removeHospitalAssignment(assignment.id);
+        }
+
+        // Then delete the hospital
         const hospitalRef = doc(db, "hospitals", id);
         await deleteDoc(hospitalRef);
 
@@ -241,39 +213,5 @@ export const deleteHospital = async (id) => {
     } catch (error) {
         console.error("Error deleting hospital:", error);
         throw error;
-    }
-};
-
-// Count departments for a hospital
-export const countDepartments = async (hospitalId) => {
-    try {
-        const departmentsCollection = collection(db, "departments");
-        const q = query(
-            departmentsCollection,
-            where("hospital", "==", doc(db, "hospitals", hospitalId)),
-        );
-
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.size;
-    } catch (error) {
-        console.error("Error counting departments:", error);
-        return 0;
-    }
-};
-
-// Count wards for a hospital
-export const countWards = async (hospitalId) => {
-    try {
-        const wardsCollection = collection(db, "wards");
-        const q = query(
-            wardsCollection,
-            where("hospital", "==", doc(db, "hospitals", hospitalId)),
-        );
-
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.size;
-    } catch (error) {
-        console.error("Error counting wards:", error);
-        return 0;
     }
 };

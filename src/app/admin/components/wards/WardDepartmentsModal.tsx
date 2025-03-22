@@ -42,7 +42,7 @@ export default function WardDepartmentsModal({
         removeWardDepartmentAssignment,
     } = useWards();
 
-    // const { organizations } = useOrganizations();
+    // const { organisations } = useOrganizations();
 
     const [selectedDepartmentId, setSelectedDepartmentId] =
         useState<string>("");

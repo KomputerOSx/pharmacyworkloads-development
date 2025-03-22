@@ -19,8 +19,8 @@ async function createSchema() {
     try {
         console.log("Starting enhanced database setup...");
 
-        // 1. Create organizations (trusts)
-        console.log("Creating organizations...");
+        // 1. Create organisations (trusts)
+        console.log("Creating organisations...");
         const organizations = [
             {
                 id: "nhs_trust_1",

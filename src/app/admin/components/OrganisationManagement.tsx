@@ -1,84 +1,84 @@
-// src/app/admin/components/OrganizationManagement.tsx
+// src/app/admin/components/OrganisationManagement.tsx
 "use client";
 
 import { useState } from "react";
-import OrganizationFilter from "./organizations/OrganizationFilter";
-import OrganizationTable from "./organizations/OrganizationTable";
-import OrganizationModal from "./organizations/OrganizationModal";
-import { Organization, useOrganizations } from "@/context/OrganizationContext";
+import OrganisationFilter from "./organisations/OrganisationFilter";
+import OrganisationTable from "./organisations/OrganisationTable";
+import OrganisationModal from "./organisations/OrganisationModal";
+import { Organisation, useOrganisations } from "@/context/OrganisationContext";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import AlertMessage from "@/components/common/AlertMessage";
 
-export default function OrganizationManagement() {
+export default function OrganisationManagement() {
     const {
-        organizations,
+        organisations,
         loading,
         error,
         filter,
         setFilter,
-        addNewOrganization,
-        updateExistingOrganization,
-        removeOrganization,
-    } = useOrganizations();
+        addNewOrganisation,
+        updateExistingOrganisation,
+        removeOrganisation,
+    } = useOrganisations();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [currentOrganization, setCurrentOrganization] =
-        useState<Organization | null>(null);
+    const [currentOrganisation, setCurrentOrganisation] =
+        useState<Organisation | null>(null);
     const [modalMode, setModalMode] = useState<"add" | "edit">("add");
     const [actionResult, setActionResult] = useState<{
         success: boolean;
         message: string;
     } | null>(null);
 
-    const handleAddOrganization = () => {
-        setCurrentOrganization(null);
+    const handleAddOrganisation = () => {
+        setCurrentOrganisation(null);
         setModalMode("add");
         setIsModalOpen(true);
     };
 
-    const handleEditOrganization = (org: Organization) => {
-        setCurrentOrganization(org);
+    const handleEditOrganisation = (org: Organisation) => {
+        setCurrentOrganisation(org);
         setModalMode("edit");
         setIsModalOpen(true);
     };
 
-    const handleDeleteOrganization = async (id: string) => {
-        if (confirm("Are you sure you want to delete this organization?")) {
+    const handleDeleteOrganisation = async (id: string) => {
+        if (confirm("Are you sure you want to delete this organisation?")) {
             try {
-                await removeOrganization(id);
+                await removeOrganisation(id);
                 setActionResult({
                     success: true,
-                    message: "Organization deleted successfully",
+                    message: "Organisation deleted successfully",
                 });
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
             } catch (err) {
                 setActionResult({
                     success: false,
-                    message: "Failed to delete organization",
+                    message: "Failed to delete organisation",
                 });
             }
         }
     };
 
-    const handleSaveOrganization = async (org: Organization) => {
+    const handleSaveOrganisation = async (org: Organisation) => {
         try {
             if (modalMode === "add") {
                 // Strip id and other fields that shouldn't be in new record
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const { id, hospitalCount, createdAt, updatedAt, ...newOrg } =
                     org;
-                await addNewOrganization(newOrg);
+                await addNewOrganisation(newOrg);
 
                 setActionResult({
                     success: true,
-                    message: "Organization added successfully",
+                    message: "Organisation added successfully",
                 });
             } else {
-                await updateExistingOrganization(org.id, org);
+                await updateExistingOrganisation(org.id, org);
 
                 setActionResult({
                     success: true,
-                    message: "Organization updated successfully",
+                    message: "Organisation updated successfully",
                 });
             }
             setIsModalOpen(false);
@@ -86,7 +86,7 @@ export default function OrganizationManagement() {
         } catch (err) {
             setActionResult({
                 success: false,
-                message: `Failed to ${modalMode === "add" ? "add" : "update"} organization`,
+                message: `Failed to ${modalMode === "add" ? "add" : "update"} organisation`,
             });
         }
     };
@@ -104,9 +104,9 @@ export default function OrganizationManagement() {
                 <div className="box">
                     {/* Properly structured title and subtitle */}
                     <div className="block">
-                        <h3 className="title is-4 mb-5">Organizations</h3>
+                        <h3 className="title is-4 mb-5">Organisations</h3>
                         <h5 className="subtitle is-6">
-                            Manage healthcare organizations
+                            Manage healthcare organisations
                         </h5>
                     </div>
 
@@ -114,18 +114,18 @@ export default function OrganizationManagement() {
                     <div className="block">
                         <button
                             className="button is-primary"
-                            onClick={handleAddOrganization}
+                            onClick={handleAddOrganisation}
                         >
                             <span className="icon">
                                 <i className="fas fa-plus"></i>
                             </span>
-                            <span>Add Organization</span>
+                            <span>Add Organisation</span>
                         </button>
                     </div>
 
                     {/* Filter in its own block */}
                     <div className="block">
-                        <OrganizationFilter
+                        <OrganisationFilter
                             filter={filter}
                             setFilter={setFilter}
                         />
@@ -153,22 +153,22 @@ export default function OrganizationManagement() {
                     </div>
                 ) : (
                     <div className="box">
-                        <OrganizationTable
-                            organizations={organizations}
-                            onEdit={handleEditOrganization}
-                            onDelete={handleDeleteOrganization}
+                        <OrganisationTable
+                            organisations={organisations}
+                            onEdit={handleEditOrganisation}
+                            onDelete={handleDeleteOrganisation}
                         />
                     </div>
                 )}
             </div>
 
-            {/* Organization Modal */}
-            <OrganizationModal
+            {/* Organisation Modal */}
+            <OrganisationModal
                 isOpen={isModalOpen}
                 mode={modalMode}
-                organization={currentOrganization}
+                organisation={currentOrganisation}
                 onClose={() => setIsModalOpen(false)}
-                onSave={handleSaveOrganization}
+                onSave={handleSaveOrganisation}
             />
         </div>
     );

@@ -132,7 +132,7 @@ export default function DepartmentModal({
         const { name, value, type } = e.target;
 
         if (name === "organizationId") {
-            // Find the selected organization from the organizations array
+            // Find the selected organization from the organisations array
             const selectedOrg = organizations.find((org) => org.id === value);
 
             // Update the form data with the selected organization

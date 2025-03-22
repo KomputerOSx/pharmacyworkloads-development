@@ -3,7 +3,7 @@
 import { useState } from "react";
 import TabNavigation from "../admin/components/TabNavigation";
 import Dashboard from "../admin/components/Dashboard";
-import OrganizationManagement from "../admin/components/OrganizationManagement";
+import OrganisationManagement from "./components/OrganisationManagement";
 import HospitalManagement from "../admin/components/HospitalManagement";
 import DepartmentManagement from "@/app/admin/components/DepartmentManagement";
 import WardManagement from "@/app/admin/components/WardManagement";
@@ -30,7 +30,7 @@ export default function AdminPage() {
 
             {activeTab === "dashboard" && <Dashboard />}
 
-            {activeTab === "organizations" && <OrganizationManagement />}
+            {activeTab === "organizations" && <OrganisationManagement />}
 
             {activeTab === "hospitals" && <HospitalManagement />}
 

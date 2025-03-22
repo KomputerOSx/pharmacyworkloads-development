@@ -10,23 +10,23 @@ import {
     updateStaff,
 } from "@/services/staffService";
 import {
-    assignStaffToOrganization,
+    assignStaffToOrganisation,
     assignStaffToHospital,
     assignStaffToDepartment,
-    getStaffOrganizationAssignments,
+    getStaffOrganisationAssignments,
     getStaffHospitalAssignments,
     getStaffDepartmentAssignments,
     getStaffAssignments,
     setPrimaryHospital,
-    removeStaffOrganizationAssignment,
+    removeStaffOrganisationAssignment,
     removeStaffHospitalAssignment,
     removeStaffDepartmentAssignment,
     removeStaffAssignments,
 } from "@/services/staffAssignmentService";
 import { getDepartments } from "@/services/departmentService";
 import { getHospitals } from "@/services/hospitalService";
-import { getOrganizations } from "@/services/organizationService";
-import { Organization } from "@/context/OrganizationContext";
+import { getOrganisations } from "@/services/organisationService";
+import { Organisation } from "@/context/OrganisationContext";
 import { Hospital } from "./HospitalContext";
 import { Department } from "@/context/DepartmentContext";
 
@@ -63,7 +63,7 @@ export type Staff = {
         name: string; // Manager, admin, coordinator, supervisor
     };
     nhsBand?: string;
-    organization: {
+    organisation: {
         id: string;
         name: string;
     };
@@ -92,16 +92,15 @@ export type Staff = {
 };
 
 // Using your existing type definitions
-export type StaffOrganizationAssignment = {
+export type StaffOrganisationAssignment = {
     id: string;
-    organization: Organization;
-    isPrimary: boolean;
-    startDate?: string;
-    endDate?: string | null;
+    staff: Staff;
+    organisation: Organisation;
 };
 
 export type StaffHospitalAssignment = {
     id: string;
+    staff: Staff;
     hospital: Hospital;
     isPrimary: boolean;
     startDate?: string;
@@ -120,7 +119,7 @@ export type StaffDepartmentAssignment = {
 
 export type StaffAssignments = {
     id: string;
-    organization: Organization;
+    organisation: Organisation;
     hospital: Hospital;
     department: Department;
     role: string; // e.g., "Pharmacist", "Doctor"
@@ -143,7 +142,7 @@ export type DepartmentRole = {
 
 // Define the filter type
 export type StaffFilter = {
-    organization: string;
+    organisation: string;
     hospital: string;
     department: string;
     role: string;
@@ -195,7 +194,7 @@ export const nhsBands = [
 // Define the context type
 interface StaffContextType {
     staff: Staff[];
-    organizations: Organization[];
+    organisations: Organisation[];
     hospitals: Hospital[];
     departments: Department[];
     staffRoles: StaffRole[];
@@ -204,7 +203,7 @@ interface StaffContextType {
     filter: StaffFilter;
     setFilter: React.Dispatch<React.SetStateAction<StaffFilter>>;
     refreshStaff: () => Promise<void>;
-    refreshOrganizations: () => Promise<void>;
+    refreshOrganisations: () => Promise<void>;
     refreshHospitals: () => Promise<void>;
     refreshDepartments: () => Promise<void>;
     refreshStaffRoles: () => Promise<void>;
@@ -216,9 +215,9 @@ interface StaffContextType {
     removeStaff: (id: string) => Promise<void>;
 
     // Staff Assignment Serivce Functions
-    assignStaffToOrganization: (
+    assignStaffToOrganisation: (
         staffId: string,
-        organizationId: string,
+        organisationId: string,
         isPrimary?: boolean,
     ) => Promise<{ id: string; isPrimary: boolean }>;
 
@@ -237,9 +236,9 @@ interface StaffContextType {
     ) => Promise<{ id: string; isPrimary: boolean }>;
 
     // Retrieval functions
-    getStaffOrganizationAssignments: (
+    getStaffOrganisationAssignments: (
         staffId: string,
-    ) => Promise<StaffOrganizationAssignment[]>;
+    ) => Promise<StaffOrganisationAssignment[]>;
     getStaffHospitalAssignments: (
         staffId: string,
     ) => Promise<StaffHospitalAssignment[]>;
@@ -247,7 +246,7 @@ interface StaffContextType {
         staffId: string,
     ) => Promise<StaffDepartmentAssignment[]>;
     getStaffAssignments: (staffId: string) => Promise<{
-        organizationAssignments: StaffOrganizationAssignment[];
+        organisationAssignments: StaffOrganisationAssignment[];
         hospitalAssignments: StaffHospitalAssignment[];
         departmentAssignments: StaffDepartmentAssignment[];
     }>;
@@ -259,21 +258,21 @@ interface StaffContextType {
     ) => Promise<void>;
 
     // Removal functions
-    removeStaffOrganizationAssignment: (assignmentId: string) => Promise<void>;
+    removeStaffOrganisationAssignment: (assignmentId: string) => Promise<void>;
     removeStaffHospitalAssignment: (assignmentId: string) => Promise<void>;
     removeStaffDepartmentAssignment: (assignmentId: string) => Promise<void>;
     removeStaffAssignments: (staffId: string) => Promise<void>;
 
     // Optional - current assignments state if needed in UI
     currentAssignments?: {
-        organizationAssignments: StaffOrganizationAssignment[];
+        organisationAssignments: StaffOrganisationAssignment[];
         hospitalAssignments: StaffHospitalAssignment[];
         departmentAssignments: StaffDepartmentAssignment[];
     } | null;
 
     setCurrentAssignments?: React.Dispatch<
         React.SetStateAction<{
-            organizationAssignments: StaffOrganizationAssignment[];
+            organisationAssignments: StaffOrganisationAssignment[];
             hospitalAssignments: StaffHospitalAssignment[];
             departmentAssignments: StaffDepartmentAssignment[];
         } | null>
@@ -290,14 +289,14 @@ export const StaffProvider: React.FC<{ children: React.ReactNode }> = ({
     const [staff, setStaff] = useState<Staff[]>([]);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [currentAssignments, setCurrentAssignments] = useState(null);
-    const [organizations, setOrganizations] = useState<Organization[]>([]);
+    const [organisations, setOrganisations] = useState<Organisation[]>([]);
     const [hospitals, setHospitals] = useState<Hospital[]>([]);
     const [departments, setDepartments] = useState<Department[]>([]);
     const [staffRoles, setStaffRoles] = useState<StaffRole[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [filter, setFilter] = useState<StaffFilter>({
-        organization: "all",
+        organisation: "all",
         hospital: "all",
         department: "all",
         role: "all",
@@ -321,14 +320,14 @@ export const StaffProvider: React.FC<{ children: React.ReactNode }> = ({
         }
     };
 
-    // Function to fetch organizations
-    const refreshOrganizations = async () => {
+    // Function to fetch organisations
+    const refreshOrganisations = async () => {
         try {
-            const data = await getOrganizations({ status: "active" });
-            setOrganizations(data);
+            const data = await getOrganisations({ status: "active" });
+            setOrganisations(data);
         } catch (err) {
-            console.error("Error fetching organizations:", err);
-            setError("Failed to load organizations. Please try again.");
+            console.error("Error fetching organisations:", err);
+            setError("Failed to load organisations. Please try again.");
         }
     };
 
@@ -465,7 +464,7 @@ export const StaffProvider: React.FC<{ children: React.ReactNode }> = ({
     // Load related data on mount
     useEffect(() => {
         Promise.all([
-            refreshOrganizations(),
+            refreshOrganisations(),
             refreshHospitals(),
             refreshDepartments(),
             refreshStaffRoles(),
@@ -475,7 +474,7 @@ export const StaffProvider: React.FC<{ children: React.ReactNode }> = ({
     // Context value
     const value: StaffContextType = {
         staff,
-        organizations,
+        organisations,
         hospitals,
         departments,
         staffRoles,
@@ -484,7 +483,7 @@ export const StaffProvider: React.FC<{ children: React.ReactNode }> = ({
         filter,
         setFilter,
         refreshStaff,
-        refreshOrganizations,
+        refreshOrganisations,
         refreshHospitals,
         refreshDepartments,
         refreshStaffRoles,
@@ -494,14 +493,14 @@ export const StaffProvider: React.FC<{ children: React.ReactNode }> = ({
         removeStaff,
 
         // Add implementations for all the new methods:
-        assignStaffToOrganization: async (
+        assignStaffToOrganisation: async (
             staffId,
-            organizationId,
+            organisationId,
             isPrimary = false,
         ) => {
-            return await assignStaffToOrganization(
+            return await assignStaffToOrganisation(
                 staffId,
-                organizationId,
+                organisationId,
                 isPrimary,
             );
         },
@@ -530,9 +529,9 @@ export const StaffProvider: React.FC<{ children: React.ReactNode }> = ({
             );
         },
 
-        getStaffOrganizationAssignments: async (staffId) => {
-            const result = await getStaffOrganizationAssignments(staffId);
-            return result as unknown as StaffOrganizationAssignment[];
+        getStaffOrganisationAssignments: async (staffId) => {
+            const result = await getStaffOrganisationAssignments(staffId);
+            return result as unknown as StaffOrganisationAssignment[];
         },
 
         getStaffHospitalAssignments: async (staffId) => {
@@ -547,7 +546,7 @@ export const StaffProvider: React.FC<{ children: React.ReactNode }> = ({
 
         getStaffAssignments: async (staffId) => {
             return (await getStaffAssignments(staffId)) as {
-                organizationAssignments: StaffOrganizationAssignment[];
+                organisationAssignments: StaffOrganisationAssignment[];
                 hospitalAssignments: StaffHospitalAssignment[];
                 departmentAssignments: StaffDepartmentAssignment[];
             };
@@ -557,8 +556,8 @@ export const StaffProvider: React.FC<{ children: React.ReactNode }> = ({
             await setPrimaryHospital(staffId, assignmentId);
         },
 
-        removeStaffOrganizationAssignment: async (assignmentId) => {
-            await removeStaffOrganizationAssignment(assignmentId);
+        removeStaffOrganisationAssignment: async (assignmentId) => {
+            await removeStaffOrganisationAssignment(assignmentId);
         },
 
         removeStaffHospitalAssignment: async (assignmentId) => {

@@ -22,7 +22,7 @@
 //     hospital: {
 //         id: string;
 //         name: string;
-//         organization?: {
+//         organisation?: {
 //             id: string;
 //             name: string;
 //         };
@@ -64,7 +64,7 @@
 //         EnhancedDepartment[]
 //     >([]);
 //
-//     // Group departments by hospital for better organization in dropdown
+//     // Group departments by hospital for better organisation in dropdown
 //     const [departmentsByHospital, setDepartmentsByHospital] = useState<{
 //         [hospitalId: string]: EnhancedDepartment[];
 //     }>({});
@@ -384,8 +384,8 @@
 //                                                 value={hospital.id}
 //                                             >
 //                                                 {hospital.name}
-//                                                 {hospital.organization?.name &&
-//                                                     ` (${hospital.organization.name})`}
+//                                                 {hospital.organisation?.name &&
+//                                                     ` (${hospital.organisation.name})`}
 //                                             </option>
 //                                         ))}
 //                                     </select>
@@ -538,7 +538,7 @@
 // src/app/admin/components/wards/WardModal.tsx
 import React, { useEffect, useState } from "react";
 import { useWards, Ward } from "@/context/WardContext";
-import { useOrganizations } from "@/context/OrganizationContext";
+import { useOrganisations } from "@/context/OrganisationContext";
 import { Hospital } from "@/context/HospitalContext";
 
 type WardModalProps = {
@@ -559,7 +559,7 @@ type EnhancedDepartment = {
     hospital: {
         id: string;
         name: string;
-        organization?: {
+        organisation?: {
             id: string;
             name: string;
         };
@@ -577,7 +577,7 @@ export default function WardModal({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { departments, hospitals, assignWardToDepartment } = useWards();
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { organizations } = useOrganizations();
+    const { organisations } = useOrganisations();
 
     // Default empty ward
     const emptyWard: Ward = {
@@ -596,8 +596,8 @@ export default function WardModal({
     const [formError, setFormError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // State for organization-hospital-department hierarchy
-    const [selectedOrganizationId, setSelectedOrganizationId] =
+    // State for organisation-hospital-department hierarchy
+    const [selectedOrganisationId, setSelectedOrganisationId] =
         useState<string>("");
     const [selectedHospitalId, setSelectedHospitalId] = useState<string>("");
     const [initialDepartmentId, setInitialDepartmentId] = useState<string>("");
@@ -611,11 +611,11 @@ export default function WardModal({
         EnhancedDepartment[]
     >([]);
 
-    // Group departments by organization and hospital for better organization\
+    // Group departments by organisation and hospital for better organisation\
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [groupedDepartments, setGroupedDepartments] = useState<{
         [orgId: string]: {
-            organization: { id: string; name: string };
+            organisation: { id: string; name: string };
             hospitals: {
                 [hospitalId: string]: {
                     hospital: Hospital;
@@ -625,29 +625,29 @@ export default function WardModal({
         };
     }>({});
 
-    // Group hospitals by organization
-    const [hospitalsByOrganization, setHospitalsByOrganization] = useState<{
+    // Group hospitals by organisation
+    const [hospitalsByOrganisation, setHospitalsByOrganisation] = useState<{
         [orgId: string]: {
-            organization: { id: string; name: string };
+            organisation: { id: string; name: string };
             hospitals: Hospital[];
         };
     }>({});
 
-    // Organize hospitals by organization
+    // Organize hospitals by organisation
     useEffect(() => {
         // @ts-nocheck-next-line
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const grouped: any = {};
 
         hospitals.forEach((hospital) => {
-            if (!hospital.organization) return;
+            if (!hospital.organisation) return;
 
-            const orgId = hospital.organization.id;
-            const orgName = hospital.organization.name;
+            const orgId = hospital.organisation.id;
+            const orgName = hospital.organisation.name;
 
             if (!grouped[orgId]) {
                 grouped[orgId] = {
-                    organization: { id: orgId, name: orgName },
+                    organisation: { id: orgId, name: orgName },
                     hospitals: [],
                 };
             }
@@ -655,10 +655,10 @@ export default function WardModal({
             grouped[orgId].hospitals.push(hospital);
         });
 
-        setHospitalsByOrganization(grouped);
+        setHospitalsByOrganisation(grouped);
     }, [hospitals]);
 
-    // Process departments to add organization and hospital context
+    // Process departments to add organisation and hospital context
     useEffect(() => {
         // Create enhanced department objects with hospital info
         const enhanced = departments.map((dept) => ({
@@ -671,7 +671,7 @@ export default function WardModal({
 
         setEnhancedDepartments(enhanced);
 
-        // Group by organization and hospital
+        // Group by organisation and hospital
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const grouped: any = {};
 
@@ -679,13 +679,13 @@ export default function WardModal({
             if (!dept.hospital) return;
 
             const hospitalId = dept.hospital.id;
-            const orgId = dept.hospital.organization?.id || "unknown";
+            const orgId = dept.hospital.organisation?.id || "unknown";
             const orgName =
-                dept.hospital.organization?.name || "Unknown Organization";
+                dept.hospital.organisation?.name || "Unknown Organisation";
 
             if (!grouped[orgId]) {
                 grouped[orgId] = {
-                    organization: { id: orgId, name: orgName },
+                    organisation: { id: orgId, name: orgName },
                     hospitals: {},
                 };
             }
@@ -702,14 +702,14 @@ export default function WardModal({
 
         setGroupedDepartments(grouped);
 
-        // If we have a specific department ID, find its organization and hospital
+        // If we have a specific department ID, find its organisation and hospital
         if (departmentId) {
             const selectedDept = departments.find((d) => d.id === departmentId);
             if (selectedDept && selectedDept.hospital) {
                 const hospitalId = selectedDept.hospital.id;
-                const orgId = selectedDept.hospital.organization?.id;
+                const orgId = selectedDept.hospital.organisation?.id;
 
-                if (orgId) setSelectedOrganizationId(orgId);
+                if (orgId) setSelectedOrganisationId(orgId);
                 if (hospitalId) setSelectedHospitalId(hospitalId);
                 setInitialDepartmentId(departmentId);
             }
@@ -723,9 +723,9 @@ export default function WardModal({
                     ...ward,
                 });
 
-                // Set organization and hospital based on the ward
-                if (ward.hospital && ward.hospital.organization) {
-                    setSelectedOrganizationId(ward.hospital.organization.id);
+                // Set organisation and hospital based on the ward
+                if (ward.hospital && ward.hospital.organisation) {
+                    setSelectedOrganisationId(ward.hospital.organisation.id);
                     setSelectedHospitalId(ward.hospital.id);
                 }
             } else {
@@ -764,14 +764,14 @@ export default function WardModal({
         [mode, ward, departments, hospitals, isOpen, departmentId],
     );
 
-    // Handle organization selection
-    const handleOrganizationChange = (
+    // Handle organisation selection
+    const handleOrganisationChange = (
         e: React.ChangeEvent<HTMLSelectElement>,
     ) => {
         const orgId = e.target.value;
-        setSelectedOrganizationId(orgId);
-        setSelectedHospitalId(""); // Reset hospital when organization changes
-        setInitialDepartmentId(""); // Reset department when organization changes
+        setSelectedOrganisationId(orgId);
+        setSelectedHospitalId(""); // Reset hospital when organisation changes
+        setInitialDepartmentId(""); // Reset department when organisation changes
 
         // Reset form values that depend on this hierarchy
         // @ts-expect-error missing properties
@@ -797,7 +797,7 @@ export default function WardModal({
                 hospital: {
                     id: selectedHospital.id,
                     name: selectedHospital.name,
-                    organization: selectedHospital.organization,
+                    organisation: selectedHospital.organisation,
                 },
                 department: { id: "", name: "" }, // Reset department
             }));
@@ -1012,40 +1012,40 @@ export default function WardModal({
                             </div>
                         </div>
 
-                        {/* Organization-Hospital-Department Selection */}
+                        {/* Organisation-Hospital-Department Selection */}
                         <div className="box">
                             <h5 className="title is-6 mb-3">
                                 Location & Department
                             </h5>
 
-                            {/* Organization Selection */}
+                            {/* Organisation Selection */}
                             <div className="field">
-                                <label className="label">Organization</label>
+                                <label className="label">Organisation</label>
                                 <div className="control">
                                     <div className="select is-fullwidth">
                                         <select
-                                            value={selectedOrganizationId}
-                                            onChange={handleOrganizationChange}
+                                            value={selectedOrganisationId}
+                                            onChange={handleOrganisationChange}
                                             disabled={mode === "edit"} // Disable in edit mode
                                         >
                                             <option value="">
-                                                Select organization
+                                                Select organisation
                                             </option>
                                             {Object.values(
-                                                hospitalsByOrganization,
+                                                hospitalsByOrganisation,
                                             ).map((org) => (
                                                 <option
-                                                    key={org.organization.id}
-                                                    value={org.organization.id}
+                                                    key={org.organisation.id}
+                                                    value={org.organisation.id}
                                                 >
-                                                    {org.organization.name}
+                                                    {org.organisation.name}
                                                 </option>
                                             ))}
                                         </select>
                                     </div>
                                     {mode === "edit" && (
                                         <p className="help mt-1">
-                                            Organization cannot be changed after
+                                            Organisation cannot be changed after
                                             ward creation
                                         </p>
                                     )}
@@ -1061,18 +1061,18 @@ export default function WardModal({
                                             value={selectedHospitalId}
                                             onChange={handleHospitalChange}
                                             disabled={
-                                                !selectedOrganizationId ||
+                                                !selectedOrganisationId ||
                                                 mode === "edit"
                                             } // Disable if no org selected or in edit mode
                                         >
                                             <option value="">
-                                                {selectedOrganizationId
+                                                {selectedOrganisationId
                                                     ? "Select hospital"
-                                                    : "Select organization first"}
+                                                    : "Select organisation first"}
                                             </option>
-                                            {selectedOrganizationId &&
-                                                hospitalsByOrganization[
-                                                    selectedOrganizationId
+                                            {selectedOrganisationId &&
+                                                hospitalsByOrganisation[
+                                                    selectedOrganisationId
                                                 ]?.hospitals.map((hospital) => (
                                                     <option
                                                         key={hospital.id}
@@ -1190,8 +1190,8 @@ export default function WardModal({
                                                     {formData.hospital?.name ||
                                                         ""}
                                                     {formData.hospital
-                                                        ?.organization?.name &&
-                                                        ` (${formData.hospital.organization.name})`}
+                                                        ?.organisation?.name &&
+                                                        ` (${formData.hospital.organisation.name})`}
                                                 </p>
                                             </div>
                                         </div>

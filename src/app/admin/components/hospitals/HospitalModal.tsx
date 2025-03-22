@@ -17,12 +17,11 @@ export default function HospitalModal({
     onClose,
     onSave,
 }: HospitalModalProps) {
-    const { organizations } = useHospitals();
+    const { organisation } = useHospitals();
 
-    const emptyHospital: Hospital = {
+    // Define a proper empty hospital without organisation
+    const emptyHospital: Omit<Hospital, "id"> = {
         name: "",
-        // @ts-expect-error small hospital component just for department creation and connect
-        organization: { id: "", name: "" },
         address: "",
         city: "",
         postcode: "",
@@ -32,75 +31,46 @@ export default function HospitalModal({
         active: true,
     };
 
-    const [formData, setFormData] = useState<Hospital>(emptyHospital);
+    const [formData, setFormData] =
+        useState<Omit<Hospital, "id">>(emptyHospital);
     const [formError, setFormError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(
-        () => {
-            if (mode === "edit" && hospital) {
-                setFormData({
-                    ...hospital,
-                });
-            } else {
-                // Reset form for add mode
-                setFormData({
-                    ...emptyHospital,
-                    // @ts-expect-error small organization component just for hospital creation and connect
-                    organization:
-                        organizations.length > 0
-                            ? {
-                                  id: organizations[0].id,
-                                  name: organizations[0].name,
-                              }
-                            : { id: "", name: "" },
-                });
-            }
-            setFormError("");
-            setIsSubmitting(false);
-        }, // eslint-disable-next-line react-hooks/exhaustive-deps
-        [mode, hospital, organizations, isOpen],
-    );
+    useEffect(() => {
+        if (mode === "edit" && hospital) {
+            setFormData({
+                ...hospital,
+            });
+        } else {
+            // Reset form for add mode
+            setFormData({
+                ...emptyHospital,
+            });
+        }
+        setFormError("");
+        setIsSubmitting(false);
+    }, [mode, hospital, isOpen]);
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     ) => {
         const { name, value, type } = e.target;
 
-        if (name === "organizationId") {
-            const selectedOrg = organizations.find((org) => org.id === value);
-            if (selectedOrg) {
-                setFormData({
-                    ...formData,
-                    // @ts-expect-error small organization component just for hospital creation and connect
-                    organization: {
-                        id: selectedOrg.id,
-                        name: selectedOrg.name,
-                    },
-                });
-            }
-        } else {
-            setFormData({
-                ...formData,
-                [name]:
-                    type === "checkbox"
-                        ? (e.target as HTMLInputElement).checked
-                        : type === "number"
-                          ? parseInt(value)
-                          : value,
-            });
-        }
+        setFormData({
+            ...formData,
+            [name]:
+                type === "checkbox"
+                    ? (e.target as HTMLInputElement).checked
+                    : type === "number"
+                      ? parseInt(value)
+                      : value,
+        });
     };
 
     const validateForm = () => {
         // Validate required fields
         if (!formData.name.trim()) {
             setFormError("Hospital name is required");
-            return false;
-        }
-
-        if (!formData.organization.id) {
-            setFormError("Organization is required");
             return false;
         }
 
@@ -145,7 +115,9 @@ export default function HospitalModal({
 
         // Save the hospital
         try {
-            onSave(formData);
+            // The organisation is provided by the context and handled by the addNewHospital/updateExistingHospital
+            // functions, so we don't need to include it in the form data
+            onSave(formData as Hospital);
         } catch (error) {
             console.error("Error saving hospital:", error);
             setFormError("An error occurred while saving. Please try again.");
@@ -183,6 +155,14 @@ export default function HospitalModal({
                             </div>
                         )}
 
+                        {/* Display current organisation info */}
+                        <div className="notification is-info is-light mb-4">
+                            <p className="is-size-6">
+                                <strong>Organisation:</strong>{" "}
+                                {organisation?.name || "Unknown"}
+                            </p>
+                        </div>
+
                         <div className="field">
                             <label className="label">Hospital Name</label>
                             <div className="control">
@@ -195,29 +175,6 @@ export default function HospitalModal({
                                     placeholder="Enter hospital name"
                                     required
                                 />
-                            </div>
-                        </div>
-
-                        <div className="field">
-                            <label className="label">Organization</label>
-                            <div className="control">
-                                <div className="select is-fullwidth">
-                                    <select
-                                        name="organizationId"
-                                        value={formData.organization.id}
-                                        onChange={handleInputChange}
-                                        required
-                                    >
-                                        <option value="">
-                                            Select an organization
-                                        </option>
-                                        {organizations.map((org) => (
-                                            <option key={org.id} value={org.id}>
-                                                {org.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
                             </div>
                         </div>
 

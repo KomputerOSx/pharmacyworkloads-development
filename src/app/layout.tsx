@@ -5,7 +5,7 @@
 // import type {Metadata} from "next";
 // import {EditModeProvider} from "@/context/EditModeContext";
 // import {WorkloadProvider} from "@/context/WorkloadContext";
-// import {OrganizationProvider} from "@/context/OrganizationContext";
+// import {OrganisationProvider} from "@/context/OrganisationContext";
 // import {HospitalProvider} from "@/context/HospitalContext";
 // import {DepartmentProvider} from "@/context/DepartmentContext";
 // import React from "react";
@@ -24,7 +24,7 @@
 //     return (
 //         <html lang="en" className={"theme-light"}>
 //             <body>
-//                 <OrganizationProvider>
+//                 <OrganisationProvider>
 //                     <HospitalProvider>
 //                         <DepartmentProvider>
 //                             <WorkloadProvider>
@@ -32,7 +32,7 @@
 //                             </WorkloadProvider>
 //                         </DepartmentProvider>
 //                     </HospitalProvider>
-//                 </OrganizationProvider>
+//                 </OrganisationProvider>
 //             </body>
 //         </html>
 //     );
@@ -42,15 +42,15 @@
 import "bulma/css/bulma.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./globals.css";
-import type {Metadata} from "next";
-import {EditModeProvider} from "@/context/EditModeContext";
-import {WorkloadProvider} from "@/context/WorkloadContext";
-import {OrganizationProvider} from "@/context/OrganizationContext";
-import {HospitalProvider} from "@/context/HospitalContext";
-import {DepartmentProvider} from "@/context/DepartmentContext";
-import {WardProvider} from "@/context/WardContext";
+import type { Metadata } from "next";
+import { EditModeProvider } from "@/context/EditModeContext";
+import { WorkloadProvider } from "@/context/WorkloadContext";
+import { OrganisationProvider } from "@/context/OrganisationContext";
+import { HospitalProvider } from "@/context/HospitalContext";
+import { DepartmentProvider } from "@/context/DepartmentContext";
+import { WardProvider } from "@/context/WardContext";
 import React from "react";
-import {StaffProvider} from "@/context/StaffContext";
+import { StaffProvider } from "@/context/StaffContext";
 
 export const metadata: Metadata = {
     title: "Pharmacy Directorate Workload Tracker",
@@ -66,7 +66,7 @@ export default function RootLayout({
     return (
         <html lang="en" className={"theme-light"}>
             <body>
-                <OrganizationProvider>
+                <OrganisationProvider>
                     <HospitalProvider>
                         <DepartmentProvider>
                             <WardProvider>
@@ -80,7 +80,7 @@ export default function RootLayout({
                             </WardProvider>
                         </DepartmentProvider>
                     </HospitalProvider>
-                </OrganizationProvider>
+                </OrganisationProvider>
             </body>
         </html>
     );

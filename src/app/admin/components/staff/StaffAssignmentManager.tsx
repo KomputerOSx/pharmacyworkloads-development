@@ -2,11 +2,11 @@
 import React, { useState, useEffect } from "react";
 import {
     useStaff,
-    StaffOrganizationAssignment,
+    StaffOrganisationAssignment,
     StaffHospitalAssignment,
     StaffDepartmentAssignment,
 } from "@/context/StaffContext";
-import { useOrganizations } from "@/context/OrganizationContext";
+import { useOrganisations } from "@/context/OrganisationContext";
 import { useHospitals } from "@/context/HospitalContext";
 import { useDepartments } from "@/context/DepartmentContext";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
@@ -25,13 +25,13 @@ export default function StaffAssignmentManager({
     onClose,
 }: StaffAssignmentManagerProps) {
     // Tabs for different assignment types
-    const tabs = ["organization", "hospital", "department"] as const;
+    const tabs = ["organisation", "hospital", "department"] as const;
     type TabType = (typeof tabs)[number];
-    const [activeTab, setActiveTab] = useState<TabType>("organization");
+    const [activeTab, setActiveTab] = useState<TabType>("organisation");
 
     // Assignment data
     const [orgAssignments, setOrgAssignments] = useState<
-        StaffOrganizationAssignment[]
+        StaffOrganisationAssignment[]
     >([]);
     const [hospitalAssignments, setHospitalAssignments] = useState<
         StaffHospitalAssignment[]
@@ -61,15 +61,15 @@ export default function StaffAssignmentManager({
     // Get contexts
     const {
         getStaffAssignments,
-        assignStaffToOrganization,
+        assignStaffToOrganisation,
         assignStaffToHospital,
         assignStaffToDepartment,
-        removeStaffOrganizationAssignment,
+        removeStaffOrganisationAssignment,
         removeStaffHospitalAssignment,
         removeStaffDepartmentAssignment,
         setPrimaryHospital,
     } = useStaff();
-    const { organizations } = useOrganizations();
+    const { organisations } = useOrganisations();
     const { hospitals } = useHospitals();
     const { departments } = useDepartments();
 
@@ -96,12 +96,12 @@ export default function StaffAssignmentManager({
             setError(null);
             try {
                 const {
-                    organizationAssignments,
+                    organisationAssignments,
                     hospitalAssignments,
                     departmentAssignments,
                 } = await getStaffAssignments(staffId);
 
-                setOrgAssignments(organizationAssignments);
+                setOrgAssignments(organisationAssignments);
                 setHospitalAssignments(hospitalAssignments);
                 setDeptAssignments(departmentAssignments);
             } catch (err) {
@@ -138,11 +138,11 @@ export default function StaffAssignmentManager({
     };
 
     // Handlers for adding new assignments
-    const handleAddOrganizationAssignment = async (e: React.FormEvent) => {
+    const handleAddOrganisationAssignment = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!selectedOrgId) {
-            setError("Please select an organization");
+            setError("Please select an organisation");
             return;
         }
 
@@ -150,22 +150,22 @@ export default function StaffAssignmentManager({
         setError(null);
 
         try {
-            await assignStaffToOrganization(staffId, selectedOrgId);
+            await assignStaffToOrganisation(staffId, selectedOrgId);
 
             // Refresh assignments
-            const { organizationAssignments } =
+            const { organisationAssignments } =
                 await getStaffAssignments(staffId);
-            setOrgAssignments(organizationAssignments);
+            setOrgAssignments(organisationAssignments);
 
             // Reset form
             setSelectedOrgId("");
             setIsPrimary(false);
             setEndDate("");
 
-            setSuccess("Organization assignment added successfully");
+            setSuccess("Organisation assignment added successfully");
         } catch (err) {
-            console.error("Error adding organization assignment:", err);
-            setError("Failed to add organization assignment");
+            console.error("Error adding organisation assignment:", err);
+            setError("Failed to add organisation assignment");
         } finally {
             setLoading(false);
         }
@@ -242,22 +242,22 @@ export default function StaffAssignmentManager({
     const handleRemoveOrgAssignment = async (assignmentId: string) => {
         if (
             confirm(
-                "Are you sure you want to remove this organization assignment?",
+                "Are you sure you want to remove this organisation assignment?",
             )
         ) {
             setLoading(true);
             try {
-                await removeStaffOrganizationAssignment(assignmentId);
+                await removeStaffOrganisationAssignment(assignmentId);
 
                 // Refresh assignments
-                const { organizationAssignments } =
+                const { organisationAssignments } =
                     await getStaffAssignments(staffId);
-                setOrgAssignments(organizationAssignments);
+                setOrgAssignments(organisationAssignments);
 
-                setSuccess("Organization assignment removed successfully");
+                setSuccess("Organisation assignment removed successfully");
             } catch (err) {
-                console.error("Error removing organization assignment:", err);
-                setError("Failed to remove organization assignment");
+                console.error("Error removing organisation assignment:", err);
+                setError("Failed to remove organisation assignment");
             } finally {
                 setLoading(false);
             }
@@ -316,16 +316,16 @@ export default function StaffAssignmentManager({
     // const handleSetPrimaryOrg = async (assignmentId: string) => {
     //     setLoading(true);
     //     try {
-    //         await setPrimaryOrganization(staffId, assignmentId);
+    //         await setPrimaryOrganisation(staffId, assignmentId);
     //
     //         // Refresh assignments
-    //         const { organizationAssignments } = await getStaffAssignments(staffId);
-    //         setOrgAssignments(organizationAssignments);
+    //         const { organisationAssignments } = await getStaffAssignments(staffId);
+    //         setOrgAssignments(organisationAssignments);
     //
-    //         setSuccess("Primary organization updated successfully");
+    //         setSuccess("Primary organisation updated successfully");
     //     } catch (err) {
-    //         console.error("Error setting primary organization:", err);
-    //         setError("Failed to update primary organization");
+    //         console.error("Error setting primary organisation:", err);
+    //         setError("Failed to update primary organisation");
     //     } finally {
     //         setLoading(false);
     //     }
@@ -367,13 +367,13 @@ export default function StaffAssignmentManager({
     //     }
     // };
 
-    // Filter hospitals based on selected organization in the org tab
+    // Filter hospitals based on selected organisation in the org tab
     const filteredHospitals = hospitals.filter((hospital) => {
         // If no org is selected, show all hospitals
         if (!selectedOrgId) return true;
 
         // Otherwise, filter by the selected org
-        return hospital.organization?.id === selectedOrgId;
+        return hospital.organisation?.id === selectedOrgId;
     });
 
     // Filter departments based on selected hospital in the department tab
@@ -419,7 +419,7 @@ export default function StaffAssignmentManager({
                                 <span className="icon is-small">
                                     <i
                                         className={`fas fa-${
-                                            tab === "organization"
+                                            tab === "organisation"
                                                 ? "building"
                                                 : tab === "hospital"
                                                   ? "hospital"
@@ -440,27 +440,27 @@ export default function StaffAssignmentManager({
                 <LoadingSpinner />
             ) : (
                 <>
-                    {/* Organization Tab */}
+                    {/* Organisation Tab */}
                     <div
                         className={
-                            activeTab === "organization" ? "" : "is-hidden"
+                            activeTab === "organisation" ? "" : "is-hidden"
                         }
                     >
                         <div className="columns">
                             <div className="column is-5">
-                                {/* Organization Assignment Form */}
+                                {/* Organisation Assignment Form */}
                                 <div className="box">
                                     <h4 className="title is-5">
-                                        Add Organization Assignment
+                                        Add Organisation Assignment
                                     </h4>
                                     <form
                                         onSubmit={
-                                            handleAddOrganizationAssignment
+                                            handleAddOrganisationAssignment
                                         }
                                     >
                                         <div className="field">
                                             <label className="label">
-                                                Organization
+                                                Organisation
                                             </label>
                                             <div className="control">
                                                 <div className="select is-fullwidth">
@@ -475,9 +475,9 @@ export default function StaffAssignmentManager({
                                                     >
                                                         <option value="">
                                                             Select an
-                                                            organization
+                                                            organisation
                                                         </option>
-                                                        {organizations.map(
+                                                        {organisations.map(
                                                             (org) => (
                                                                 <option
                                                                     key={org.id}
@@ -549,7 +549,7 @@ export default function StaffAssignmentManager({
                                                         }
                                                     />
                                                     &nbsp;Set as primary
-                                                    organization
+                                                    organisation
                                                 </label>
                                             </div>
                                         </div>
@@ -570,21 +570,21 @@ export default function StaffAssignmentManager({
                             </div>
 
                             <div className="column is-7">
-                                {/* Organization Assignment List */}
+                                {/* Organisation Assignment List */}
                                 <div className="box">
                                     <h4 className="title is-5">
-                                        Current Organization Assignments
+                                        Current Organisation Assignments
                                     </h4>
 
                                     {orgAssignments.length === 0 ? (
                                         <div className="notification is-warning is-light">
-                                            No organization assignments found.
+                                            No organisation assignments found.
                                         </div>
                                     ) : (
                                         <table className="table is-fullwidth">
                                             <thead>
                                                 <tr>
-                                                    <th>Organization</th>
+                                                    <th>Organisation</th>
                                                     <th>Period</th>
                                                     <th>Primary</th>
                                                     <th>Actions</th>
@@ -602,7 +602,7 @@ export default function StaffAssignmentManager({
                                                                     <span>
                                                                         {
                                                                             assignment
-                                                                                .organization
+                                                                                .organisation
                                                                                 .name
                                                                         }
                                                                     </span>
@@ -685,7 +685,7 @@ export default function StaffAssignmentManager({
                                     >
                                         <div className="field">
                                             <label className="label">
-                                                Organization Filter
+                                                Organisation Filter
                                             </label>
                                             <div className="control">
                                                 <div className="select is-fullwidth">
@@ -698,9 +698,9 @@ export default function StaffAssignmentManager({
                                                         }
                                                     >
                                                         <option value="">
-                                                            All Organizations
+                                                            All Organisations
                                                         </option>
-                                                        {organizations.map(
+                                                        {organisations.map(
                                                             (org) => (
                                                                 <option
                                                                     key={org.id}
@@ -717,7 +717,7 @@ export default function StaffAssignmentManager({
                                             </div>
                                             <p className="help">
                                                 Optional - Filter hospitals by
-                                                organization
+                                                organisation
                                             </p>
                                         </div>
 
@@ -754,8 +754,8 @@ export default function StaffAssignmentManager({
                                                                     {
                                                                         hospital.name
                                                                     }
-                                                                    {hospital.organization &&
-                                                                        ` (${hospital.organization.name})`}
+                                                                    {hospital.organisation &&
+                                                                        ` (${hospital.organisation.name})`}
                                                                 </option>
                                                             ),
                                                         )}
@@ -855,7 +855,7 @@ export default function StaffAssignmentManager({
                                             <thead>
                                                 <tr>
                                                     <th>Hospital</th>
-                                                    <th>Organization</th>
+                                                    <th>Organisation</th>
                                                     <th>Period</th>
                                                     <th>Primary</th>
                                                     <th>Actions</th>
@@ -882,7 +882,7 @@ export default function StaffAssignmentManager({
                                                             <td>
                                                                 {assignment
                                                                     .hospital
-                                                                    .organization
+                                                                    .organisation
                                                                     ?.name ||
                                                                     "N/A"}
                                                             </td>
@@ -998,8 +998,8 @@ export default function StaffAssignmentManager({
                                                                     {
                                                                         hospital.name
                                                                     }
-                                                                    {hospital.organization &&
-                                                                        ` (${hospital.organization.name})`}
+                                                                    {hospital.organisation &&
+                                                                        ` (${hospital.organisation.name})`}
                                                                 </option>
                                                             ),
                                                         )}
