@@ -13,6 +13,7 @@ import HospitalCard from "@/app/admin/components/hospitals/HospitalCard";
 import HospitalModal from "@/app/admin/components/hospitals/HospitalModal";
 import { getOrganisation } from "@/services/organisationService";
 import { Organisation } from "@/context/OrganisationContext";
+import { HospitalDeleteModal } from "@/app/admin/components/hospitals/HospitalDeleteModal";
 
 // Main component that will be wrapped with the provider
 function HospitalsList() {
@@ -30,6 +31,7 @@ function HospitalsList() {
 
     const [organisation, setOrganisation] = useState<Organisation | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [currentHospital, setCurrentHospital] = useState<Hospital | null>(
         null,
     );
@@ -51,21 +53,25 @@ function HospitalsList() {
         setIsModalOpen(true);
     };
 
-    const handleDeleteHospital = async (id: string) => {
-        if (window.confirm("Are you sure you want to delete this hospital?")) {
-            try {
-                await removeHospital(id);
-                setActionResult({
-                    success: true,
-                    message: "Hospital deleted successfully",
-                });
-            } catch (err) {
-                setActionResult({
-                    success: false,
-                    message: "Failed to delete hospital",
-                });
-                console.error(err);
-            }
+    const handleDeleteHospital = (hospital: Hospital) => {
+        setCurrentHospital(hospital);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = async (hospital: Hospital) => {
+        try {
+            await removeHospital(hospital.id);
+            setActionResult({
+                success: true,
+                message: "Hospital deleted successfully",
+            });
+            setIsDeleteModalOpen(false);
+        } catch (err) {
+            setActionResult({
+                success: false,
+                message: "Failed to delete hospital",
+            });
+            console.error(err);
         }
     };
 
@@ -88,8 +94,15 @@ function HospitalsList() {
                     throw new Error("Organisation data is missing");
                 }
             } else {
-                await updateExistingHospital(hospital.id, orgId);
-
+                await updateExistingHospital(hospital.id, orgId, hospital);
+                console.log(
+                    "Updating hospital:",
+                    hospital.id,
+                    "with organization:",
+                    orgId,
+                    "and data:",
+                    hospital,
+                );
                 setActionResult({
                     success: true,
                     message: "Hospital updated successfully",
@@ -184,9 +197,7 @@ function HospitalsList() {
                             <HospitalCard
                                 hospital={hospital}
                                 onEdit={() => handleEditHospital(hospital)}
-                                onDelete={() =>
-                                    handleDeleteHospital(hospital.id)
-                                }
+                                onDelete={() => handleDeleteHospital(hospital)}
                             />
                         </div>
                     ))
@@ -201,6 +212,15 @@ function HospitalsList() {
                 organisationName={organisation?.name}
                 onClose={() => setIsModalOpen(false)}
                 onSave={handleSaveHospital}
+            />
+
+            {/* Hospital Delete Modal */}
+            <HospitalDeleteModal
+                isOpen={isDeleteModalOpen}
+                hospital={currentHospital}
+                organisationName={organisation?.name}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onDelete={handleConfirmDelete}
             />
         </div>
     );

@@ -56,6 +56,7 @@ interface HospitalContextType {
     updateExistingHospital: (
         id: string,
         organisationId: string,
+        data: Omit<Hospital, "id" | "createdAt" | "updatedAt">,
     ) => Promise<Hospital>;
     removeHospital: (id: string) => Promise<void>;
 }
@@ -91,13 +92,10 @@ export const HospitalProvider: React.FC<{
             setError(null);
 
             console.log("Fetching hospitals for organisation:", organisationId);
-            console.log("With filters:", filter);
 
             // Get hospitals for this organisation
-            const hospitalData = await getHospitalsByOrganisation(
-                organisationId,
-                filter,
-            );
+            const hospitalData =
+                await getHospitalsByOrganisation(organisationId);
 
             console.log("Received hospital data:", hospitalData);
             setHospitals(hospitalData);
@@ -133,13 +131,18 @@ export const HospitalProvider: React.FC<{
     const updateExistingHospital = async (
         id: string,
         organisationId: string,
+        data: Omit<Hospital, "id" | "createdAt" | "updatedAt">,
     ) => {
         if (!organisationId) {
             throw new Error("Cannot update hospital: No organisation selected");
         }
 
         try {
-            const updatedHospital = await updateHospital(id, organisationId);
+            const updatedHospital = await updateHospital(
+                id,
+                organisationId,
+                data,
+            );
             await refreshHospitals();
             return updatedHospital;
         } catch (err) {

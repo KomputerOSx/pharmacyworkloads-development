@@ -23,7 +23,7 @@ export default function HospitalCard({
                         </figure>
                     </div>
                     <div className="media-content">
-                        <p className="title is-4 mb-2">{hospital.name}</p>
+                        <p className="title is-4 mb-5">{hospital.name}</p>
                         <p className="subtitle is-6">
                             {hospital.city}, {hospital.postcode}
                         </p>

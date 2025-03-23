@@ -156,19 +156,27 @@ export const addHospital = async (
 };
 
 // Update an existing hospital
-export const updateHospital = async (id, organisationId, userId = "system") => {
+export const updateHospital = async (
+    id,
+    organisationId,
+    data,
+    userId = "system",
+) => {
     try {
         const hospitalRef = doc(db, "hospitals", id);
 
-        // Add update timestamp and audit field - no otherData needed since we're just updating timestamps
+        // Add update timestamp and audit field
         const dataToUpdate = {
+            ...data,
             updatedAt: serverTimestamp(),
             updatedById: userId,
         };
+        console.log("Data being sent to Firestore:", dataToUpdate);
 
         // Update the hospital document (just the timestamp)
+        console.log("Before update:", await getHospital(id));
         await updateDoc(hospitalRef, dataToUpdate);
-
+        console.log("After update:", await getHospital(id));
         // Handle organisation assignment if organisation is provided
         if (organisationId) {
             // Get current organisation assignment
@@ -183,11 +191,13 @@ export const updateHospital = async (id, organisationId, userId = "system") => {
 
                 // If organisation has changed
                 if (currentOrgId !== organisationId) {
-                    // Fixed: compare with organisationId parameter
-                    // Remove old assignment
+                    console.log(
+                        "Organization changed from",
+                        currentOrgId,
+                        "to",
+                        organisationId,
+                    );
                     await removeHospitalAssignment(currentAssignment.id);
-
-                    // Create new assignment
                     await assignHospitalToOrganisation(
                         id,
                         organisationId,
