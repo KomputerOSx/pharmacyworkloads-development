@@ -11,6 +11,8 @@ import LoadingSpinner from "@/components/common/LoadingSpinner";
 import AlertMessage from "@/components/common/AlertMessage";
 import HospitalCard from "@/app/admin/components/hospitals/HospitalCard";
 import HospitalModal from "@/app/admin/components/hospitals/HospitalModal";
+import { getOrganisation } from "@/services/organisationService";
+import { Organisation } from "@/context/OrganisationContext";
 
 // Main component that will be wrapped with the provider
 function HospitalsList() {
@@ -25,6 +27,8 @@ function HospitalsList() {
 
     const params = useParams();
     const orgId = params.orgId as string;
+
+    const [organisation, setOrganisation] = useState<Organisation | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentHospital, setCurrentHospital] = useState<Hospital | null>(
         null,
@@ -84,7 +88,7 @@ function HospitalsList() {
                     throw new Error("Organisation data is missing");
                 }
             } else {
-                await updateExistingHospital(hospital.id, hospital);
+                await updateExistingHospital(hospital.id, orgId);
 
                 setActionResult({
                     success: true,
@@ -100,7 +104,17 @@ function HospitalsList() {
             console.error(err);
         }
     };
-
+    useEffect(() => {
+        const fetchOrganisation = async () => {
+            try {
+                const org = await getOrganisation(orgId);
+                setOrganisation(org);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchOrganisation();
+    }, [orgId]);
     // Clear action result after 5 seconds
     useEffect(() => {
         if (actionResult) {
@@ -112,6 +126,8 @@ function HospitalsList() {
     }, [actionResult]);
 
     if (loading) return <LoadingSpinner />;
+
+    // Fetch organisation data
 
     return (
         <div className="container py-6">
@@ -182,6 +198,7 @@ function HospitalsList() {
                 isOpen={isModalOpen}
                 mode={modalMode}
                 hospital={currentHospital}
+                organisationName={organisation?.name}
                 onClose={() => setIsModalOpen(false)}
                 onSave={handleSaveHospital}
             />

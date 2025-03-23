@@ -86,10 +86,7 @@ export const getHospitalOrganisationAssignment = async (hospitalId) => {
 };
 
 // In src/services/hospitalAssignmentService.js
-export const getHospitalsByOrganisation = async (
-    organisationId,
-    filters = {},
-) => {
+export const getHospitalsByOrganisation = async (organisationId) => {
     try {
         const organisationRef = doc(db, "organisations", organisationId);
 
@@ -97,7 +94,6 @@ export const getHospitalsByOrganisation = async (
         const assignmentsQuery = query(
             collection(db, "hospital_organisation_assignments"),
             where("organisation", "==", organisationRef),
-            where("active", "==", true),
         );
 
         const assignmentsSnapshot = await getDocs(assignmentsQuery);
@@ -112,59 +108,20 @@ export const getHospitalsByOrganisation = async (
             return [];
         }
 
-        // Build filter constraints
-        const constraints = [];
-
-        if (filters.status === "active") {
-            constraints.push(where("active", "==", true));
-        } else if (filters.status === "inactive") {
-            constraints.push(where("active", "==", false));
-        }
-
         // Get all hospitals that match these IDs and filters
         const hospitals = [];
 
-        // We might need to do multiple queries if there are many IDs
-        // Firestore has a limit on "in" clause items
-        const batchSize = 10;
-        for (let i = 0; i < hospitalIds.length; i += batchSize) {
-            const batch = hospitalIds.slice(i, i + batchSize);
+        let q = query(collection(db, "hospitals"));
 
-            let q;
-            if (constraints.length > 0) {
-                q = query(
-                    collection(db, "hospitals"),
-                    where(documentId(), "in", batch),
-                    ...constraints,
-                );
-            } else {
-                q = query(
-                    collection(db, "hospitals"),
-                    where(documentId(), "in", batch),
-                );
-            }
-
-            const querySnapshot = await getDocs(q);
-            querySnapshot.forEach((doc) => {
-                hospitals.push({
-                    id: doc.id,
-                    ...doc.data(),
-                    createdAt: formatFirestoreTimestamp(doc.data().createdAt),
-                    updatedAt: formatFirestoreTimestamp(doc.data().updatedAt),
-                });
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+            hospitals.push({
+                id: doc.id,
+                ...doc.data(),
+                createdAt: formatFirestoreTimestamp(doc.data().createdAt),
+                updatedAt: formatFirestoreTimestamp(doc.data().updatedAt),
             });
-        }
-
-        // Apply search filter if provided
-        if (filters.search) {
-            const searchLower = filters.search.toLowerCase();
-            return hospitals.filter(
-                (hospital) =>
-                    hospital.name?.toLowerCase().includes(searchLower) ||
-                    hospital.city?.toLowerCase().includes(searchLower) ||
-                    hospital.postcode?.toLowerCase().includes(searchLower),
-            );
-        }
+        });
 
         return hospitals;
     } catch (error) {

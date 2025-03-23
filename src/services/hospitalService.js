@@ -8,7 +8,6 @@ import {
     doc,
     getDoc,
     getDocs,
-    orderBy,
     query,
     serverTimestamp,
     updateDoc,
@@ -31,21 +30,41 @@ const formatFirestoreTimestamp = (timestamp) => {
     return timestamp || null;
 };
 
-// Get all hospitals with optional filters
 export const getHospitals = async (organisationId) => {
     try {
-        const assignedHospitals = await getDocs(
-            query(
-                collection(db, "hospital_organisation_assignments"),
-                where("organisation", "==", organisationId),
-                orderBy("name"),
-            ),
+        const organisationRef = doc(db, "organisations", organisationId);
+
+        const assignmentsQuery = query(
+            collection(db, "hospital_organisation_assignments"),
+            where("organisation", "==", organisationRef),
+            where("active", "==", true),
         );
 
-        return assignedHospitals.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-        }));
+        const assignmentsSnapshot = await getDocs(assignmentsQuery);
+
+        const hospitals = [];
+        for (const assignmentDoc of assignmentsSnapshot.docs) {
+            const data = assignmentDoc.data();
+            const hospitalRef = data.hospital;
+
+            if (hospitalRef) {
+                const hospitalDoc = await getDoc(hospitalRef);
+                if (hospitalDoc.exists()) {
+                    hospitals.push({
+                        id: hospitalDoc.id,
+                        ...hospitalDoc.data(),
+                        createdAt: formatFirestoreTimestamp(
+                            hospitalDoc.data().createdAt,
+                        ),
+                        updatedAt: formatFirestoreTimestamp(
+                            hospitalDoc.data().updatedAt,
+                        ),
+                    });
+                }
+            }
+        }
+
+        return hospitals;
     } catch (error) {
         console.error("Error getting hospitals:", error);
         throw error;
@@ -141,16 +160,13 @@ export const updateHospital = async (id, organisationId, userId = "system") => {
     try {
         const hospitalRef = doc(db, "hospitals", id);
 
-        // Extract organisation from hospital data
-
-        // Add update timestamp and audit field
+        // Add update timestamp and audit field - no otherData needed since we're just updating timestamps
         const dataToUpdate = {
-            ...otherData,
             updatedAt: serverTimestamp(),
             updatedById: userId,
         };
 
-        // Update the hospital document (without organisation reference)
+        // Update the hospital document (just the timestamp)
         await updateDoc(hospitalRef, dataToUpdate);
 
         // Handle organisation assignment if organisation is provided
@@ -166,7 +182,8 @@ export const updateHospital = async (id, organisationId, userId = "system") => {
                 const currentOrgId = currentOrgRef.path.split("/").pop();
 
                 // If organisation has changed
-                if (currentOrgId !== organisation.id) {
+                if (currentOrgId !== organisationId) {
+                    // Fixed: compare with organisationId parameter
                     // Remove old assignment
                     await removeHospitalAssignment(currentAssignment.id);
 
@@ -184,9 +201,28 @@ export const updateHospital = async (id, organisationId, userId = "system") => {
             }
         }
 
-        // Return the updated hospital
+        // Fetch the updated hospital to return complete data
+        const updatedHospitalDoc = await getDoc(hospitalRef);
+
+        if (!updatedHospitalDoc.exists()) {
+            throw new Error(`Hospital with ID ${id} not found after update`);
+        }
+
+        const hospitalData = updatedHospitalDoc.data();
+
+        // Return the complete updated hospital object
         return {
             id,
+            name: hospitalData.name || "",
+            address: hospitalData.address || "",
+            city: hospitalData.city || "",
+            postcode: hospitalData.postcode || "",
+            contactNumber: hospitalData.contactNumber || "",
+            contactEmail: hospitalData.contactEmail || "",
+            active:
+                hospitalData.active !== undefined ? hospitalData.active : true,
+            createdAt: formatFirestoreTimestamp(hospitalData.createdAt),
+            updatedAt: formatFirestoreTimestamp(hospitalData.updatedAt),
         };
     } catch (error) {
         console.error("Error updating hospital:", error);

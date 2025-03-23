@@ -81,6 +81,7 @@ export const HospitalProvider: React.FC<{
     // Function to fetch hospitals for the current organisation
     const refreshHospitals = useCallback(async () => {
         if (!organisationId) {
+            console.log("No organisation ID provided");
             setHospitals([]);
             return;
         }
@@ -89,11 +90,16 @@ export const HospitalProvider: React.FC<{
             setLoading(true);
             setError(null);
 
+            console.log("Fetching hospitals for organisation:", organisationId);
+            console.log("With filters:", filter);
+
             // Get hospitals for this organisation
             const hospitalData = await getHospitalsByOrganisation(
                 organisationId,
                 filter,
             );
+
+            console.log("Received hospital data:", hospitalData);
             setHospitals(hospitalData);
         } catch (err) {
             console.error("Error fetching hospitals:", err);

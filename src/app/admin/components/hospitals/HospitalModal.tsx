@@ -1,23 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { Hospital, useHospitals } from "@/context/HospitalContext";
+import { Hospital } from "@/context/HospitalContext";
 
 type HospitalModalProps = {
     isOpen: boolean;
     mode: "add" | "edit";
     hospital: Hospital | null;
+    organisationName?: string;
     onClose: () => void;
-    onSave: (hospital: Hospital, organisation: Organisation) => void;
+    onSave: (hospital: Hospital) => void;
 };
 
 export default function HospitalModal({
     isOpen,
     mode,
     hospital,
+    organisationName,
     onClose,
     onSave,
 }: HospitalModalProps) {
-    const { organisation } = useHospitals();
-
     // Define a proper empty hospital without organisation
     const emptyHospital: Omit<Hospital, "id"> = {
         name: "",
@@ -163,7 +163,7 @@ export default function HospitalModal({
                         <div className="notification is-info is-light mb-4">
                             <p className="is-size-6">
                                 <strong>Organisation:</strong>{" "}
-                                {organisation?.name || "Unknown"}
+                                {organisationName || "Unknown"}
                             </p>
                         </div>
 
