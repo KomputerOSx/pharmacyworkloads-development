@@ -1,0 +1,94 @@
+/* Hospital management specific styles */
+.hospitalCard {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+}
+
+.hospitalCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.cardContent {
+    flex-grow: 1;
+}
+
+.contactInfo {
+    margin-top: 0.5rem;
+}
+
+.contactItem {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.contactIcon {
+    margin-right: 0.5rem;
+    color: #3273dc;
+}
+
+.cardFooter {
+    border-top: 1px solid #f5f5f5;
+    padding: 0;
+}
+
+.cardFooterItem {
+    padding: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4a4a4a;
+    transition: background-color 0.2s ease;
+}
+
+.cardFooterItem:hover {
+    background-color: #f5f5f5;
+}
+
+.cardFooterItem.edit:hover {
+    background-color: #ebfffc;
+    color: #00947e;
+}
+
+.cardFooterItem.delete:hover {
+    background-color: #fff5f7;
+    color: #ff3860;
+}
+
+.statusBadge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 290486px;
+    font-size: 0.75rem;
+    line-height: 1;
+    white-space: nowrap;
+    margin-left: 0.5rem;
+}
+
+.statusBadge.active {
+    background-color: #23d160;
+    color: #fff;
+}
+
+.statusBadge.inactive {
+    background-color: #ff3860;
+    color: #fff;
+}
+
+/* Hospital list filters */
+.filters {
+    padding: 1rem;
+    background-color: #f5f5f7;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.filterTitle {
+    margin-bottom: 1rem;
+    font-weight: bold;
+}
+
+.filterGroup {
+    margin-bottom: 1rem;
+}

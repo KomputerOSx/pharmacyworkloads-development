@@ -79,15 +79,19 @@ export const getHospital = async (id) => {
 // Add a new hospital
 // create the hospital
 // create a new organisation assignment
-export const addHospital = async (hospitalData, userId = "system") => {
+export const addHospital = async (
+    hospitalData,
+    organisationId,
+    userId = "system",
+) => {
     try {
         // Validate organization is provided
-        if (!hospitalData.organization || !hospitalData.organization.id) {
+        if (!organisationId) {
             throw new Error("Organization is required to create a hospital");
         }
 
         // Extract organization from hospital data
-        const { organization, ...otherData } = hospitalData;
+        const { ...otherData } = hospitalData;
 
         // Add timestamps and audit fields for the hospital
         const dataToAdd = {
@@ -106,7 +110,7 @@ export const addHospital = async (hospitalData, userId = "system") => {
         try {
             await assignHospitalToOrganisation(
                 hospitalId,
-                organization.id,
+                organisationId,
                 userId,
             );
         } catch (assignmentError) {
@@ -133,12 +137,11 @@ export const addHospital = async (hospitalData, userId = "system") => {
 };
 
 // Update an existing hospital
-export const updateHospital = async (id, hospitalData, userId = "system") => {
+export const updateHospital = async (id, organisationId, userId = "system") => {
     try {
         const hospitalRef = doc(db, "hospitals", id);
 
         // Extract organisation from hospital data
-        const { organisation, ...otherData } = hospitalData;
 
         // Add update timestamp and audit field
         const dataToUpdate = {
@@ -151,7 +154,7 @@ export const updateHospital = async (id, hospitalData, userId = "system") => {
         await updateDoc(hospitalRef, dataToUpdate);
 
         // Handle organisation assignment if organisation is provided
-        if (organisation && organisation.id) {
+        if (organisationId) {
             // Get current organisation assignment
             const currentAssignments =
                 await getHospitalOrganisationAssignment(id);
@@ -170,21 +173,20 @@ export const updateHospital = async (id, hospitalData, userId = "system") => {
                     // Create new assignment
                     await assignHospitalToOrganisation(
                         id,
-                        organisation.id,
+                        organisationId,
                         userId,
                     );
                 }
                 // If same organisation, no need to update assignment
             } else {
                 // No current assignment, create a new one
-                await assignHospitalToOrganisation(id, organisation.id, userId);
+                await assignHospitalToOrganisation(id, organisationId, userId);
             }
         }
 
         // Return the updated hospital
         return {
             id,
-            ...hospitalData,
         };
     } catch (error) {
         console.error("Error updating hospital:", error);

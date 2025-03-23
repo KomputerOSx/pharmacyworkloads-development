@@ -1,6 +1,6 @@
-// src/app/admin/components/hospitals/HospitalCard.tsx
+import React from "react";
 import { Hospital } from "@/context/HospitalContext";
-import styles from "../../styles/HospitalManagement.module.css";
+import styles from "../../\styles/HospitalCard.module.css";
 
 type HospitalCardProps = {
     hospital: Hospital;
@@ -23,44 +23,42 @@ export default function HospitalCard({
                         </figure>
                     </div>
                     <div className="media-content">
-                        <p className="title is-4 mb-5">{hospital.name}</p>
+                        <p className="title is-4 mb-2">{hospital.name}</p>
                         <p className="subtitle is-6">
-                            {hospital.organization?.name ||
-                                "Unknown Organization"}
+                            {hospital.city}, {hospital.postcode}
                         </p>
                     </div>
                 </div>
                 <div className="content">
                     <p>
-                        <i className="fas fa-map-marker-alt"></i>{" "}
-                        {hospital.address}, {hospital.city}, {hospital.postcode}
+                        <i className="fas fa-map-marker-alt mr-2"></i>
+                        {hospital.address}
                         <br />
-                        <i className="fas fa-phone"></i>{" "}
-                        {hospital.contactNumber}
+                        <i className="fas fa-phone mr-2"></i>
+                        {hospital.contactNumber || "Not provided"}
                         <br />
-                        <i className="fas fa-bed"></i> {hospital.beds} beds
+                        <i className="fas fa-envelope mr-2"></i>
+                        {hospital.contactEmail || "Not provided"}
+                        <br />
                     </p>
-                    <div className="tags">
-                        <span className="tag is-success">
-                            {hospital.departments || 0} Departments
-                        </span>
-                        <span className="tag is-primary">
-                            {hospital.wards || 0} Wards
-                        </span>
+                    <div className="tags mt-2">
                         <span
-                            className={`tag ${hospital.active ? "is-info" : "is-danger"}`}
+                            className={`tag ${hospital.active ? "is-success" : "is-danger"}`}
                         >
                             {hospital.active ? "Active" : "Inactive"}
                         </span>
                     </div>
                 </div>
             </div>
-            <footer className="card-footer">
-                <a className="card-footer-item has-text-info" onClick={onEdit}>
+            <footer className={`card-footer ${styles.cardFooter}`}>
+                <a
+                    className={`card-footer-item ${styles.cardFooterItem} has-text-info`}
+                    onClick={onEdit}
+                >
                     <i className="fas fa-edit mr-1"></i> Edit
                 </a>
                 <a
-                    className="card-footer-item has-text-danger"
+                    className={`card-footer-item ${styles.cardFooterItem} has-text-danger`}
                     onClick={onDelete}
                 >
                     <i className="fas fa-trash mr-1"></i> Delete

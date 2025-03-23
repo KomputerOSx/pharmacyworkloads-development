@@ -9,8 +9,9 @@ import {
     serverTimestamp,
     updateDoc,
     deleteDoc,
+    documentId,
 } from "firebase/firestore";
-import { db } from "./firebase";
+import { db } from "./firebase.js";
 import { formatFirestoreTimestamp } from "@/utils/firestoreUtil";
 
 export const assignHospitalToOrganisation = async (

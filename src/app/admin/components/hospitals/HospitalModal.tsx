@@ -1,4 +1,3 @@
-// src/app/admin/components/hospitals/HospitalModal.tsx
 import React, { useEffect, useState } from "react";
 import { Hospital, useHospitals } from "@/context/HospitalContext";
 
@@ -7,7 +6,7 @@ type HospitalModalProps = {
     mode: "add" | "edit";
     hospital: Hospital | null;
     onClose: () => void;
-    onSave: (hospital: Hospital) => void;
+    onSave: (hospital: Hospital, organisation: Organisation) => void;
 };
 
 export default function HospitalModal({
@@ -27,7 +26,6 @@ export default function HospitalModal({
         postcode: "",
         contactNumber: "",
         contactEmail: "",
-        beds: 0,
         active: true,
     };
 
@@ -115,9 +113,14 @@ export default function HospitalModal({
 
         // Save the hospital
         try {
-            // The organisation is provided by the context and handled by the addNewHospital/updateExistingHospital
-            // functions, so we don't need to include it in the form data
-            onSave(formData as Hospital);
+            // For new hospitals, the organisation will be added in the parent component
+            // For existing hospitals, we pass the full hospital object
+            const hospitalToSave =
+                mode === "edit" && hospital
+                    ? { ...formData, id: hospital.id }
+                    : (formData as Hospital);
+
+            onSave(hospitalToSave);
         } catch (error) {
             console.error("Error saving hospital:", error);
             setFormError("An error occurred while saving. Please try again.");
@@ -149,6 +152,7 @@ export default function HospitalModal({
                             <div className="notification is-danger">
                                 <button
                                     className="delete"
+                                    type="button"
                                     onClick={() => setFormError("")}
                                 ></button>
                                 {formError}
@@ -226,22 +230,6 @@ export default function HospitalModal({
                                             onChange={handleInputChange}
                                             placeholder="Postcode"
                                             required
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="column">
-                                <div className="field">
-                                    <label className="label">Beds</label>
-                                    <div className="control">
-                                        <input
-                                            className="input"
-                                            type="number"
-                                            name="beds"
-                                            value={formData.beds}
-                                            onChange={handleInputChange}
-                                            placeholder="Number of beds"
-                                            min="0"
                                         />
                                     </div>
                                 </div>
