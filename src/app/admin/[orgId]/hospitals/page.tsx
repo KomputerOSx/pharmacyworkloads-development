@@ -117,6 +117,7 @@ function HospitalsList() {
             console.error(err);
         }
     };
+
     useEffect(() => {
         const fetchOrganisation = async () => {
             try {
@@ -126,6 +127,10 @@ function HospitalsList() {
                 console.error(err);
             }
         };
+        console.log(
+            "Hospital Page.tsx fetchOrganisation() called- orgId:",
+            orgId,
+        );
         fetchOrganisation();
     }, [orgId]);
     // Clear action result after 5 seconds
