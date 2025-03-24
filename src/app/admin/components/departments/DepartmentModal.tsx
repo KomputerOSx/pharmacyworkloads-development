@@ -1,467 +1,572 @@
-// src/app/admin/components/departments/DepartmentModal.tsx
-import React, { useEffect, useState } from "react";
-import { Department, useDepartments } from "@/context/DepartmentContext";
-import { useHospitals } from "@/context/HospitalContext";
+// import React, { useEffect, useState } from "react";
+// import { Department, useDepartments } from "@/context/DepartmentContext";
+// import { Hospital } from "@/context/HospitalContext";
+//
+// interface DepartmentModalProps {
+//     isOpen: boolean;
+//     mode: "add" | "edit";
+//     department: Department | null;
+//     organisationName?: string;
+//     onClose: () => void;
+//     onSave: (department: Department) => void;
+//     availableHospitals?: Hospital[];
+//     selectedHospitalId?: string;
+//     onHospitalChange?: (
+//         value: ((prevState: string) => string) | string,
+//     ) => void;
+// }
+//
+// const DepartmentModal: React.FC<DepartmentModalProps> = ({
+//     isOpen,
+//     mode,
+//     department,
+//     onClose,
+//     onSave,
+//     availableHospitals,
+//     selectedHospitalId,
+//     onHospitalChange,
+// }) => {
+//     const { departmentTypes } = useDepartments();
+//
+//     // Initialize form state
+//     const [formData, setFormData] = useState<Department>({
+//         id: "",
+//         name: "",
+//         code: "",
+//         description: "",
+//         type: "",
+//         color: "#1a73e8", // Default blue color
+//         active: true,
+//         uniqueProperties: {
+//             requiresLunchCover: false,
+//             pharmacistCount: 0,
+//             technicianCount: 0,
+//         },
+//     });
+//
+//     // Reset form when modal opens with a department or for adding
+//     useEffect(() => {
+//         if (isOpen) {
+//             if (mode === "edit" && department) {
+//                 // For editing, use the provided department
+//                 setFormData({
+//                     ...department,
+//                     // Ensure uniqueProperties exists
+//                     uniqueProperties: department.uniqueProperties || {
+//                         requiresLunchCover: false,
+//                         pharmacistCount: 0,
+//                         technicianCount: 0,
+//                     },
+//                 });
+//             } else {
+//                 // For adding, reset to defaults
+//                 setFormData({
+//                     id: "",
+//                     name: "",
+//                     code: "",
+//                     description: "",
+//                     type:
+//                         departmentTypes.length > 0 ? departmentTypes[0].id : "",
+//                     color: "#1a73e8",
+//                     active: true,
+//                     uniqueProperties: {
+//                         requiresLunchCover: false,
+//                         pharmacistCount: 0,
+//                         technicianCount: 0,
+//                     },
+//                 });
+//             }
+//         }
+//     }, [isOpen, mode, department, departmentTypes]);
+//
+//     // Handle form input changes
+//     const handleInputChange = (
+//         e: React.ChangeEvent<
+//             HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+//         >,
+//     ) => {
+//         const { name, value } = e.target;
+//         setFormData({ ...formData, [name]: value });
+//     };
+//
+//     // Handle checkbox changes
+//     const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//         const { name, checked } = e.target;
+//         setFormData({ ...formData, [name]: checked });
+//     };
+//
+//     // Handle unique properties changes
+//     const handleUniquePropertyChange = (
+//         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+//     ) => {
+//         const { name, value, type } = e.target;
+//         const newValue =
+//             type === "checkbox"
+//                 ? (e.target as HTMLInputElement).checked
+//                 : type === "number"
+//                   ? parseInt(value, 10)
+//                   : value;
+//
+//         setFormData({
+//             ...formData,
+//             uniqueProperties: {
+//                 ...formData.uniqueProperties,
+//                 [name]: newValue,
+//             },
+//         });
+//     };
+//
+//     // Handle form submission
+//     const handleSubmit = (e: React.FormEvent) => {
+//         e.preventDefault();
+//         onSave(formData);
+//     };
+//
+//     if (!isOpen) return null;
+//
+//     return (
+//         <div className="modal is-active">
+//             <div className="modal-background" onClick={onClose}></div>
+//             <div
+//                 className="modal-card"
+//                 style={{ maxWidth: "800px", width: "100%" }}
+//             >
+//                 <header className="modal-card-head">
+//                     <p className="modal-card-title">
+//                         {mode === "add"
+//                             ? "Add New Department"
+//                             : `Edit Department: ${department?.name}`}
+//                     </p>
+//                     <button
+//                         className="delete"
+//                         aria-label="close"
+//                         onClick={onClose}
+//                     ></button>
+//                 </header>
+//                 <form onSubmit={handleSubmit}>
+//                     <section className="modal-card-body">
+//                         <div className="columns">
+//                             <div className="column is-6">
+//                                 {/* Basic Information */}
+//                                 <h4 className="title is-5">
+//                                     Basic Information
+//                                 </h4>
+//
+//                                 <div className="field">
+//                                     <label className="label">
+//                                         Department Name*
+//                                     </label>
+//                                     <div className="control">
+//                                         <input
+//                                             className="input"
+//                                             type="text"
+//                                             name="name"
+//                                             placeholder="Department Name"
+//                                             value={formData.name}
+//                                             onChange={handleInputChange}
+//                                             required
+//                                         />
+//                                     </div>
+//                                 </div>
+//
+//                                 <div className="field">
+//                                     <label className="label">Code*</label>
+//                                     <div className="control">
+//                                         <input
+//                                             className="input"
+//                                             type="text"
+//                                             name="code"
+//                                             placeholder="Department Code"
+//                                             value={formData.code}
+//                                             onChange={handleInputChange}
+//                                             required
+//                                         />
+//                                     </div>
+//                                     <p className="help">
+//                                         A unique code for this department
+//                                     </p>
+//                                 </div>
+//
+//                                 <div className="field">
+//                                     <label className="label">Description</label>
+//                                     <div className="control">
+//                                         <textarea
+//                                             className="textarea"
+//                                             name="description"
+//                                             placeholder="Department Description"
+//                                             value={formData.description || ""}
+//                                             onChange={handleInputChange}
+//                                         />
+//                                     </div>
+//                                 </div>
+//
+//                                 <div className="field">
+//                                     <label className="label">Type*</label>
+//                                     <div className="control">
+//                                         <div className="select is-fullwidth">
+//                                             <select
+//                                                 name="type"
+//                                                 value={formData.type}
+//                                                 onChange={handleInputChange}
+//                                                 required
+//                                             >
+//                                                 <option value="">
+//                                                     Select Type
+//                                                 </option>
+//                                                 {departmentTypes.map((type) => (
+//                                                     <option
+//                                                         key={type.id}
+//                                                         value={type.id}
+//                                                     >
+//                                                         {type.name}
+//                                                     </option>
+//                                                 ))}
+//                                             </select>
+//                                         </div>
+//                                     </div>
+//                                 </div>
+//
+//                                 <div className="field">
+//                                     <label className="label">Color</label>
+//                                     <div className="control">
+//                                         <input
+//                                             type="color"
+//                                             name="color"
+//                                             value={formData.color || "#1a73e8"}
+//                                             onChange={handleInputChange}
+//                                             className="input"
+//                                             style={{ height: "40px" }}
+//                                         />
+//                                     </div>
+//                                     <p className="help">
+//                                         Choose a color for this department
+//                                     </p>
+//                                 </div>
+//
+//                                 <div className="field">
+//                                     <label className="checkbox">
+//                                         <input
+//                                             type="checkbox"
+//                                             name="active"
+//                                             checked={formData.active}
+//                                             onChange={handleCheckboxChange}
+//                                         />{" "}
+//                                         Active
+//                                     </label>
+//                                 </div>
+//                             </div>
+//
+//                             <div className="column is-6">
+//                                 {/* Special Properties */}
+//                                 <h4 className="title is-5">
+//                                     Special Properties
+//                                 </h4>
+//
+//                                 <div className="field">
+//                                     <label className="checkbox">
+//                                         <input
+//                                             type="checkbox"
+//                                             name="requiresLunchCover"
+//                                             checked={
+//                                                 formData.uniqueProperties
+//                                                     ?.requiresLunchCover ||
+//                                                 false
+//                                             }
+//                                             onChange={
+//                                                 handleUniquePropertyChange
+//                                             }
+//                                         />{" "}
+//                                         Requires Lunch Cover
+//                                     </label>
+//                                 </div>
+//
+//                                 <div className="field">
+//                                     <label className="label">
+//                                         Pharmacist Count
+//                                     </label>
+//                                     <div className="control">
+//                                         <input
+//                                             className="input"
+//                                             type="number"
+//                                             name="pharmacistCount"
+//                                             min="0"
+//                                             placeholder="Number of Pharmacists"
+//                                             value={
+//                                                 formData.uniqueProperties
+//                                                     ?.pharmacistCount || 0
+//                                             }
+//                                             onChange={
+//                                                 handleUniquePropertyChange
+//                                             }
+//                                         />
+//                                     </div>
+//                                 </div>
+//
+//                                 <div className="field">
+//                                     <label className="label">
+//                                         Technician Count
+//                                     </label>
+//                                     <div className="control">
+//                                         <input
+//                                             className="input"
+//                                             type="number"
+//                                             name="technicianCount"
+//                                             min="0"
+//                                             placeholder="Number of Technicians"
+//                                             value={
+//                                                 formData.uniqueProperties
+//                                                     ?.technicianCount || 0
+//                                             }
+//                                             onChange={
+//                                                 handleUniquePropertyChange
+//                                             }
+//                                         />
+//                                     </div>
+//                                 </div>
+//                             </div>
+//                         </div>
+//                     </section>
+//                     <footer className="modal-card-foot">
+//                         <button className="button is-primary" type="submit">
+//                             {mode === "add" ? "Add Department" : "Save Changes"}
+//                         </button>
+//                         <button
+//                             className="button"
+//                             type="button"
+//                             onClick={onClose}
+//                         >
+//                             Cancel
+//                         </button>
+//                     </footer>
+//                 </form>
+//             </div>
+//         </div>
+//     );
+// };
+//
+// export default DepartmentModal;
 
-type DepartmentModalProps = {
+import React, { useEffect, useState } from "react";
+import {
+    Department,
+    DepartmentType,
+    useDepartments,
+} from "@/context/DepartmentContext";
+import { Hospital } from "@/context/HospitalContext";
+
+interface DepartmentModalProps {
     isOpen: boolean;
     mode: "add" | "edit";
     department: Department | null;
+    organisationName?: string;
+    availableHospitals: Hospital[];
+    selectedHospitalId: string;
+    onHospitalChange: (hospitalId: string) => void;
     onClose: () => void;
     onSave: (department: Department) => void;
-    parentDepartment?: Department | null;
-};
+}
 
-export default function DepartmentModal({
+const DepartmentModal: React.FC<DepartmentModalProps> = ({
     isOpen,
     mode,
     department,
+    organisationName,
+    availableHospitals,
+    selectedHospitalId,
+    onHospitalChange,
     onClose,
     onSave,
-    parentDepartment = null,
-}: DepartmentModalProps) {
-    const { departmentTypes, departments } = useDepartments();
-    const { organizations } = useHospitals();
-    const hospitals = useHospitals().hospitals;
-    // Default empty department
-    const emptyDepartment: Department = {
+}) => {
+    const { departmentTypes } = useDepartments();
+
+    // Initialize form state
+    const [formData, setFormData] = useState<Department>({
         id: "",
         name: "",
         code: "",
         description: "",
         type: "",
-        color: "#3273dc",
-        // @ts-expect-error small hospital component just for department creation and connect. Full hospital attributes not required here
-        hospital: { id: "", name: "" },
-        parent: parentDepartment,
-        requiresLunchCover: false,
-        pharmacistCount: 0,
-        technicianCount: 0,
+        color: "#1a73e8", // Default blue color
         active: true,
-    };
+        uniqueProperties: {
+            requiresLunchCover: false,
+            pharmacistCount: 0,
+            technicianCount: 0,
+        },
+    });
 
-    const [formData, setFormData] = useState<Department>(emptyDepartment);
-    const [formError, setFormError] = useState("");
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    // Add a new state for filtered hospitals
-    const [filteredHospitals, setFilteredHospitals] = useState(hospitals);
-
-    // Additional state for showing special fields based on department type
-    const [showSpecialFields, setShowSpecialFields] = useState(false);
-
-    useEffect(
-        () => {
+    // Reset form when modal opens with a department or for adding
+    useEffect(() => {
+        if (isOpen) {
             if (mode === "edit" && department) {
-                const departmentWithOrg = {
+                // For editing, use the provided department
+                setFormData({
                     ...department,
-                    // If department doesn't have organization but has hospital with organization
-                    organization: department.hospital.organization ||
-                        (department.hospital &&
-                            department.hospital.organization) || {
-                            id: "",
-                            name: "",
-                        },
-                };
-                setFormData(departmentWithOrg);
-
-                // Filter hospitals based on selected organization
-                if (formData.hospital.organization?.id) {
-                    setFilteredHospitals(
-                        hospitals.filter(
-                            (h) =>
-                                h.organization?.id ===
-                                departmentWithOrg.organization?.id,
-                        ),
-                    );
-                } else {
-                    setFilteredHospitals(hospitals);
-                }
-
-                // Set special fields visibility based on department type
-                setShowSpecialFields(
-                    department.type === "inpatient" ||
-                        department.type === "outpatient" ||
-                        department.type === "pharmacy",
-                );
+                    // Ensure uniqueProperties exists
+                    uniqueProperties: department.uniqueProperties || {
+                        requiresLunchCover: false,
+                        pharmacistCount: 0,
+                        technicianCount: 0,
+                    },
+                });
             } else {
-                // Reset form for add mode
-                const initialDepartment = {
-                    ...emptyDepartment,
-                    parent: parentDepartment,
-                };
-
-                // If we're adding to a parent, use the parent's hospital and organization
-                if (parentDepartment && parentDepartment.hospital) {
-                    initialDepartment.hospital = parentDepartment.hospital;
-                    initialDepartment.hospital.organization = parentDepartment
-                        .hospital.organization || { id: "", name: "" };
-
-                    // Filter hospitals based on selected organization
-                    if (parentDepartment.hospital.organization?.id) {
-                        setFilteredHospitals(
-                            hospitals.filter(
-                                (h) =>
-                                    h.organization?.id ===
-                                    parentDepartment.hospital.organization?.id,
-                            ),
-                        );
-                    }
-                } else {
-                    setFilteredHospitals(hospitals);
-                }
-
-                setFormData(initialDepartment);
-                // Set default special fields visibility
-                setShowSpecialFields(false);
-            }
-            setFormError("");
-            setIsSubmitting(false);
-        }, // eslint-disable-next-line react-hooks/exhaustive-deps
-        [mode, department, hospitals, isOpen, parentDepartment],
-    );
-
-    // Get// eslint-disable-next-line react-hooks/exhaustive-deps root departments (for parent dropdown)
-    const rootDepartments = departments.filter((dept) => !dept.parent);
-
-    const handleInputChange = (
-        e: React.ChangeEvent<
-            HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-        >,
-    ) => {
-        const { name, value, type } = e.target;
-
-        if (name === "organizationId") {
-            // Find the selected organization from the organisations array
-            const selectedOrg = organizations.find((org) => org.id === value);
-
-            // Update the form data with the selected organization
-            const updatedFormData = {
-                ...formData,
-                hospital: {
-                    ...formData.hospital,
-                    organization: selectedOrg
-                        ? {
-                              id: selectedOrg.id,
-                              name: selectedOrg.name,
-                          }
-                        : { id: "", name: "" },
-                    // Reset hospital ID when organization changes
+                // For adding, reset to defaults
+                setFormData({
                     id: "",
                     name: "",
-                },
-            };
-            // @ts-expect-error small hospital component just for department creation and connect
-            setFormData(updatedFormData);
-
-            // Filter hospitals based on selected organization
-            if (value) {
-                setFilteredHospitals(
-                    hospitals.filter((h) => h.organization?.id === value),
-                );
-            } else {
-                setFilteredHospitals(hospitals);
-            }
-        } else if (name === "hospitalId") {
-            const selectedHospital = hospitals.find((h) => h.id === value);
-            if (selectedHospital) {
-                setFormData({
-                    ...formData,
-                    hospital: {
-                        ...formData.hospital, // Preserve existing hospital properties, including organization
-                        id: selectedHospital.id,
-                        name: selectedHospital.name,
+                    code: "",
+                    description: "",
+                    type:
+                        departmentTypes.length > 0 ? departmentTypes[0].id : "",
+                    color: "#1a73e8",
+                    active: true,
+                    uniqueProperties: {
+                        requiresLunchCover: false,
+                        pharmacistCount: 0,
+                        technicianCount: 0,
                     },
                 });
             }
-        } else if (name === "parentId") {
-            if (value === "") {
-                // No parent selected
-                setFormData({
-                    ...formData,
-                    parent: null,
-                });
-            } else {
-                const selectedParent = departments.find((d) => d.id === value);
-                if (selectedParent) {
-                    const updates: Partial<Department> = {
-                        parent: {
-                            id: selectedParent.id,
-                            name: selectedParent.name,
-                        },
-                    };
-
-                    // Also update hospital to match parent's hospital
-                    if (selectedParent.hospital) {
-                        updates.hospital = selectedParent.hospital;
-                    }
-
-                    // Also update organization to match parent's organization
-                    if (selectedParent.hospital && updates.hospital) {
-                        updates.hospital.organization =
-                            selectedParent.hospital.organization;
-
-                        // Filter hospitals by parent's organization
-                        setFilteredHospitals(
-                            hospitals.filter(
-                                (h) =>
-                                    h.organization?.id ===
-                                    selectedParent.hospital.organization?.id,
-                            ),
-                        );
-                    }
-
-                    setFormData({
-                        ...formData,
-                        ...updates,
-                    });
-                }
-            }
-        } else if (name === "type") {
-            // Update special fields visibility when type changes
-            setShowSpecialFields(
-                value === "inpatient" ||
-                    value === "outpatient" ||
-                    value === "pharmacy",
-            );
-
-            setFormData({
-                ...formData,
-                [name]: value,
-            });
-        } else {
-            setFormData({
-                ...formData,
-                [name]:
-                    type === "checkbox"
-                        ? (e.target as HTMLInputElement).checked
-                        : type === "number"
-                          ? parseInt(value)
-                          : value,
-            });
         }
+    }, [isOpen, mode, department, departmentTypes]);
+
+    // Handle form input changes
+    const handleInputChange = (
+        e: React.ChangeEvent<
+            HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+        >,
+    ) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
     };
 
-    const validateForm = () => {
-        // Validate required fields
-        if (!formData.name.trim()) {
-            setFormError("Department name is required");
-            return false;
-        }
-
-        if (!formData.code.trim()) {
-            setFormError("Department code is required");
-            return false;
-        }
-
-        if (!formData.type) {
-            setFormError("Department type is required");
-            return false;
-        }
-
-        if (!formData.hospital.organization?.id) {
-            setFormError("Organization is required");
-            return false;
-        }
-
-        if (!formData.hospital?.id) {
-            setFormError("Hospital is required");
-            return false;
-        }
-
-        // Check for special fields if department is inpatient/outpatient
-        if (formData.type === "inpatient" || formData.type === "outpatient") {
-            if (
-                formData.pharmacistCount === undefined ||
-                formData.pharmacistCount < 0
-            ) {
-                setFormError("Pharmacist count must be 0 or higher");
-                return false;
-            }
-
-            if (
-                formData.technicianCount === undefined ||
-                formData.technicianCount < 0
-            ) {
-                setFormError("Technician count must be 0 or higher");
-                return false;
-            }
-        }
-
-        return true;
+    // Handle checkbox changes
+    const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, checked } = e.target;
+        setFormData({ ...formData, [name]: checked });
     };
 
+    // Handle unique properties changes
+    const handleUniquePropertyChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    ) => {
+        const { name, value, type } = e.target;
+        const newValue =
+            type === "checkbox"
+                ? (e.target as HTMLInputElement).checked
+                : type === "number"
+                  ? parseInt(value, 10)
+                  : value;
+
+        setFormData({
+            ...formData,
+            uniqueProperties: {
+                ...formData.uniqueProperties,
+                [name]: newValue,
+            },
+        });
+    };
+
+    // Handle hospital selection change
+    const handleHospitalChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        onHospitalChange(e.target.value);
+    };
+
+    // Handle form submission
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        onSave(formData);
+    };
 
-        // Validate form
-        if (!validateForm()) {
-            return;
-        }
+    // Find the current hospital name if available
+    const getCurrentHospitalName = () => {
+        if (!selectedHospitalId) return "None";
 
-        setIsSubmitting(true);
-
-        // Save the department
-        try {
-            onSave(formData);
-        } catch (error) {
-            console.error("Error saving department:", error);
-            setFormError("An error occurred while saving. Please try again.");
-            setIsSubmitting(false);
-        }
+        const hospital = availableHospitals.find(
+            (h) => h.id === selectedHospitalId,
+        );
+        return hospital ? hospital.name : "Unknown Hospital";
     };
 
     if (!isOpen) return null;
 
     return (
-        <div className={`modal ${isOpen ? "is-active" : ""}`}>
+        <div className="modal is-active">
             <div className="modal-background" onClick={onClose}></div>
-            <div className="modal-card">
+            <div
+                className="modal-card"
+                style={{ maxWidth: "800px", width: "100%" }}
+            >
                 <header className="modal-card-head">
                     <p className="modal-card-title">
                         {mode === "add"
                             ? "Add New Department"
-                            : "Edit Department"}
+                            : `Edit Department: ${department?.name}`}
                     </p>
                     <button
                         className="delete"
                         aria-label="close"
                         onClick={onClose}
-                        disabled={isSubmitting}
                     ></button>
                 </header>
-
                 <form onSubmit={handleSubmit}>
                     <section className="modal-card-body">
-                        {formError && (
-                            <div className="notification is-danger">
-                                <button
-                                    type="button"
-                                    className="delete"
-                                    onClick={() => setFormError("")}
-                                ></button>
-                                {formError}
-                            </div>
-                        )}
-
                         <div className="columns">
-                            <div className="column is-8">
+                            <div className="column is-6">
+                                {/* Basic Information */}
+                                <h4 className="title is-5">
+                                    Basic Information
+                                </h4>
+
                                 <div className="field">
                                     <label className="label">
-                                        Department Name
+                                        Department Name*
                                     </label>
                                     <div className="control">
                                         <input
                                             className="input"
                                             type="text"
                                             name="name"
+                                            placeholder="Department Name"
                                             value={formData.name}
                                             onChange={handleInputChange}
-                                            placeholder="Enter department name"
                                             required
                                         />
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="column is-4">
                                 <div className="field">
-                                    <label className="label">Code</label>
+                                    <label className="label">Code*</label>
                                     <div className="control">
                                         <input
                                             className="input"
                                             type="text"
                                             name="code"
+                                            placeholder="Department Code"
                                             value={formData.code}
                                             onChange={handleInputChange}
-                                            placeholder="Department code"
                                             required
                                         />
                                     </div>
+                                    <p className="help">
+                                        A unique code for this department
+                                    </p>
                                 </div>
-                            </div>
-                        </div>
 
-                        <div className="field">
-                            <label className="label">Description</label>
-                            <div className="control">
-                                <textarea
-                                    className="textarea"
-                                    name="description"
-                                    value={formData.description || ""}
-                                    onChange={handleInputChange}
-                                    placeholder="Department description"
-                                    rows={2}
-                                ></textarea>
-                            </div>
-                        </div>
-
-                        <div className="columns">
-                            <div className="column is-6">
+                                {/* Hospital Selection Field */}
                                 <div className="field">
-                                    <label className="label">
-                                        Organization
-                                    </label>
+                                    <label className="label">Hospital*</label>
                                     <div className="control">
                                         <div className="select is-fullwidth">
                                             <select
-                                                name="organizationId"
-                                                value={
-                                                    formData.hospital
-                                                        .organization?.id ||
-                                                    formData.hospital
-                                                        ?.organization?.id ||
-                                                    ""
-                                                }
-                                                onChange={handleInputChange}
+                                                value={selectedHospitalId}
+                                                onChange={handleHospitalChange}
                                                 required
-                                                disabled={!!formData.parent} // Disable if parent is selected
                                             >
                                                 <option value="">
-                                                    Select organization
+                                                    Select Hospital
                                                 </option>
-                                                {organizations.map((org) => (
-                                                    <option
-                                                        key={org.id}
-                                                        value={org.id}
-                                                    >
-                                                        {org.name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        {formData.parent && (
-                                            <p className="help">
-                                                Organization is determined by
-                                                parent department
-                                            </p>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="column is-6">
-                                <div className="field">
-                                    <label className="label">Hospital</label>
-                                    <div className="control">
-                                        <div className="select is-fullwidth">
-                                            <select
-                                                name="hospitalId"
-                                                value={
-                                                    formData.hospital?.id || ""
-                                                }
-                                                onChange={handleInputChange}
-                                                required
-                                                disabled={
-                                                    !!formData.parent ||
-                                                    !formData.hospital
-                                                        .organization?.id
-                                                } // Disable if parent is selected or no organization
-                                            >
-                                                <option value="">
-                                                    Select hospital
-                                                </option>
-                                                {filteredHospitals.map(
+                                                {availableHospitals.map(
                                                     (hospital) => (
                                                         <option
                                                             key={hospital.id}
@@ -473,31 +578,36 @@ export default function DepartmentModal({
                                                 )}
                                             </select>
                                         </div>
-                                        {formData.parent ? (
-                                            <p className="help">
-                                                Hospital is determined by parent
-                                                department
-                                            </p>
-                                        ) : (
-                                            !formData.hospital.organization
-                                                ?.id && (
-                                                <p className="help">
-                                                    Please select an
-                                                    organization first
-                                                </p>
-                                            )
-                                        )}
+                                    </div>
+                                    {mode === "edit" && (
+                                        <p className="help">
+                                            Currently linked to:{" "}
+                                            <strong>
+                                                {getCurrentHospitalName()}
+                                            </strong>
+                                        </p>
+                                    )}
+                                    <p className="help mt-2">
+                                        Changing the hospital will update the
+                                        department-hospital assignment
+                                    </p>
+                                </div>
+
+                                <div className="field">
+                                    <label className="label">Description</label>
+                                    <div className="control">
+                                        <textarea
+                                            className="textarea"
+                                            name="description"
+                                            placeholder="Department Description"
+                                            value={formData.description || ""}
+                                            onChange={handleInputChange}
+                                        />
                                     </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <div className="columns">
-                            <div className="column is-6">
                                 <div className="field">
-                                    <label className="label">
-                                        Department Type
-                                    </label>
+                                    <label className="label">Type*</label>
                                     <div className="control">
                                         <div className="select is-fullwidth">
                                             <select
@@ -507,7 +617,7 @@ export default function DepartmentModal({
                                                 required
                                             >
                                                 <option value="">
-                                                    Select type
+                                                    Select Type
                                                 </option>
                                                 {departmentTypes.map((type) => (
                                                     <option
@@ -521,176 +631,115 @@ export default function DepartmentModal({
                                         </div>
                                     </div>
                                 </div>
+
+                                <div className="field">
+                                    <label className="label">Color</label>
+                                    <div className="control">
+                                        <input
+                                            type="color"
+                                            name="color"
+                                            value={formData.color || "#1a73e8"}
+                                            onChange={handleInputChange}
+                                            className="input"
+                                            style={{ height: "40px" }}
+                                        />
+                                    </div>
+                                    <p className="help">
+                                        Choose a color for this department
+                                    </p>
+                                </div>
+
+                                <div className="field">
+                                    <label className="checkbox">
+                                        <input
+                                            type="checkbox"
+                                            name="active"
+                                            checked={formData.active}
+                                            onChange={handleCheckboxChange}
+                                        />{" "}
+                                        Active
+                                    </label>
+                                </div>
                             </div>
 
                             <div className="column is-6">
-                                <div className="field">
-                                    <label className="label">
-                                        Parent Department
-                                    </label>
-                                    <div className="control">
-                                        <div className="select is-fullwidth">
-                                            <select
-                                                name="parentId"
-                                                value={
-                                                    formData.parent?.id || ""
-                                                }
-                                                onChange={handleInputChange}
-                                                // Disable if this is an edit and we have children
-                                                disabled={
-                                                    mode === "edit" &&
-                                                    department?.children &&
-                                                    department.children.length >
-                                                        0
-                                                }
-                                            >
-                                                <option value="">
-                                                    No Parent (Top-Level)
-                                                </option>
-                                                {rootDepartments
-                                                    .filter(
-                                                        (d) =>
-                                                            d.id !==
-                                                            formData.id,
-                                                    ) // Prevent selecting self as parent
-                                                    .map((dept) => (
-                                                        <option
-                                                            key={dept.id}
-                                                            value={dept.id}
-                                                        >
-                                                            {dept.name}
-                                                        </option>
-                                                    ))}
-                                            </select>
-                                        </div>
-                                        {mode === "edit" &&
-                                            department?.children &&
-                                            department.children.length > 0 && (
-                                                <p className="help">
-                                                    Cannot change parent when
-                                                    department has
-                                                    subdepartments
-                                                </p>
-                                            )}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="field mt-3">
-                            <label className="label">Color</label>
-                            <div className="control has-icons-left">
-                                <input
-                                    className="input"
-                                    type="color"
-                                    name="color"
-                                    value={formData.color || "#3273dc"}
-                                    onChange={handleInputChange}
-                                />
-                                <span className="icon is-small is-left">
-                                    <i className="fas fa-palette"></i>
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Special fields for inpatient/outpatient pharmacy */}
-                        {showSpecialFields && (
-                            <div className="box mt-4">
-                                <h4 className="title is-5 mb-3">
-                                    Special Settings
+                                {/* Special Properties */}
+                                <h4 className="title is-5">
+                                    Special Properties
                                 </h4>
 
                                 <div className="field">
+                                    <label className="checkbox">
+                                        <input
+                                            type="checkbox"
+                                            name="requiresLunchCover"
+                                            checked={
+                                                formData.uniqueProperties
+                                                    ?.requiresLunchCover ||
+                                                false
+                                            }
+                                            onChange={
+                                                handleUniquePropertyChange
+                                            }
+                                        />{" "}
+                                        Requires Lunch Cover
+                                    </label>
+                                </div>
+
+                                <div className="field">
+                                    <label className="label">
+                                        Pharmacist Count
+                                    </label>
                                     <div className="control">
-                                        <label className="checkbox">
-                                            <input
-                                                type="checkbox"
-                                                name="requiresLunchCover"
-                                                checked={
-                                                    formData.requiresLunchCover ||
-                                                    false
-                                                }
-                                                onChange={handleInputChange}
-                                            />
-                                            &nbsp;Requires Lunch Cover
-                                        </label>
+                                        <input
+                                            className="input"
+                                            type="number"
+                                            name="pharmacistCount"
+                                            min="0"
+                                            placeholder="Number of Pharmacists"
+                                            value={
+                                                formData.uniqueProperties
+                                                    ?.pharmacistCount || 0
+                                            }
+                                            onChange={
+                                                handleUniquePropertyChange
+                                            }
+                                        />
                                     </div>
                                 </div>
 
-                                <div className="columns">
-                                    <div className="column is-6">
-                                        <div className="field">
-                                            <label className="label">
-                                                Pharmacist Count
-                                            </label>
-                                            <div className="control">
-                                                <input
-                                                    className="input"
-                                                    type="number"
-                                                    name="pharmacistCount"
-                                                    value={
-                                                        formData.pharmacistCount ||
-                                                        0
-                                                    }
-                                                    onChange={handleInputChange}
-                                                    min="0"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="column is-6">
-                                        <div className="field">
-                                            <label className="label">
-                                                Technician Count
-                                            </label>
-                                            <div className="control">
-                                                <input
-                                                    className="input"
-                                                    type="number"
-                                                    name="technicianCount"
-                                                    value={
-                                                        formData.technicianCount ||
-                                                        0
-                                                    }
-                                                    onChange={handleInputChange}
-                                                    min="0"
-                                                />
-                                            </div>
-                                        </div>
+                                <div className="field">
+                                    <label className="label">
+                                        Technician Count
+                                    </label>
+                                    <div className="control">
+                                        <input
+                                            className="input"
+                                            type="number"
+                                            name="technicianCount"
+                                            min="0"
+                                            placeholder="Number of Technicians"
+                                            value={
+                                                formData.uniqueProperties
+                                                    ?.technicianCount || 0
+                                            }
+                                            onChange={
+                                                handleUniquePropertyChange
+                                            }
+                                        />
                                     </div>
                                 </div>
-                            </div>
-                        )}
-
-                        <div className="field mt-4">
-                            <div className="control">
-                                <label className="checkbox">
-                                    <input
-                                        type="checkbox"
-                                        name="active"
-                                        checked={formData.active}
-                                        onChange={handleInputChange}
-                                    />
-                                    &nbsp;Active
-                                </label>
                             </div>
                         </div>
                     </section>
-
                     <footer className="modal-card-foot">
-                        <button
-                            type="submit"
-                            className={`button is-primary ${isSubmitting ? "is-loading" : ""}`}
-                            disabled={isSubmitting}
-                        >
+                        <button className="button is-primary" type="submit">
                             {mode === "add" ? "Add Department" : "Save Changes"}
                         </button>
                         <button
-                            type="button"
                             className="button"
+                            type="button"
                             onClick={onClose}
-                            disabled={isSubmitting}
                         >
                             Cancel
                         </button>
@@ -699,4 +748,6 @@ export default function DepartmentModal({
             </div>
         </div>
     );
-}
+};
+
+export default DepartmentModal;

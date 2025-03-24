@@ -8,6 +8,7 @@ import {
     getOrganisations,
     updateOrganisation,
 } from "@/services/organisationService";
+import { Timestamp } from "firebase/firestore";
 
 // Define the Organisation type
 export type Organisation = {
@@ -17,8 +18,8 @@ export type Organisation = {
     contactEmail: string;
     contactPhone: string;
     active: boolean;
-    createdAt?: string;
-    updatedAt?: string;
+    createdAt?: Timestamp | string | null;
+    updatedAt?: Timestamp | string | null;
 };
 
 // Define the filter type

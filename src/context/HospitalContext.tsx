@@ -11,9 +11,10 @@ import React, {
 import {
     addHospital,
     deleteHospital,
+    getHospitals,
     updateHospital,
 } from "@/services/hospitalService";
-import { getHospitalsByOrganisation } from "@/services/hospitalAssignmentService";
+import { Timestamp } from "firebase/firestore";
 
 // Define the Hospital type
 export type Hospital = {
@@ -25,8 +26,8 @@ export type Hospital = {
     contactNumber: string;
     contactEmail: string;
     active: boolean;
-    createdAt?: string;
-    updatedAt?: string;
+    createdAt?: string | Timestamp;
+    updatedAt?: string | Timestamp;
 };
 
 export type HospitalOrganisationAssignment = {
@@ -94,8 +95,7 @@ export const HospitalProvider: React.FC<{
             console.log("Fetching hospitals for organisation:", organisationId);
 
             // Get hospitals for this organisation
-            const hospitalData =
-                await getHospitalsByOrganisation(organisationId);
+            const hospitalData = await getHospitals(organisationId);
 
             console.log("Received hospital data:", hospitalData);
             setHospitals(hospitalData);

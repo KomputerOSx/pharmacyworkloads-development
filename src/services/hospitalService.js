@@ -16,20 +16,15 @@ import {
 import { db } from "./firebase";
 import {
     assignHospitalToOrganisation,
-    cleanupExistingAssignments,
+    cleanupHosOrgAss,
     getHospitalOrganisationAssignment,
     removeHospitalAssignment,
 } from "./hospitalAssignmentService";
+import { formatFirestoreTimestamp } from "@/utils/firestoreUtil";
 
 const hospitalsCollection = collection(db, "hospitals");
 
 // Helper function to safely format Firestore timestamps
-const formatFirestoreTimestamp = (timestamp) => {
-    if (timestamp && typeof timestamp.toDate === "function") {
-        return timestamp.toDate().toISOString().split("T")[0];
-    }
-    return timestamp || null;
-};
 
 export const getHospitals = async (organisationId) => {
     try {
@@ -38,7 +33,6 @@ export const getHospitals = async (organisationId) => {
         const assignmentsQuery = query(
             collection(db, "hospital_organisation_assignments"),
             where("organisation", "==", organisationRef),
-            where("active", "==", true),
         );
 
         const assignmentsSnapshot = await getDocs(assignmentsQuery);
@@ -156,99 +150,6 @@ export const addHospital = async (
     }
 };
 
-// Update an existing hospital
-// export const updateHospital = async (
-//     id,
-//     organisationId,
-//     data,
-//     userId = "system",
-// ) => {
-//     try {
-//         const hospitalRef = doc(db, "hospitals", id);
-//
-//         // Add update timestamp and audit field
-//         const dataToUpdate = {
-//             ...data,
-//             updatedAt: serverTimestamp(),
-//             updatedById: userId,
-//         };
-//         console.log("Data being sent to Firestore:", dataToUpdate);
-//
-//         // Update the hospital document (just the timestamp)
-//         console.log("Before update:", await getHospital(id));
-//         await updateDoc(hospitalRef, dataToUpdate);
-//         console.log("After update:", await getHospital(id));
-//
-//         const currentAssignments = await getHospitalOrganisationAssignment(id);
-//
-//         if (organisationId) {
-//             // Get current organisation assignment
-//
-//             // Clean up ALL existing assignments first
-//             for (const assignment of currentAssignments) {
-//                 await removeHospitalAssignment(assignment.id);
-//             }
-//
-//             // Create a new assignment
-//             await assignHospitalToOrganisation(id, organisationId, userId);
-//         } else {
-//             // If there's a current assignment, and it's different from the new one
-//             if (currentAssignments.length > 0) {
-//                 const currentAssignment = currentAssignments[0];
-//                 const currentOrgRef = currentAssignment.organisation;
-//                 const currentOrgId = currentOrgRef.path.split("/").pop();
-//
-//                 // If organisation has changed
-//                 if (currentOrgId !== organisationId) {
-//                     console.log(
-//                         "Organization changed from",
-//                         currentOrgId,
-//                         "to",
-//                         organisationId,
-//                     );
-//                     await removeHospitalAssignment(currentAssignment.id);
-//                     await assignHospitalToOrganisation(
-//                         id,
-//                         organisationId,
-//                         userId,
-//                     );
-//                 }
-//                 // If same organisation, no need to update assignment
-//             } else {
-//                 // No current assignment, create a new one
-//                 await assignHospitalToOrganisation(id, organisationId, userId);
-//             }
-//         }
-//
-//         // Fetch the updated hospital to return complete data
-//         const updatedHospitalDoc = await getDoc(hospitalRef);
-//
-//         if (!updatedHospitalDoc.exists()) {
-//             throw new Error(`Hospital with ID ${id} not found after update`);
-//         }
-//
-//         const hospitalData = updatedHospitalDoc.data();
-//
-//         // Return the complete updated hospital object
-//         return {
-//             id,
-//             name: hospitalData.name || "",
-//             address: hospitalData.address || "",
-//             city: hospitalData.city || "",
-//             postcode: hospitalData.postcode || "",
-//             contactNumber: hospitalData.contactNumber || "",
-//             contactEmail: hospitalData.contactEmail || "",
-//             active:
-//                 hospitalData.active !== undefined ? hospitalData.active : true,
-//             createdAt: formatFirestoreTimestamp(hospitalData.createdAt),
-//             updatedAt: formatFirestoreTimestamp(hospitalData.updatedAt),
-//         };
-//     } catch (error) {
-//         console.error("Error updating hospital:", error);
-//         throw error;
-//     }
-// };
-
 export const updateHospital = async (
     id,
     organisationId,
@@ -274,7 +175,7 @@ export const updateHospital = async (
         // Handle organisation assignment if organisation is provided
         if (organisationId) {
             // Clean up any existing assignments and get the current one (if any)
-            const existingAssignment = await cleanupExistingAssignments(
+            const existingAssignment = await cleanupHosOrgAss(
                 id,
                 organisationId,
             );
