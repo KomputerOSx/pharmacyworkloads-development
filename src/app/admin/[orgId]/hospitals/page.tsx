@@ -131,7 +131,7 @@ function HospitalsList() {
             "Hospital Page.tsx fetchOrganisation() called- orgId:",
             orgId,
         );
-        fetchOrganisation();
+        fetchOrganisation().then((r) => r);
     }, [orgId]);
     // Clear action result after 5 seconds
     useEffect(() => {

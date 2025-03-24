@@ -7,6 +7,7 @@ import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { getOrganisation } from "@/services/organisationService";
 import Link from "next/link";
 import styles from "../styles/Dashboard.module.css";
+import { useHospitals } from "@/context/HospitalContext";
 
 export default function OrganisationPage() {
     const params = useParams();
@@ -15,6 +16,8 @@ export default function OrganisationPage() {
     const [organisation, setOrganisation] = useState<Organisation | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+
+    const hospitals = useHospitals().hospitals;
 
     useEffect(() => {
         const fetchOrganisation = async () => {
@@ -76,7 +79,7 @@ export default function OrganisationPage() {
                                                     Hospitals
                                                 </p>
                                                 <p className="title has-text-white">
-                                                    4
+                                                    {hospitals.length}
                                                 </p>
                                             </div>
                                         </div>
