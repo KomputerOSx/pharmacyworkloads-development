@@ -844,7 +844,6 @@ export const updateDepartment = async (
                     {
                         updatedAt: serverTimestamp(),
                         updatedById: userId,
-                        active: true, // Ensure it's marked as active
                     },
                 );
             } else {

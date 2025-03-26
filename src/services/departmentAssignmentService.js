@@ -237,7 +237,6 @@ export const assignDepartmentToHospital = async (
                 {
                     updatedAt: serverTimestamp(),
                     updatedById: userId,
-                    active: true, // Ensure it's marked as active
                 },
             );
 
@@ -251,7 +250,6 @@ export const assignDepartmentToHospital = async (
         const assignmentData = {
             department: departmentRef,
             hospital: hospitalRef,
-            active: true,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
             createdById: userId,
@@ -286,7 +284,6 @@ export const getDepartmentHospitalAssignment = async (departmentId) => {
         const q = query(
             assignmentsCollection,
             where("department", "==", departmentRef),
-            where("active", "==", true),
         );
 
         const assignments = await getDocs(q);
@@ -327,7 +324,6 @@ export const getDepartmentsByHospital = async (hospitalId) => {
         const assignmentsQuery = query(
             assignmentsCollection,
             where("hospital", "==", hospitalRef),
-            where("active", "==", true),
         );
 
         const assignmentsSnapshot = await getDocs(assignmentsQuery);
