@@ -1,8 +1,9 @@
 import { Department, DepartmentFilter } from "@/context/DepartmentContext";
 import {
-    getDepartmentChildren as getDepChildren,
-    getDepartments as getDepData,
+    getDepartmentChildren,
+    getDepartments,
 } from "@/services/departmentService";
+import { getDepartmentHospitalAssignment } from "@/services/departmentAssignmentService";
 
 /**
  * Ensures a department object conforms to the Department type
@@ -26,6 +27,7 @@ export const ensureCompleteDepartment = (
             pharmacistCount: dept.uniqueProperties?.pharmacistCount || 0,
             technicianCount: dept.uniqueProperties?.technicianCount || 0,
         },
+        hospital: dept.hospital || undefined,
         createdAt: dept.createdAt,
         updatedAt: dept.updatedAt,
         children: dept.children
@@ -35,83 +37,112 @@ export const ensureCompleteDepartment = (
 };
 
 /**
- * A type-safe wrapper for getDepartments that ensures returned data
- * conforms to the Department type and includes proper error handling
+ * Enhance departments with their hospital information
+ * @param {Array} departments - Array of department objects
+ * @param {Array} hospitals - Array of hospital objects
+ * @returns {Promise<Array>} - Enhanced departments with hospital information
  */
+export const enhanceDepartmentsWithHospitals = async (
+    departments: Department[],
+    hospitals: { id: string; name: string }[],
+): Promise<Department[]> => {
+    if (!departments?.length || !hospitals?.length) {
+        return departments;
+    }
+
+    console.log("Enhancing departments with hospital data...");
+
+    const enhancedDepartments = [];
+
+    // Process departments in batches to avoid too many parallel requests
+    const batchSize = 5;
+    for (let i = 0; i < departments.length; i += batchSize) {
+        const batch = departments.slice(i, i + batchSize);
+        const batchPromises = batch.map(async (department) => {
+            try {
+                // Get assignments for this department
+                const assignments = await getDepartmentHospitalAssignment(
+                    department.id,
+                );
+                console.log(
+                    `Department ${department.name}: Found ${assignments.length} assignments`,
+                );
+
+                if (assignments && assignments.length > 0) {
+                    // Get the first active assignment
+                    const assignment = assignments[0];
+
+                    if (assignment.hospitalId) {
+                        // Find the hospital in our hospital array
+                        const hospital = hospitals.find(
+                            (h) => h.id === assignment.hospitalId,
+                        );
+
+                        // Create enhanced department with hospital info
+                        return {
+                            ...department,
+                            hospital: {
+                                id: assignment.hospitalId,
+                                name: hospital
+                                    ? hospital.name
+                                    : "Unknown Hospital",
+                            },
+                        };
+                    }
+                }
+
+                // Return department without hospital if no valid assignment found
+                return department;
+            } catch (error) {
+                console.error(
+                    `Error enhancing department ${department.id}:`,
+                    error,
+                );
+                return department;
+            }
+        });
+
+        // Wait for all promises in this batch
+        const batchResults = await Promise.all(batchPromises);
+        enhancedDepartments.push(...batchResults);
+    }
+
+    console.log(
+        `Enhanced ${enhancedDepartments.length} departments with hospital data`,
+    );
+    return enhancedDepartments;
+};
+
 export const getDepartmentsSafe = async (
     organisationId: string,
     filter: DepartmentFilter,
 ): Promise<Department[]> => {
     try {
-        // Call the actual service function with the organization ID
-        const departments = await getDepData(organisationId);
+        // Get all departments from the organisation
+        const allDepartments = await getDepartments(organisationId);
 
-        // Check if departments is actually an array before mapping
-        if (!Array.isArray(departments)) {
-            console.error(
-                "Expected departments to be an array but got:",
-                typeof departments,
-            );
-            return [];
-        }
+        // Apply hospital filter if needed (not "all")
+        let filteredDepartments = [...allDepartments];
 
-        // Apply additional client-side filtering based on other filter parameters
-        let filteredDepartments = departments;
-
-        // Filter by type if specified
-        if (filter.type && filter.type !== "all") {
+        // If filter.hospital is not the organisation ID, it's a specific hospital ID
+        if (
+            filter.hospital &&
+            filter.hospital !== organisationId &&
+            filter.hospital !== "all"
+        ) {
+            // Filter by hospitalId if present, or by hospital.id if using the new format
             filteredDepartments = filteredDepartments.filter(
-                (dept) => dept.type === filter.type,
+                (dept) =>
+                    dept.hospitalId === filter.hospital ||
+                    (dept.hospital && dept.hospital.id === filter.hospital),
             );
         }
 
-        // Filter by parent if specified
-        if (filter.parent && filter.parent !== "all") {
-            if (filter.parent === "none") {
-                // Only root departments (no parent)
-                filteredDepartments = filteredDepartments.filter(
-                    (dept) => !dept.parent,
-                );
-            } else {
-                // Departments with specific parent
-                filteredDepartments = filteredDepartments.filter(
-                    (dept) => dept.parent && dept.parent.id === filter.parent,
-                );
-            }
-        }
-
-        // Apply search filter if provided
-        if (filter.search) {
-            const searchLower = filter.search.toLowerCase();
-            filteredDepartments = filteredDepartments.filter((dept) => {
-                // Safely check each property before using indexOf
-                const nameMatch =
-                    typeof dept.name === "string" &&
-                    dept.name.toLowerCase().includes(searchLower);
-                const codeMatch =
-                    typeof dept.code === "string" &&
-                    dept.code.toLowerCase().includes(searchLower);
-                const descMatch =
-                    typeof dept.description === "string" &&
-                    dept.description.toLowerCase().includes(searchLower);
-
-                return nameMatch || codeMatch || descMatch;
-            });
-        }
-
-        // Apply active filter if specified
-        if (filter.active !== undefined) {
-            filteredDepartments = filteredDepartments.filter(
-                (dept) => dept.active === filter.active,
-            );
-        }
-
-        return filteredDepartments.map((dept) =>
-            ensureCompleteDepartment(dept),
-        );
+        // Ensure each department conforms to the Department type
+        return filteredDepartments.map(ensureCompleteDepartment);
     } catch (error) {
         console.error("Error in getDepartmentsSafe:", error);
-        return []; // Return empty array on error instead of crashing
+        return [];
     }
 };
 
@@ -126,7 +157,7 @@ export const getDepartmentChildrenSafe = async (
             return [];
         }
 
-        const children = await getDepChildren(departmentId);
+        const children = await getDepartmentChildren(departmentId);
 
         // Check if children is actually an array before mapping
         if (!Array.isArray(children)) {

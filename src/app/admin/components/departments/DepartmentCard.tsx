@@ -4,6 +4,7 @@ import { Department } from "@/context/DepartmentContext";
 
 interface DepartmentCardProps {
     department: Department;
+    hospitalName?: string; // Added hospital name prop
     onEdit: () => void;
     onDelete: () => void;
     onViewDetails: string; // URL to navigate to for details
@@ -11,6 +12,7 @@ interface DepartmentCardProps {
 
 const DepartmentCard: React.FC<DepartmentCardProps> = ({
     department,
+    hospitalName,
     onEdit,
     onDelete,
     onViewDetails,
@@ -37,6 +39,12 @@ const DepartmentCard: React.FC<DepartmentCardProps> = ({
                     <p>
                         <strong>Code:</strong> {department.code}
                     </p>
+                    {/* Display hospital name */}
+                    {hospitalName && (
+                        <p>
+                            <strong>Hospital:</strong> {hospitalName}
+                        </p>
+                    )}
                     {department.description && (
                         <p>
                             <strong>Description:</strong>{" "}

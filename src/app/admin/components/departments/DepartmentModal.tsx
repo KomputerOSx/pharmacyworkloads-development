@@ -115,9 +115,9 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({
     };
 
     // Handle hospital selection change
-    const handleHospitalChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        onHospitalChange(e.target.value);
-    };
+    // const handleHospitalChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    //     onHospitalChange(e.target.value);
+    // };
 
     // Handle form submission
     const handleSubmit = (e: React.FormEvent) => {
@@ -126,14 +126,14 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({
     };
 
     // Find the current hospital name if available
-    const getCurrentHospitalName = () => {
-        if (!selectedHospitalId) return "None";
-
-        const hospital = availableHospitals.find(
-            (h) => h.id === selectedHospitalId,
-        );
-        return hospital ? hospital.name : "Unknown Hospital";
-    };
+    // const getCurrentHospitalName = () => {
+    //     if (!selectedHospitalId) return "None";
+    //
+    //     const hospital = availableHospitals.find(
+    //         (h) => h.id === selectedHospitalId,
+    //     );
+    //     return hospital ? hospital.name : "Unknown Hospital";
+    // };
 
     if (!isOpen) return null;
 
@@ -200,24 +200,30 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({
                                     </p>
                                 </div>
 
-                                {/* Hospital Selection Field */}
+                                {/* Hospital selection */}
                                 <div className="field">
-                                    <label className="label">Hospital*</label>
+                                    <label className="label">Hospital *</label>
                                     <div className="control">
                                         <div className="select is-fullwidth">
                                             <select
-                                                value={selectedHospitalId}
-                                                onChange={handleHospitalChange}
+                                                value={selectedHospitalId} // This should match what we're setting in handleEditDepartment
+                                                onChange={(e) =>
+                                                    onHospitalChange(
+                                                        e.target.value,
+                                                    )
+                                                }
                                                 required
                                             >
-                                                <option value="">
+                                                <option value="" disabled>
                                                     Select Hospital
                                                 </option>
                                                 {availableHospitals.map(
                                                     (hospital) => (
                                                         <option
                                                             key={hospital.id}
-                                                            value={hospital.id}
+                                                            value={String(
+                                                                hospital.id,
+                                                            )}
                                                         >
                                                             {hospital.name}
                                                         </option>
@@ -226,18 +232,6 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({
                                             </select>
                                         </div>
                                     </div>
-                                    {mode === "edit" && (
-                                        <p className="help">
-                                            Currently linked to:{" "}
-                                            <strong>
-                                                {getCurrentHospitalName()}
-                                            </strong>
-                                        </p>
-                                    )}
-                                    <p className="help mt-2">
-                                        Changing the hospital will update the
-                                        department-hospital assignment
-                                    </p>
                                 </div>
 
                                 <div className="field">

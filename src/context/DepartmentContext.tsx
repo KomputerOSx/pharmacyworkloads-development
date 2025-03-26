@@ -30,7 +30,12 @@ export type Department = {
     description?: string;
     type: string;
     color?: string;
-    hospitalId?: string;
+    hospitalId?: string; // Keep for backward compatibility
+    hospital?: {
+        // New preferred structure
+        id: string;
+        name: string;
+    };
     parent?: {
         id: string;
         name: string;
