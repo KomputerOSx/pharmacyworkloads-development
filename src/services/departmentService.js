@@ -995,3 +995,5 @@ export const getAvailableHospitals = async () => {
         throw error;
     }
 };
+
+export class getDepartments {}
