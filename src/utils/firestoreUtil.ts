@@ -1,5 +1,6 @@
 import { doc, getDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/config/firebase";
+import { Organisation } from "@/styles/orgTypes";
 
 export const formatFirestoreTimestamp = (timestamp: Timestamp) => {
     if (timestamp && typeof timestamp.toDate === "function") {

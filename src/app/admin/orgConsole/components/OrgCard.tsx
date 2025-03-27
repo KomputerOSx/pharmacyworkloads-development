@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -5,20 +7,18 @@ import {
     Card,
     CardContent,
     CardDescription,
+    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
 import { Organisation } from "@/styles/orgTypes";
 import { Badge } from "@/components/ui/badge";
 
-interface OrgCardProps {
-    org: Organisation;
-}
-export function OrgCard({ org }: OrgCardProps) {
+export function OrgCard({ org }: { org: Organisation }) {
     return (
         <Card className="container w-[350px]">
             <CardHeader>
-                <CardTitle>{org.name}</CardTitle>
+                <CardTitle className={"text-xl"}>{org.name}</CardTitle>
             </CardHeader>
             <CardContent>
                 <CardDescription>
@@ -34,15 +34,16 @@ export function OrgCard({ org }: OrgCardProps) {
                         <strong>Phone: </strong>
                         {org.contactPhone}
                     </p>
-                    <p>
-                        {org.active ? (
-                            <Badge variant="default">Active</Badge>
-                        ) : (
-                            <Badge variant="destructive">Inactive</Badge>
-                        )}
-                    </p>
                 </CardDescription>
             </CardContent>
+            <CardFooter>
+                {" "}
+                {org.active ? (
+                    <Badge variant="default">Active</Badge>
+                ) : (
+                    <Badge variant="destructive">Inactive</Badge>
+                )}
+            </CardFooter>
             <Button>View</Button>
         </Card>
     );

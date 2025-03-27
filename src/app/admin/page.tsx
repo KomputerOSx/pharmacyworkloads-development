@@ -1,3 +1,6 @@
+//redirect to org console
 import { redirect } from "next/navigation";
 
-redirect("/admin/orgConsole");
+export default function Admin() {
+    redirect("/admin/orgConsole");
+}

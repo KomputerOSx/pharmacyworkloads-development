@@ -1,5 +1,3 @@
-import { Timestamp } from "firebase/firestore";
-
 export type Organisation = {
     id: string;
     name: string;
@@ -7,6 +5,6 @@ export type Organisation = {
     contactEmail: string;
     contactPhone: string;
     active: boolean;
-    createdAt?: Timestamp | string | null;
-    updatedAt?: Timestamp | string | null;
+    createdAt?: string | null;
+    updatedAt?: string | null;
 };

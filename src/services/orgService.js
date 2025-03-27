@@ -22,6 +22,7 @@ const OrgsCol = collection(db, "organisations");
 // Get all Organisations with optional filters
 export const getOrgs = async () => {
     try {
+        const Organisations = [];
         // Start with a basic query
         let q = OrgsCol;
 
@@ -39,17 +40,25 @@ export const getOrgs = async () => {
         const querySnapshot = await getDocs(q);
 
         // Convert to array of data objects with IDs
-        const Organisations = [];
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             Organisations.push({
                 id: doc.id,
                 ...data,
                 // Add derived fields for UI with safe conversion
-                createdAt: formatFirestoreTimestamp(data.createdAt),
-                updatedAt: formatFirestoreTimestamp(data.updatedAt),
+                createdAt: data.createdAt
+                    ? formatFirestoreTimestamp(data.createdAt)
+                    : null,
+                updatedAt: data.updatedAt
+                    ? formatFirestoreTimestamp(data.updatedAt)
+                    : null,
             });
         });
+
+        // console.log(
+        //     "tfnyZf1S - Final Organisations array being returned:",
+        //     JSON.stringify(Organisations, null, 2),
+        // ); // Attempt to stringify
 
         return Organisations;
     } catch (error) {
