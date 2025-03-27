@@ -6,7 +6,7 @@ import { DepartmentProvider } from "@/context/DepartmentContext";
 import { useHospitals } from "@/context/HospitalContext";
 import { getOrganisation } from "@/services/organisationService";
 import { Organisation } from "@/context/OrganisationContext";
-import DepartmentList from "@/app/admin/components/departments/DepartmentList"; // Import the new component
+import DepartmentList from "@/app/admin/org/departments/DepartmentList"; // Import the new component
 
 // Page component with provider wrapper
 export default function DepartmentsPage() {
@@ -42,7 +42,7 @@ export default function DepartmentsPage() {
                 availableHospitals={availableHospitals}
             />
 
-            {/* Pass modal components as props if needed */}
+            {/* Pass modal org as props if needed */}
             {/* Alternatively, you can move these to the DepartmentList component */}
         </DepartmentProvider>
     );

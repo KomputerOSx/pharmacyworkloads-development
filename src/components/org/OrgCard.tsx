@@ -11,7 +11,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Organisation } from "@/styles/orgTypes";
+import { Organisation } from "@/types/orgTypes";
 import { Badge } from "@/components/ui/badge";
 
 export function OrgCard({ org }: { org: Organisation }) {

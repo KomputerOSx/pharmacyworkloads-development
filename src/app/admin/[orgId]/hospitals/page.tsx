@@ -9,11 +9,11 @@ import {
 } from "@/context/HospitalContext";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import AlertMessage from "@/components/common/AlertMessage";
-import HospitalCard from "@/app/admin/components/hospitals/HospitalCard";
-import HospitalModal from "@/app/admin/components/hospitals/HospitalModal";
+import HospitalCard from "@/app/admin/org/hospitals/HospitalCard";
+import HospitalModal from "@/app/admin/org/hospitals/HospitalModal";
 import { getOrganisation } from "@/services/organisationService";
 import { Organisation } from "@/context/OrganisationContext";
-import { HospitalDeleteModal } from "@/app/admin/components/hospitals/HospitalDeleteModal";
+import { HospitalDeleteModal } from "@/app/admin/org/hospitals/HospitalDeleteModal";
 
 // Main component that will be wrapped with the provider
 function HospitalsList() {

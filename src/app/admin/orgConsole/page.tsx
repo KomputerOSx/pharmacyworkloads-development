@@ -1,24 +1,29 @@
 "use client";
 
 import "../styles/orgConsole.css";
-import { OrgCard } from "@/app/admin/orgConsole/components/OrgCard";
-import AddOrgCard from "@/app/admin/orgConsole/components/AddOrgCard";
+import { OrgCard } from "@/components/org/OrgCard";
+import AddOrgCard from "@/components/org/AddOrgCard";
 import { useOrgContext } from "@/context/OrgContext";
+import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 
 export default function OrgConsole() {
     const { orgs, isLoading, error, refetchOrgs } = useOrgContext();
 
-    // Optional: Button to trigger refetch
-    // const handleRefresh = () => {
-    //   refetchOrgs();
-    // };
-
     if (isLoading) {
-        return <div>Loading...</div>;
+        return (
+            <LoadingSpinner
+                className={"flex items-center justify-center h-screen"}
+                text={"Loading organisations..."}
+                size={"xxlg"}
+            />
+        );
     }
 
     if (error) {
-        return <div>Error loading organisations: {error.message}</div>;
+        return (
+            <div>JUPq8Mdk - Error loading organisations: {error.message}</div>
+        );
     }
 
     return (
@@ -26,6 +31,9 @@ export default function OrgConsole() {
             <h1 className="container scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
                 Select organisation
             </h1>
+            <Button className={"container max-w-1/12"} onClick={refetchOrgs}>
+                Refresh
+            </Button>
             <div className={"card-list"}>
                 <div className={"card"}>
                     <AddOrgCard />
