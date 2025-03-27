@@ -15,35 +15,25 @@ import {
 import { db } from "@/config/firebase";
 import { formatFirestoreTimestamp } from "@/utils/firestoreUtil";
 
-const OrganisationsCollection = collection(db, "organisations");
+const OrgsCol = collection(db, "organisations");
 
 // Helper function to safely format Firestore timestamps
 
 // Get all Organisations with optional filters
-export const getOrganisations = async (filters = {}) => {
+export const getOrgs = async () => {
     try {
         // Start with a basic query
-        let q = OrganisationsCollection;
+        let q = OrgsCol;
 
         // Apply filters if provided
         const constraints = [];
-
-        if (filters.type && filters.type !== "all") {
-            constraints.push(where("type", "==", filters.type));
-        }
-
-        if (filters.status === "active") {
-            constraints.push(where("active", "==", true));
-        } else if (filters.status === "inactive") {
-            constraints.push(where("active", "==", false));
-        }
 
         // Add sorting
         constraints.push(orderBy("name"));
 
         // Apply all constraints
         if (constraints.length > 0) {
-            q = query(OrganisationsCollection, ...constraints);
+            q = query(OrgsCol, ...constraints);
         }
 
         const querySnapshot = await getDocs(q);
@@ -60,18 +50,6 @@ export const getOrganisations = async (filters = {}) => {
                 updatedAt: formatFirestoreTimestamp(data.updatedAt),
             });
         });
-
-        // Apply search filter (client-side) if provided
-        if (filters.search) {
-            const searchLower = filters.search.toLowerCase();
-            return Organisations.filter(
-                (org) =>
-                    org.name?.toLowerCase().includes(searchLower) ||
-                    org.contactEmail?.toLowerCase().includes(searchLower) ||
-                    (org.contactPhone &&
-                        org.contactPhone.includes(filters.search)),
-            );
-        }
 
         return Organisations;
     } catch (error) {
@@ -96,17 +74,13 @@ export const getOrganisation = async (id) => {
 
             // Make sure we have a valid data object
             if (!data) {
-                console.error("Document exists but has no data");
+                console.error("C3P6y9Du - Document exists but has no data");
                 return null;
             }
 
             return {
                 id: docSnap.id,
-                name: data.name || "Unknown Organisation",
-                type: data.type || "Unknown Type",
-                contactEmail: data.contactEmail || "",
-                contactPhone: data.contactPhone || "",
-                active: data.active !== undefined ? data.active : true,
+                ...data,
                 createdAt: data.createdAt
                     ? formatFirestoreTimestamp(data.createdAt)
                     : null,
@@ -115,11 +89,11 @@ export const getOrganisation = async (id) => {
                     : null,
             };
         } else {
-            console.error(`No organisation found with ID: ${id}`);
+            console.error(`YiDf9v38 - No organisation found with ID: ${id}`);
             return null;
         }
     } catch (error) {
-        console.error("Error getting organisation:", error);
+        console.error("n0b846Cp - Error getting organisation:", error);
         throw error;
     }
 };
@@ -136,7 +110,7 @@ export const addOrganisation = async (OrganisationData, userId = "system") => {
             updatedById: userId,
         };
 
-        const docRef = await addDoc(OrganisationsCollection, dataToAdd);
+        const docRef = await addDoc(OrgsCol, dataToAdd);
 
         // Return the created Organisation with its new ID
         return {
@@ -144,7 +118,7 @@ export const addOrganisation = async (OrganisationData, userId = "system") => {
             ...OrganisationData,
         };
     } catch (error) {
-        console.error("Error adding Organisation:", error);
+        console.error("6pHK68JX - Error adding Organisation:", error);
         throw error;
     }
 };
@@ -156,7 +130,7 @@ export const updateOrganisation = async (
     userId = "system",
 ) => {
     try {
-        const OrganisationRef = doc(db, "Organisations", id);
+        const OrgRef = doc(db, "Organisations", id);
 
         // Add update timestamp and audit field
         const dataToUpdate = {
@@ -165,7 +139,7 @@ export const updateOrganisation = async (
             updatedById: userId,
         };
 
-        await updateDoc(OrganisationRef, dataToUpdate);
+        await updateDoc(OrgRef, dataToUpdate);
 
         // Return the updated Organisation
         return {
@@ -173,7 +147,7 @@ export const updateOrganisation = async (
             ...OrganisationData,
         };
     } catch (error) {
-        console.error("Error updating Organisation:", error);
+        console.error("wJ47B2Uk - Error updating Organisation:", error);
         throw error;
     }
 };
@@ -189,7 +163,7 @@ export const deleteOrganisation = async (id) => {
 
         return { success: true, id };
     } catch (error) {
-        console.error("Error deleting Organisation:", error);
+        console.error("1rsnPn8K - Error deleting Organisation:", error);
         throw error;
     }
 };
@@ -197,20 +171,24 @@ export const deleteOrganisation = async (id) => {
 // Count hospitals for an Organisation
 export const countHospitals = async (OrganisationId) => {
     try {
-        const hospitalsCollection = collection(db, "hospitals");
+        const hospOrgAssCol = collection(
+            db,
+            "hospital_organisation_assignments",
+        );
+
         const q = query(
-            hospitalsCollection,
+            hospOrgAssCol,
             where(
-                "Organisation",
+                "organisation",
                 "==",
-                doc(db, "Organisations", OrganisationId),
+                doc(db, "organisations", OrganisationId),
             ),
         );
 
         const querySnapshot = await getDocs(q);
         return querySnapshot.size;
     } catch (error) {
-        console.error("Error counting hospitals:", error);
+        console.error("vfW8WEG7 - Error counting hospitals:", error);
         return 0;
     }
 };

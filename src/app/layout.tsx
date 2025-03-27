@@ -1,24 +1,15 @@
-// src/app/layout.tsx
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactNode } from "react";
 
-"use client";
+const queryClient = new QueryClient();
 
-import "bulma/css/bulma.min.css";
-import "@fortawesome/fontawesome-free/css/all.min.css";
-import "./globals.css";
-
-import { OrganisationProvider } from "@/context/OrganisationContext";
-
-import React from "react";
-
-export default function RootLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
     return (
-        <html lang="en" className={"theme-light"}>
+        <html lang="en">
             <body>
-                <OrganisationProvider>{children}</OrganisationProvider>
+                <QueryClientProvider client={queryClient}>
+                    {children}
+                </QueryClientProvider>
             </body>
         </html>
     );

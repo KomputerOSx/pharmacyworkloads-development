@@ -23,7 +23,7 @@ export const formatReferenceField = async (reference: string) => {
         }
         return null;
     } catch (error) {
-        console.error("Error getting reference document:", error);
+        console.error("nqUJ6hMZ - Error getting reference document:", error);
         return null;
     }
 };
