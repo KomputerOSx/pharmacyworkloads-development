@@ -93,11 +93,7 @@ export default function AddOrgCard() {
     return (
         <Card className="container w-[350px]">
             <CardTitle>Create Organisation</CardTitle>
-            <Dialog
-                open={open}
-                onOpenChange={setOpen}
-                className="flex justify-center items-center"
-            >
+            <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                     <Button variant={"outline"}>Create</Button>
                 </DialogTrigger>
