@@ -78,13 +78,18 @@ export default function AddOrgCard() {
                 active: true,
             }); // Reset the form
             toast.success("Organisation created successfully!"); // Success toast
-        } catch (err: any) {
-            console.error("Error creating organisation:", err);
+        } catch (err) {
+            console.error("6vtJHW8N - Error creating organisation:", err);
             setError(
+                //@ts-expect-error error type
                 err.message ||
-                    "Failed to create organisation. Please try again.",
+                    "ZYU6m1bF - Failed to create organisation. Please try again.",
             );
-            toast.error(err.message || "Failed to create organisation."); // Error toast
+
+            toast.error(
+                //@ts-expect-error error type
+                err.message || "tV15Uh7X - Failed to create organisation.",
+            ); // Error toast
         } finally {
             setLoading(false);
         }
