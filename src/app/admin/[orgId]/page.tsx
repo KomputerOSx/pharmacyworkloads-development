@@ -1,7 +1,7 @@
-export default function OrgPortal() {
+export default function Org() {
     return (
-        <div>
-            <h1>Organisation XYZ Portal</h1>
+        <div className={"container"}>
+            <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl"></h1>
         </div>
     );
 }

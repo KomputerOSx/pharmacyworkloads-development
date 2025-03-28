@@ -1,6 +1,6 @@
 "use client";
 
-import "../styles/orgConsole.css";
+import "../../../styles/console/orgConsole.css";
 import { OrgCard } from "@/components/org/OrgCard";
 import AddOrgCard from "@/components/org/AddOrgCard";
 import { useOrgContext } from "@/context/OrgContext";
@@ -27,17 +27,21 @@ export default function OrgConsole() {
     }
 
     return (
-        <div>
-            <h1 className="container scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+        <div className={"container"}>
+            <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
                 Select organisation
             </h1>
-            <Button className={"container max-w-1/12"} onClick={refetchOrgs}>
+            <AddOrgCard />
+            <Button
+                className={" container w-[150px]"}
+                onClick={refetchOrgs}
+                variant={"outline"}
+            >
                 Refresh
             </Button>
+
             <div className={"card-list"}>
-                <div className={"card"}>
-                    <AddOrgCard />
-                </div>
+                <div className={"card"}></div>
 
                 {orgs.map((org) => (
                     <div key={org.id} className={"card"}>

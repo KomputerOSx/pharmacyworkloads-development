@@ -4,7 +4,7 @@ import * as React from "react";
 import { useState } from "react";
 import { toast } from "sonner"; // Import the toast function
 import { Button } from "@/components/ui/button";
-import { Card, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import {
     Dialog,
     DialogContent,
@@ -96,112 +96,109 @@ export default function AddOrgCard() {
     };
 
     return (
-        <Card className="container w-[350px]">
-            <CardTitle>Create Organisation</CardTitle>
-            <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                    <Button variant={"outline"}>Create</Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Create Organisation</DialogTitle>
-                        <DialogDescription>
-                            Enter the details for your new organisation.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="name" className="text-right">
-                                Name
-                            </Label>
-                            <Input
-                                id="name"
-                                name="name"
-                                value={formData.name}
-                                onChange={handleChange}
-                                className="col-span-3"
-                                disabled={loading}
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="type" className="text-right">
-                                Type
-                            </Label>
-                            <Select>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select Orgnisation Type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        {getOrganisationTypes().map((type) => (
-                                            <SelectItem
-                                                key={type.id}
-                                                value={type.name}
-                                            >
-                                                {type.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="contactEmail" className="">
-                                Contact Email
-                            </Label>
-                            <Input
-                                id="contactEmail"
-                                name="contactEmail"
-                                type="email"
-                                value={formData.contactEmail}
-                                onChange={handleChange}
-                                className="col-span-3"
-                                disabled={loading}
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="contactPhone">Contact Phone</Label>
-                            <Input
-                                id="contactPhone"
-                                name="contactPhone"
-                                type="tel" // Important: Set the input type to "tel" for phone validation
-                                value={formData.contactPhone}
-                                onChange={handleChange}
-                                className="col-span-3"
-                                disabled={loading}
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="active" className="text-right">
-                                Active
-                            </Label>
-                            <Checkbox
-                                id="active"
-                                name="active"
-                                checked={formData.active}
-                                onCheckedChange={(checked) =>
-                                    setFormData({
-                                        ...formData,
-                                        active: !!checked,
-                                    })
-                                } // Explicitly cast to boolean
-                                disabled={loading}
-                            />
-                        </div>
-
-                        {error && (
-                            <p className="text-red-500 text-sm">{error}</p>
-                        )}
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <Button className={"justify-center"}>
+                    Create Organisation
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Create Organisation</DialogTitle>
+                    <DialogDescription>
+                        Enter the details for your new organisation.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="name" className="text-right">
+                            Name
+                        </Label>
+                        <Input
+                            id="name"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            className="col-span-3"
+                            disabled={loading}
+                        />
                     </div>
-                    <Button onClick={handleSubmit} disabled={loading}>
-                        {loading ? "Creating..." : "Create"}
-                    </Button>
-                </DialogContent>
-            </Dialog>
-        </Card>
+
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="type" className="text-right">
+                            Type
+                        </Label>
+                        <Select>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select Orgnisation Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    {getOrganisationTypes().map((type) => (
+                                        <SelectItem
+                                            key={type.id}
+                                            value={type.name}
+                                        >
+                                            {type.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="contactEmail" className="">
+                            Contact Email
+                        </Label>
+                        <Input
+                            id="contactEmail"
+                            name="contactEmail"
+                            type="email"
+                            value={formData.contactEmail}
+                            onChange={handleChange}
+                            className="col-span-3"
+                            disabled={loading}
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="contactPhone">Contact Phone</Label>
+                        <Input
+                            id="contactPhone"
+                            name="contactPhone"
+                            type="tel" // Important: Set the input type to "tel" for phone validation
+                            value={formData.contactPhone}
+                            onChange={handleChange}
+                            className="col-span-3"
+                            disabled={loading}
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="active" className="text-right">
+                            Active
+                        </Label>
+                        <Checkbox
+                            id="active"
+                            name="active"
+                            checked={formData.active}
+                            onCheckedChange={(checked) =>
+                                setFormData({
+                                    ...formData,
+                                    active: !!checked,
+                                })
+                            } // Explicitly cast to boolean
+                            disabled={loading}
+                        />
+                    </div>
+
+                    {error && <p className="text-red-500 text-sm">{error}</p>}
+                </div>
+                <Button onClick={handleSubmit} disabled={loading}>
+                    {loading ? "Creating..." : "Create"}
+                </Button>
+            </DialogContent>
+        </Dialog>
     );
 }

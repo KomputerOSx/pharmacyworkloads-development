@@ -15,6 +15,9 @@ import { Organisation } from "@/types/orgTypes";
 import { Badge } from "@/components/ui/badge";
 
 export function OrgCard({ org }: { org: Organisation }) {
+    const handleClick = (id: string) => () => {
+        window.location.href = `/admin/${id}`;
+    };
     return (
         <Card className="container w-[350px]">
             <CardHeader>
@@ -44,7 +47,7 @@ export function OrgCard({ org }: { org: Organisation }) {
                     <Badge variant="destructive">Inactive</Badge>
                 )}
             </CardFooter>
-            <Button>View</Button>
+            <Button onClick={handleClick(org.id)}>View</Button>
         </Card>
     );
 }
