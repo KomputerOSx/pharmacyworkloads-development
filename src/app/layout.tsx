@@ -1,4 +1,5 @@
 import "./globals.css";
+import "@/styles/themes.css";
 import { ReactNode } from "react";
 import { OrgProvider } from "@/context/OrgContext";
 
