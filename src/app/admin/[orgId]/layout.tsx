@@ -15,7 +15,7 @@ export default function OrgLayout({ children }: { children: ReactNode }) {
         return (
             <LoadingSpinner
                 className={"flex items-center justify-center h-screen"}
-                text={"Loading organisations..."}
+                text={"Loading..."}
                 size={"xxlg"}
             />
         );

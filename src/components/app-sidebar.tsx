@@ -2,19 +2,16 @@
 
 import * as React from "react";
 import {
-    AudioWaveform,
+    Bed,
     BookOpen,
     Bot,
-    Command,
     Frame,
-    GalleryVerticalEnd,
-    Map,
-    PieChart,
+    Hospital,
+    PersonStanding,
     Settings2,
     SquareTerminal,
 } from "lucide-react";
 
-import { NavMain } from "@/components/nav-main";
 import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
 import { TeamSwitcher } from "@/components/team-switcher";
@@ -25,52 +22,48 @@ import {
     SidebarHeader,
     SidebarRail,
 } from "@/components/ui/sidebar";
+import { useParams, useRouter } from "next/navigation";
 import { useOrgContext } from "@/context/OrgContext";
 
-// This is sample data.
 const data = {
     user: {
         name: "shadcn",
         email: "m@example.com",
         avatar: "https://github.com/shadcn.png",
     },
-    teams: [
+    sections: [
         {
-            name: "Acme Inc",
-            logo: GalleryVerticalEnd,
-            plan: "Enterprise",
+            name: "Dashboard",
+            url: "/",
+            icon: SquareTerminal,
         },
         {
-            name: "Acme Corp.",
-            logo: AudioWaveform,
-            plan: "Startup",
+            name: "Hospitals",
+            url: "hospitals",
+            icon: Hospital,
         },
         {
-            name: "Evil Corp.",
-            logo: Command,
-            plan: "Free",
+            name: "Departments",
+            url: "departments",
+            icon: Frame,
+        },
+        {
+            name: "Wards",
+            url: "wards",
+            icon: Bed,
+        },
+        {
+            name: "Staff",
+            url: "staff",
+            icon: PersonStanding,
         },
     ],
     navMain: [
         {
-            title: "Playground",
-            url: "#",
+            title: "Hospitals",
+            url: "/hospitals",
             icon: SquareTerminal,
             isActive: true,
-            items: [
-                {
-                    title: "History",
-                    url: "#",
-                },
-                {
-                    title: "Starred",
-                    url: "#",
-                },
-                {
-                    title: "Settings",
-                    url: "#",
-                },
-            ],
         },
         {
             title: "Models",
@@ -138,27 +131,20 @@ const data = {
             ],
         },
     ],
-    projects: [
-        {
-            name: "Design Engineering",
-            url: "#",
-            icon: Frame,
-        },
-        {
-            name: "Sales & Marketing",
-            url: "#",
-            icon: PieChart,
-        },
-        {
-            name: "Travel",
-            url: "#",
-            icon: Map,
-        },
-    ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const { orgId } = useParams();
     const { orgs } = useOrgContext();
+    const router = useRouter();
+
+    const handleNavigation = (url: string) => {
+        if (orgId && url) {
+            router.push(`/admin/${orgId}/${url}`); // Construct the URL and navigate
+        } else {
+            console.warn("orgId is not available.  Cannot navigate.");
+        }
+    };
 
     return (
         <Sidebar collapsible="offcanvas" {...props}>
@@ -166,8 +152,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <TeamSwitcher orgs={orgs} />
             </SidebarHeader>
             <SidebarContent>
-                <NavMain items={data.navMain} />
-                <NavProjects projects={data.projects} />
+                <NavProjects
+                    projects={data.sections}
+                    onNavigate={handleNavigation}
+                />
+                {/*<NavMain items={data.navMain} />*/}
             </SidebarContent>
             <SidebarFooter>
                 <NavUser user={data.user} />

@@ -26,6 +26,7 @@ interface Org {
 interface OrgContextType {
     orgs: Org[];
     isLoading: boolean;
+    setIsLoading: (isLoading: boolean) => void;
     error: Error | null;
     refetchOrgs: () => Promise<void>; // Function to manually refetch
 }
@@ -76,6 +77,7 @@ export const OrgProvider: React.FC<OrgProviderProps> = ({ children }) => {
     const contextValue: OrgContextType = {
         orgs,
         isLoading,
+        setIsLoading,
         error,
         refetchOrgs: fetchOrgs,
     };
