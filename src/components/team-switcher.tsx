@@ -18,8 +18,9 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar";
-import { redirect, useParams } from "next/navigation";
-import { useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 
 export function TeamSwitcher({
     orgs,
@@ -32,23 +33,35 @@ export function TeamSwitcher({
 }) {
     const { isMobile } = useSidebar();
 
-    const { orgId } = useParams();
-    const [activeOrg] = React.useState(() => {
-        const initialOrg = orgs.find((org) => org.id === orgId);
-        console.log("Initial activeOrg:", initialOrg);
-        return initialOrg;
-    });
+    const { orgId: currentOrgIdParam } = useParams(); // Renamed to avoid conflict
+    const router = useRouter();
+
+    const activeOrg = React.useMemo(() => {
+        return orgs.find((org) => org.id === currentOrgIdParam);
+    }, [orgs, currentOrgIdParam]);
+
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        console.log("orgId from useParams:", orgId);
+        console.log("orgId from useParams:", currentOrgIdParam);
         console.log("orgs prop:", orgs);
-    }, [orgId, orgs]);
+    }, [currentOrgIdParam, orgs]);
 
     const handleOrgChange = (orgId: string) => {
-        redirect(`/admin/${orgId}`);
+        if (orgId === currentOrgIdParam) {
+            return;
+        }
+        setIsLoading(true);
+
+        router.push(`/admin/${orgId}`);
     };
 
+    if (isLoading) return <LoadingSpinner text={"Loading..."} />;
+
     if (!activeOrg) {
+        console.warn(
+            `No matching organization found for ID: ${currentOrgIdParam}`,
+        );
         return null;
     }
 

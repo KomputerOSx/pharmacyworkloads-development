@@ -2,7 +2,6 @@
 
 import React, { useEffect } from "react";
 import { useOrgContext } from "@/context/OrgContext";
-import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 import { useRouter, useParams } from "next/navigation";
 
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
