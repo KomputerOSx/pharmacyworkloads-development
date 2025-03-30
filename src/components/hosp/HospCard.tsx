@@ -16,7 +16,6 @@ import { Badge } from "@/components/ui/badge";
 
 interface HospCardProps {
     hosp: Hosp;
-    orgId: string;
 }
 
 export function HospCard({ hosp }: HospCardProps) {

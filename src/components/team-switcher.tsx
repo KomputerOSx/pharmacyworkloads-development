@@ -19,7 +19,7 @@ import {
     useSidebar,
 } from "@/components/ui/sidebar";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 
 export function TeamSwitcher({
