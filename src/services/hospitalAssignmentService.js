@@ -10,7 +10,7 @@ import {
     updateDoc,
     deleteDoc,
 } from "firebase/firestore";
-import { db } from "./firebase.js";
+import { db } from "@/config/firebase";
 
 export const assignHospitalToOrganisation = async (
     hospitalId,

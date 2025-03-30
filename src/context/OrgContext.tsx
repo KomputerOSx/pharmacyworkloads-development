@@ -9,27 +9,7 @@ import React, {
     useCallback,
 } from "react";
 import { getOrgs } from "@/services/orgService";
-
-interface Org {
-    id: string;
-    name: string;
-    type: string;
-    active: boolean;
-    contactEmail: string;
-    contactPhone: string;
-    createdAt: string | null;
-    updatedAt: string | null;
-    createdById: string;
-    updatedById: string;
-}
-
-interface OrgContextType {
-    orgs: Org[];
-    isLoading: boolean;
-    setIsLoading: (isLoading: boolean) => void;
-    error: Error | null;
-    refetchOrgs: () => Promise<void>; // Function to manually refetch
-}
+import { Org, OrgContextType } from "@/types/orgTypes";
 
 const OrgContext = createContext<OrgContextType | null>(null);
 

@@ -11,43 +11,47 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Org } from "@/types/orgTypes";
+import { Hosp } from "@/types/hospTypes";
 import { Badge } from "@/components/ui/badge";
 
-export function OrgCard({ org }: { org: Org }) {
-    const handleClick = (id: string) => () => {
-        window.location.href = `/admin/${id}`;
-    };
+interface HospCardProps {
+    hosp: Hosp;
+    orgId: string;
+}
+
+export function HospCard({ hosp }: HospCardProps) {
+    // const handleClick = (id: string) => () => {
+    //     window.location.href = `/admin/${id}`;
+    // };
     return (
         <Card className="container w-[350px]">
             <CardHeader>
-                <CardTitle className={"text-xl"}>{org.name}</CardTitle>
+                <CardTitle className={"text-xl"}>{hosp.name}</CardTitle>
             </CardHeader>
             <CardContent>
                 <CardDescription>
                     <p>
-                        <strong>Type: </strong>
-                        {org.type}
+                        <strong>Address: </strong>
+                        {hosp.address}, {hosp.city}, {hosp.postCode}
                     </p>
                     <p>
                         <strong>Email: </strong>
-                        {org.contactEmail}
+                        {hosp.contactEmail}
                     </p>
                     <p>
                         <strong>Phone: </strong>
-                        {org.contactPhone}
+                        {hosp.contactPhone}
                     </p>
                 </CardDescription>
             </CardContent>
             <CardFooter>
                 {" "}
-                {org.active ? (
+                {hosp.active ? (
                     <Badge variant="default">Active</Badge>
                 ) : (
                     <Badge variant="destructive">Inactive</Badge>
                 )}
             </CardFooter>
-            <Button onClick={handleClick(org.id)}>View</Button>
         </Card>
     );
 }

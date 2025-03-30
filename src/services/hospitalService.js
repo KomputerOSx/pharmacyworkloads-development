@@ -13,7 +13,7 @@ import {
     updateDoc,
     where,
 } from "firebase/firestore";
-import { db } from "./firebase";
+import { db } from "@/config/firebase";
 import {
     assignHospitalToOrganisation,
     cleanupHosOrgAss,
@@ -222,7 +222,7 @@ export const updateHospital = async (
             address: hospitalData.address || "",
             city: hospitalData.city || "",
             postcode: hospitalData.postcode || "",
-            contactNumber: hospitalData.contactNumber || "",
+            contactPhone: hospitalData.contactNumber || "",
             contactEmail: hospitalData.contactEmail || "",
             active:
                 hospitalData.active !== undefined ? hospitalData.active : true,
