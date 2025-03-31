@@ -27,8 +27,9 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox"; // Import Checkbox
 
-import { addOrganisation, getOrganisationTypes } from "@/services/orgService";
+import { addOrg } from "@/services/orgService";
 import { useOrgContext } from "@/context/OrgContext";
+import { getOrganisationTypes } from "@/types/orgTypes";
 
 const formSchema = z.object({
     name: z.string().min(2, {
@@ -37,6 +38,7 @@ const formSchema = z.object({
     type: z.string().min(2, {
         message: "Organisation Type must be selected.",
     }),
+    address: z.string().min(2, { message: "Address Required" }),
     contactEmail: z
         .string()
         .email({
@@ -57,6 +59,7 @@ export function AddOrgForm({ onOpenChange }: AddOrgCardProps) {
         defaultValues: {
             name: "",
             type: "",
+            address: "",
             contactEmail: "",
             contactPhone: "",
             active: true,
@@ -80,7 +83,7 @@ export function AddOrgForm({ onOpenChange }: AddOrgCardProps) {
                 );
                 return;
             }
-            await addOrganisation(values);
+            await addOrg(values);
             onOpenChange(false);
             form.reset();
             toast.success("Organisation created successfully!");
