@@ -23,7 +23,8 @@ import {
     SidebarRail,
 } from "@/components/ui/sidebar";
 import { useParams, useRouter } from "next/navigation";
-import { useOrgContext } from "@/context/OrgContext";
+import { useOrgs } from "@/hooks/useOrgs";
+import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 
 const data = {
     user: {
@@ -135,28 +136,48 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { orgId } = useParams();
-    const { orgs } = useOrgContext();
+    const { data: orgs, isLoading, isError } = useOrgs();
     const router = useRouter();
 
     const handleNavigation = (url: string) => {
         if (orgId && url) {
-            router.push(`/admin/${orgId}/${url}`); // Construct the URL and navigate
+            router.push(`/admin/${orgId}/${url}`);
         } else {
-            console.warn("orgId is not available.  Cannot navigate.");
+            console.warn("vWVn17Xq - orgId is not available. Cannot navigate.");
         }
     };
 
+    let headerContent;
+    if (isLoading) {
+        // Show a loading state in the header area
+        headerContent = (
+            <div className="p-4">
+                <LoadingSpinner size="sm" />
+            </div>
+        );
+    } else if (isError || !orgs) {
+        // Show an error state or handle case where orgs is still undefined after loading
+        headerContent = (
+            <div className="p-4 text-xs text-destructive">
+                Error loading orgs.
+            </div>
+        );
+    } else {
+        // Only render TeamSwitcher when data is loaded and valid
+        headerContent = <TeamSwitcher orgs={orgs} />;
+    }
     return (
         <Sidebar collapsible="offcanvas" {...props}>
             <SidebarHeader>
-                <TeamSwitcher orgs={orgs} />
+                {headerContent}{" "}
+                {/* Render the conditionally determined content */}
             </SidebarHeader>
             <SidebarContent>
+                {/* You might also want to conditionally render this based on loading/error */}
                 <NavProjects
                     projects={data.sections}
                     onNavigate={handleNavigation}
                 />
-                {/*<NavMain items={data.navMain} />*/}
             </SidebarContent>
             <SidebarFooter>
                 <NavUser user={data.user} />
