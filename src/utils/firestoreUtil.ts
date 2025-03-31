@@ -49,7 +49,6 @@ export const mapFirestoreDocToOrg = (
         active: (data.active as boolean) ?? false,
         contactEmail: (data.contactEmail as string) ?? "",
         contactPhone: (data.contactPhone as string) ?? "",
-        address: (data.address as string) ?? "",
         createdById: (data.createdById as string) ?? "system",
         updatedById: (data.updatedById as string) ?? "system",
 

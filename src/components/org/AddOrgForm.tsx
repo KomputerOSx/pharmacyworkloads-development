@@ -27,8 +27,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox"; // Import Checkbox
 
-import { addOrg } from "@/services/orgService";
-import { useOrgContext } from "@/context/OrgContext";
+import { useOrgs, useAddOrg } from "@/hooks/useOrgs";
 import { getOrganisationTypes } from "@/types/orgTypes";
 
 const formSchema = z.object({
@@ -38,7 +37,6 @@ const formSchema = z.object({
     type: z.string().min(2, {
         message: "Organisation Type must be selected.",
     }),
-    address: z.string().min(2, { message: "Address Required" }),
     contactEmail: z
         .string()
         .email({
@@ -59,53 +57,87 @@ export function AddOrgForm({ onOpenChange }: AddOrgCardProps) {
         defaultValues: {
             name: "",
             type: "",
-            address: "",
             contactEmail: "",
             contactPhone: "",
-            active: true,
+            active: true, // Explicitly setting default for clarity
         },
     });
 
-    const { orgs } = useOrgContext();
-    const [error, setError] = React.useState<string | null>(null);
-    const [loading, setLoading] = React.useState(false);
+    // Fetch existing orgs for validation check
+    const {
+        data: orgs,
+        isLoading: isLoadingOrgs,
+        isError: isErrorOrgs,
+        error: orgsError,
+    } = useOrgs();
 
+    // Get the mutation hook
+    const addMutation = useAddOrg();
+
+    // Define the onSubmit handler - this function runs *when* the form is submitted
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        setLoading(true);
-        setError(null);
-
-        try {
-            if (orgs.find((org) => org.name === values.name)) {
-                setError(
-                    "Organisation with name " +
-                        values.name +
-                        " already exists.",
-                );
-                return;
-            }
-            await addOrg(values);
-            onOpenChange(false);
-            form.reset();
-            toast.success("Organisation created successfully!");
-        } catch (err) {
-            console.error("Error creating organisation:", err);
-            setError(
-                //@ts-expect-error error type
-                err.message ||
-                    "ZYU6m1bF - Failed to create organisation. Please try again.",
-            );
-            toast.error(
-                //@ts-expect-error error type
-                err.message || "tV15Uh7X - Failed to create organisation.",
-            );
-        } finally {
-            setLoading(false);
+        // 1. Check if already loading existing orgs
+        if (isLoadingOrgs) {
+            toast.info("Checking existing organisations...");
+            return; // Prevent submission while checking
         }
+        // 2. Check for errors fetching existing orgs
+        if (isErrorOrgs) {
+            toast.error(
+                `Error fetching organisations for check: ${orgsError?.message}`,
+            );
+            return; // Prevent submission if check failed
+        }
+
+        // 3. Check if org name already exists
+        if (orgs?.find((org) => org.name === values.name)) {
+            toast.error(
+                `Organisation with name "${values.name}" already exists.`,
+            );
+            form.setError("name", {
+                type: "manual",
+                message: `Organisation with name "${values.name}" already exists.`,
+            });
+            return; // Stop submission
+        }
+
+        // 4. If checks pass, call the mutation
+        addMutation.mutate(
+            { orgData: values }, // Pass the validated form data
+            {
+                onSuccess: () => {
+                    // Runs *after* the mutation's internal onSuccess (which invalidates cache)
+                    toast.success("Organisation created successfully!");
+                    onOpenChange(false); // Close the dialog
+                    form.reset(); // Reset the form fields
+                },
+                onError: (error) => {
+                    // Runs *after* the mutation's internal onError
+                    console.error(
+                        "Rnv9sQJ9 - Component-level onError for addOrg:",
+                        error,
+                    );
+                    // Show a generic error or potentially map to specific fields
+                    toast.error(
+                        `Failed to create organisation: ${error.message}`,
+                    );
+                    // Example: Set a general server error on the form
+                    form.setError("root.serverError", {
+                        type: "server",
+                        message: `Failed to create organisation: ${error.message || "Unknown server error"}`,
+                    });
+                },
+            },
+        );
     }
 
+    // The component *returns* the JSX for the form
+    // onSubmit is passed to form.handleSubmit
+    // The button's disabled state uses addMutation.isPending
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                {/* Name Field */}
                 <FormField
                     control={form.control}
                     name="name"
@@ -116,12 +148,15 @@ export function AddOrgForm({ onOpenChange }: AddOrgCardProps) {
                                 <Input
                                     placeholder="Organisation Name"
                                     {...field}
+                                    disabled={addMutation.isPending} // Disable during submission
                                 />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
+
+                {/* Type Field */}
                 <FormField
                     control={form.control}
                     name="type"
@@ -131,10 +166,11 @@ export function AddOrgForm({ onOpenChange }: AddOrgCardProps) {
                             <Select
                                 onValueChange={field.onChange}
                                 defaultValue={field.value}
+                                disabled={addMutation.isPending}
                             >
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select Orgnisation Type" />
+                                        <SelectValue placeholder="Select Organisation Type" />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -154,6 +190,8 @@ export function AddOrgForm({ onOpenChange }: AddOrgCardProps) {
                         </FormItem>
                     )}
                 />
+
+                {/* Contact Email Field */}
                 <FormField
                     control={form.control}
                     name="contactEmail"
@@ -165,12 +203,15 @@ export function AddOrgForm({ onOpenChange }: AddOrgCardProps) {
                                     placeholder="contact@example.com"
                                     {...field}
                                     type="email"
+                                    disabled={addMutation.isPending}
                                 />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
+
+                {/* Contact Phone Field */}
                 <FormField
                     control={form.control}
                     name="contactPhone"
@@ -179,41 +220,63 @@ export function AddOrgForm({ onOpenChange }: AddOrgCardProps) {
                             <FormLabel>Contact Phone</FormLabel>
                             <FormControl>
                                 <Input
-                                    placeholder="0191 000 0000"
+                                    placeholder="01234567890" // Example placeholder
                                     {...field}
                                     type="tel"
-                                    pattern="[0-9]{11}"
+                                    // pattern="[0-9]{11}" // Basic pattern, consider more robust validation if needed
+                                    disabled={addMutation.isPending}
                                 />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
+
+                {/* Active Checkbox Field */}
                 <FormField
                     control={form.control}
                     name="active"
                     render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-md border p-4">
-                            <div className="space-y-0.5">
-                                <FormLabel>Active</FormLabel>
-                                <FormDescription>
-                                    Is this organisation Active?
-                                </FormDescription>
-                            </div>
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                             <FormControl>
                                 <Checkbox
                                     checked={field.value}
                                     onCheckedChange={field.onChange}
+                                    disabled={addMutation.isPending}
+                                    id="active-checkbox" // Added id for label association
                                 />
                             </FormControl>
-                            <FormMessage />
+                            <div className="space-y-1 leading-none">
+                                <FormLabel htmlFor="active-checkbox">
+                                    {" "}
+                                    {/* Associated label */}
+                                    Active
+                                </FormLabel>
+                                <FormDescription>
+                                    Is this organisation currently active?
+                                </FormDescription>
+                            </div>
+                            <FormMessage />{" "}
+                            {/* Usually not needed for checkbox unless complex validation */}
                         </FormItem>
                     )}
                 />
-                {error && <p className="text-red-500 text-sm">{error}</p>}
 
-                <Button type="submit" disabled={loading}>
-                    {loading ? "Creating..." : "Create"}
+                {/* Display general form errors (like server errors) */}
+                {form.formState.errors.root?.serverError && (
+                    <p className="text-sm font-medium text-destructive">
+                        {form.formState.errors.root.serverError.message}
+                    </p>
+                )}
+
+                {/* Submit Button */}
+                <Button
+                    type="submit"
+                    disabled={addMutation.isPending || isLoadingOrgs}
+                >
+                    {addMutation.isPending
+                        ? "Creating..."
+                        : "Create Organisation"}
                 </Button>
             </form>
         </Form>

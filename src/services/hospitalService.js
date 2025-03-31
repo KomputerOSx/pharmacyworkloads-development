@@ -219,7 +219,6 @@ export const updateHospital = async (
         return {
             id,
             name: hospitalData.name || "",
-            address: hospitalData.address || "",
             city: hospitalData.city || "",
             postcode: hospitalData.postcode || "",
             contactPhone: hospitalData.contactNumber || "",

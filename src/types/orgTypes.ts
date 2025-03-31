@@ -4,7 +4,6 @@ export type Org = {
     id: string;
     name: string;
     type: string;
-    address: string;
     contactEmail: string;
     contactPhone: string;
     active: boolean;
