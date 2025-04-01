@@ -15,14 +15,11 @@ import {
 import { Org } from "@/types/orgTypes";
 import { toast } from "sonner"; // Adjust path if needed
 
-// --- Query Keys ---
-// Central place for keys, makes invalidation easier
 const orgKeys = {
     all: ["orgs"] as const, // Base key for the list of all orgs
     detail: (id: string) => [...orgKeys.all, id] as const, // Key for a single org detail
 };
 
-// --- Hook to fetch ALL Organisations ---
 export function useOrgs() {
     return useQuery<Org[], Error>({
         queryKey: orgKeys.all, // Unique key for this query
@@ -31,7 +28,6 @@ export function useOrgs() {
     });
 }
 
-// --- Hook to fetch a SINGLE Organisation ---
 export function useOrg(id?: string) {
     return useQuery<Org | null, Error>({
         queryKey: orgKeys.detail(id!), // Use the specific key + id
@@ -40,7 +36,6 @@ export function useOrg(id?: string) {
     });
 }
 
-// --- Hook for ADDING an Organisation ---
 export function useCreateOrg() {
     const queryClient = useQueryClient(); // Get client instance
 
@@ -132,7 +127,6 @@ export function useUpdateOrg() {
     });
 }
 
-// --- Hook for DELETING an Organisation ---
 export function useDeleteOrg() {
     const queryClient = useQueryClient();
 

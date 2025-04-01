@@ -13,13 +13,6 @@ export type Org = {
     updatedById: string;
 };
 
-export type OrgContextType = {
-    orgs: Org[];
-    isLoading: boolean;
-    setIsLoading: (isLoading: boolean) => void;
-    error: Error | null;
-    refetchOrgs: () => Promise<void>; // Function to manually refetch
-};
 // Get Organisation types (for dropdowns)
 export const getOrganisationTypes = () => {
     return [
