@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import { useHospContext } from "@/context/HospitalContext";
-import { addHospital } from "@/services/hospitalService";
+import { createHospital } from "@/services/hospitalService";
 
 const formSchema = z.object({
     name: z.string().min(2, {
@@ -72,7 +72,7 @@ export function AddHospForm({ onOpenChange, orgId }: AddHospCardProps) {
                 );
                 return;
             }
-            await addHospital(values, orgId);
+            await createHospital(values, orgId);
             onOpenChange(false);
             form.reset();
             toast.success("Hospital created successfully!");

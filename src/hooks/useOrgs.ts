@@ -41,7 +41,7 @@ export function useOrg(id?: string) {
 }
 
 // --- Hook for ADDING an Organisation ---
-export function useAddOrg() {
+export function useCreateOrg() {
     const queryClient = useQueryClient(); // Get client instance
 
     return useMutation({

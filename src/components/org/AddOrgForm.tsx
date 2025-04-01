@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox"; // Import Checkbox
 
-import { useOrgs, useAddOrg } from "@/hooks/useOrgs";
+import { useOrgs, useCreateOrg } from "@/hooks/useOrgs";
 import { getOrganisationTypes } from "@/types/orgTypes";
 
 const formSchema = z.object({
@@ -72,7 +72,7 @@ export function AddOrgForm({ onOpenChange }: AddOrgCardProps) {
     } = useOrgs();
 
     // Get the mutation hook
-    const addMutation = useAddOrg();
+    const addMutation = useCreateOrg();
 
     // Define the onSubmit handler - this function runs *when* the form is submitted
     async function onSubmit(values: z.infer<typeof formSchema>) {
