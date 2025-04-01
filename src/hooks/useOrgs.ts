@@ -23,25 +23,25 @@ const orgKeys = {
 };
 
 // --- Hook to fetch ALL Organisations ---
-export const useOrgs = () => {
+export function useOrgs() {
     return useQuery<Org[], Error>({
         queryKey: orgKeys.all, // Unique key for this query
         queryFn: getOrgs, // Function that fetches the data
         staleTime: 5 * 60 * 1000, // Optional: Data is considered fresh for 5 mins
     });
-};
+}
 
 // --- Hook to fetch a SINGLE Organisation ---
-export const useOrg = (id: string) => {
+export function useOrg(id?: string) {
     return useQuery<Org | null, Error>({
         queryKey: orgKeys.detail(id!), // Use the specific key + id
         queryFn: () => getOrg(id!), // Fetcher needs the id
         enabled: !!id, // VERY IMPORTANT: Only run query if id is truthy
     });
-};
+}
 
 // --- Hook for ADDING an Organisation ---
-export const useAddOrg = () => {
+export function useAddOrg() {
     const queryClient = useQueryClient(); // Get client instance
 
     return useMutation({
@@ -69,9 +69,9 @@ export const useAddOrg = () => {
             );
         },
     });
-};
+}
 
-export const useUpdateOrg = () => {
+export function useUpdateOrg() {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -130,10 +130,10 @@ export const useUpdateOrg = () => {
             );
         },
     });
-};
+}
 
 // --- Hook for DELETING an Organisation ---
-export const useDeleteOrg = () => {
+export function useDeleteOrg() {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -160,4 +160,4 @@ export const useDeleteOrg = () => {
             );
         },
     });
-};
+}

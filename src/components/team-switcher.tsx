@@ -42,15 +42,11 @@ export function TeamSwitcher({
 
     const [isLoading, setIsLoading] = useState(false);
 
-    // useEffect(() => {
-    //     console.log("orgId from useParams:", currentOrgIdParam);
-    //     console.log("orgs prop:", orgs);
-    // }, [currentOrgIdParam, orgs]);
-
     const handleOrgChange = (orgId: string) => {
         if (orgId === currentOrgIdParam) {
             return;
         }
+
         setIsLoading(true);
 
         router.push(`/admin/${orgId}`);
