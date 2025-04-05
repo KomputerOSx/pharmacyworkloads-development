@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ChevronsUpDown, Plus } from "lucide-react";
+import { ChevronsUpDown, House, Plus } from "lucide-react";
 
 import {
     DropdownMenu,
@@ -21,6 +21,7 @@ import {
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
+import Link from "next/link";
 
 export function TeamSwitcher({
     orgs,
@@ -112,11 +113,14 @@ export function TeamSwitcher({
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="gap-2 p-2">
                             <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
-                                <Plus className="size-4" />
+                                <House className="size-4" />
                             </div>
-                            <div className="text-muted-foreground font-medium">
-                                Add Organisation
-                            </div>
+                            <Link
+                                href="/admin/orgsConsole"
+                                className="text-muted-foreground font-medium"
+                            >
+                                Return to Orgs Console
+                            </Link>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
