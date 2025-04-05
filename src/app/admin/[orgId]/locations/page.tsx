@@ -1,7 +1,7 @@
 // src/app/admin/[orgId]/locations/page.tsx
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 
 // UI Components
@@ -25,6 +25,8 @@ import { HospLocDataTable } from "@/components/locations/HospLocDataTable";
 import { HospLoc } from "@/types/hosLocTypes"; // *** IMPORT THE DATA TABLE COMPONENT ***
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
 import { EditHospLocForm } from "@/components/locations/EditHospLocForm";
+import { Hosp } from "@/types/hospTypes";
+import { useHosps } from "@/hooks/useHosps";
 
 export default function LocationsPage() {
     const params = useParams();
@@ -43,10 +45,26 @@ export default function LocationsPage() {
         data: locations, // locations will be HospLoc[] | undefined
         isLoading,
         isError,
-        error,
         refetch,
         isRefetching, // Use isRefetching for refresh button state
     } = useHospLocs(orgId);
+
+    const {
+        data: hosps,
+        isLoading: isLoadingHosps,
+        isError: isErrorHosps,
+        error: errorHosps,
+    } = useHosps(orgId);
+
+    const hospitalNameMap = useMemo(() => {
+        const map = new Map<string, string>();
+        if (hosps) {
+            hosps.forEach((hosp: Hosp) => {
+                map.set(hosp.id, hosp.name);
+            });
+        }
+        return map;
+    }, [hosps]);
 
     const deleteHospLocMutation = useDeleteHospLoc();
 
@@ -128,7 +146,7 @@ export default function LocationsPage() {
 
     // --- Rendering Logic ---
     const renderContent = () => {
-        if (isLoading) {
+        if (isLoading || isLoadingHosps) {
             // Show skeleton loaders matching table structure more closely
             return (
                 <div className="space-y-4 mt-4">
@@ -164,14 +182,18 @@ export default function LocationsPage() {
             );
         }
 
-        if (isError) {
+        if (isError || isErrorHosps) {
+            const errorToShow = isError ? isError : errorHosps;
+            const errorTitle = isError
+                ? "Error Fetching Locations"
+                : "Error Fetching Hospitals";
             return (
                 <Alert variant="destructive" className="mt-4">
                     <Terminal className="h-4 w-4" />
-                    <AlertTitle>Error Fetching Locations</AlertTitle>
+                    <AlertTitle>{errorTitle}</AlertTitle>
                     <AlertDescription>
-                        {error instanceof Error
-                            ? error.message
+                        {errorToShow instanceof Error
+                            ? errorToShow.message
                             : "An unknown error occurred."}
                         <Button
                             variant="secondary"
@@ -193,6 +215,8 @@ export default function LocationsPage() {
                 locations={locations ?? []}
                 onEditRequest={handleOpenEditDialog}
                 onDeleteRequest={handleOpenDeleteDialog}
+                hospitalNameMap={hospitalNameMap}
+                isLoadingHospitalMap={isLoadingHosps}
             />
         );
     };

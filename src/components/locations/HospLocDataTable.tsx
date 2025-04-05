@@ -47,6 +47,8 @@ import { columns, DataTableViewOptions } from "./HospLocColumns"; // Import upda
 interface HospLocTableMeta extends TableMeta<HospLoc> {
     openEditDialog: (location: HospLoc) => void;
     openDeleteDialog: (location: HospLoc) => void;
+    hospitalNameMap: Map<string, string>; // Add the map
+    isLoadingHospitalMap: boolean;
     // Add other functions/data needed by columns here
 }
 
@@ -54,15 +56,34 @@ interface HospLocDataTableProps {
     locations: HospLoc[];
     onEditRequest: (location: HospLoc) => void;
     onDeleteRequest: (location: HospLoc) => void;
+    hospitalNameMap: Map<string, string>; // Add the map
+    isLoadingHospitalMap: boolean;
 }
 
 export function HospLocDataTable({
     locations,
     onEditRequest,
     onDeleteRequest,
+    hospitalNameMap,
+    isLoadingHospitalMap,
 }: HospLocDataTableProps) {
     // Memoize data to prevent unnecessary recalculations
     const data = useMemo(() => locations ?? [], [locations]);
+
+    // OPTION 1 (Preferred if map is reliable): Use the passed hospitalNameMap
+    const distinctHospitalsForFilter = useMemo(() => {
+        if (isLoadingHospitalMap || !hospitalNameMap) {
+            return [];
+        }
+        const hospitalOptions: { value: string; label: string }[] = [];
+        hospitalNameMap.forEach((name, id) => {
+            if (name && name.trim() !== "" && id) {
+                hospitalOptions.push({ value: id, label: name });
+            }
+        });
+        // Sort options by label (name)
+        return hospitalOptions.sort((a, b) => a.label.localeCompare(b.label));
+    }, [hospitalNameMap, isLoadingHospitalMap]);
 
     // --- TanStack Table State ---
     const [sorting, setSorting] = useState<SortingState>(() => [
@@ -115,6 +136,8 @@ export function HospLocDataTable({
         meta: {
             openEditDialog: onEditRequest,
             openDeleteDialog: onDeleteRequest,
+            hospitalNameMap: hospitalNameMap,
+            isLoadingHospitalMap: isLoadingHospitalMap,
         } as HospLocTableMeta,
     });
 
@@ -147,11 +170,19 @@ export function HospLocDataTable({
             ?.setFilterValue(value === "all" ? undefined : value);
     };
 
+    const handleHospitalFilterChange = (value: string) => {
+        table
+            .getColumn("hospId") // Target the correct column ID
+            ?.setFilterValue(value === "all" ? undefined : value); // Set ID as filter value
+    };
+
     // --- Sorting Button Handlers ---
     const sortByNameAsc = () => setSorting([{ id: "name", desc: false }]);
     const sortByCreatedAtDesc = () =>
         setSorting([{ id: "createdAt", desc: true }]);
     const resetSort = () => setSorting([]); // Clear sorting
+
+    const isFilterLoading = isLoadingHospitalMap;
 
     return (
         <div className="w-full space-y-4">
@@ -204,6 +235,51 @@ export function HospLocDataTable({
                             {distinctTypes.map((type) => (
                                 <SelectItem key={type} value={type}>
                                     {type}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                {/* Hospital Filter */}
+                <div className="flex flex-col space-y-1">
+                    <label
+                        htmlFor="hospital-filter"
+                        className="text-sm font-medium"
+                    >
+                        Filter by Hospital
+                    </label>
+                    <Select
+                        // Value is the hospId stored in the column's filter state
+                        value={
+                            (table
+                                .getColumn("hospId")
+                                ?.getFilterValue() as string) ?? "all"
+                        }
+                        onValueChange={handleHospitalFilterChange}
+                        disabled={isFilterLoading} // Disable while loading options
+                    >
+                        <SelectTrigger
+                            className="h-9 w-full sm:w-[180px]"
+                            disabled={isFilterLoading}
+                        >
+                            <SelectValue
+                                placeholder={
+                                    isFilterLoading
+                                        ? "Loading..."
+                                        : "Select Hospital"
+                                }
+                            />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Hospitals</SelectItem>
+                            {/* Map over the {value, label} options */}
+                            {distinctHospitalsForFilter.map((hospital) => (
+                                <SelectItem
+                                    key={hospital.value}
+                                    value={hospital.value}
+                                >
+                                    {hospital.label} {/* Display Name */}
                                 </SelectItem>
                             ))}
                         </SelectContent>

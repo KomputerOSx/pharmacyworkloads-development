@@ -35,12 +35,15 @@ import { MixerHorizontalIcon } from "@radix-ui/react-icons"; // Ensure @radix-ui
 import { HospLoc } from "@/types/hosLocTypes";
 import { formatDate } from "@/utils/utils";
 import { cn } from "@/lib/utils"; // Assuming you have cn utility
+import { Skeleton } from "../ui/skeleton";
 
 // --- Table Meta Interface ---
 // Defines the custom properties added to the table's meta option
 interface HospLocTableMeta {
     openEditDialog: (location: HospLoc) => void;
     openDeleteDialog: (location: HospLoc) => void;
+    hospitalNameMap: Map<string, string>;
+    isLoadingHospitalMap: boolean;
 }
 
 // --- Action Row Component Props ---
@@ -164,12 +167,29 @@ export const columns: ColumnDef<HospLoc>[] = [
     {
         accessorKey: "hospId",
         header: ({ column }) => (
-            <SortableHeader column={column} title="Hospital ID" />
+            <SortableHeader column={column} title="Hospital" />
         ),
-        cell: ({ row }) => <div>{row.getValue("hospId")}</div>,
+        // Cell renderer still uses the map from meta to DISPLAY the name
+        cell: ({ row, table }: CellContext<HospLoc, unknown>) => {
+            const hospId = row.getValue("hospId") as string;
+            const meta = table.options.meta as HospLocTableMeta;
+            const hospitalNameMap = meta.hospitalNameMap;
+            const isLoading = meta.isLoadingHospitalMap;
+
+            if (isLoading) {
+                return <Skeleton className="h-5 w-24" />;
+            }
+            const hospName = hospitalNameMap.get(hospId);
+            return (
+                <div className="">
+                    {hospName ?? (
+                        <span className="text-muted-foreground">N/A</span>
+                    )}
+                </div>
+            );
+        },
         enableSorting: true,
         enableHiding: true,
-        filterFn: "includesString",
     },
 
     // 4. Type Column
@@ -251,30 +271,6 @@ export const columns: ColumnDef<HospLoc>[] = [
         size: 80,
     },
 
-    // // 9. Created At Column
-    // {
-    //     accessorKey: "createdAt",
-    //     header: ({ column }) => (
-    //         <SortableHeader column={column} title="Created At" />
-    //     ),
-    //     cell: ({ row }) => {
-    //         const dateVal = row.getValue("createdAt") as
-    //             | Timestamp
-    //             | Date
-    //             | string
-    //             | null
-    //             | undefined;
-    //         return (
-    //             <div className="whitespace-nowrap text-sm text-muted-foreground">
-    //                 {formatDate(dateVal)}
-    //             </div>
-    //         );
-    //     },
-    //     enableSorting: true,
-    //     enableHiding: true,
-    //     sortDescFirst: true, // Default sort newest first
-    // },
-
     // 9. Created At Column
     {
         accessorKey: "createdAt",
@@ -282,37 +278,15 @@ export const columns: ColumnDef<HospLoc>[] = [
             <SortableHeader column={column} title="Created At" />
         ),
         cell: ({ row }) => {
-            // *** 1. Log the RAW value and its TYPE ***
-            const rawValue = row.getValue("createdAt");
-            console.log(
-                `Row ID: ${row.id}, Raw createdAt:`,
-                rawValue,
-                `Type: ${typeof rawValue}`,
-            );
-
-            // You can also log if it's a Firestore Timestamp instance specifically
-            if (rawValue instanceof Timestamp) {
-                console.log(`Row ID: ${row.id} - Is Firestore Timestamp: true`);
-            }
-
-            // 2. Perform the type assertion (be mindful if the logs show unexpected types)
-            const dateVal = rawValue as
+            const dateVal = row.getValue("createdAt") as
                 | Timestamp
                 | Date
                 | string
                 | null
                 | undefined;
-
-            // 3. Format the date
-            const formattedDate = formatDate(dateVal);
-
-            // Optional: Log the formatted date too
-            // console.log(`Row ID: ${row.id}, Formatted Date:`, formattedDate);
-
             return (
                 <div className="whitespace-nowrap text-sm text-muted-foreground">
-                    {/* Display the formatted date */}
-                    {formattedDate}
+                    {formatDate(dateVal)}
                 </div>
             );
         },

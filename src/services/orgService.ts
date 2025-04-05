@@ -9,7 +9,7 @@ import {
     orderBy,
     query,
     serverTimestamp,
-    setDoc,
+    addDoc,
     updateDoc,
     where,
 } from "firebase/firestore";
@@ -68,32 +68,6 @@ export const getOrg = async (orgId: string): Promise<Org | null> => {
     }
 };
 
-// export const addOrg = async (
-//     orgData: Omit<
-//         Org,
-//         "id" | "createdAt" | "updatedAt" | "createdById" | "updatedById"
-//     >,
-//     userId: string = "system",
-// ): Promise<Org | null> => {
-//     try {
-//         const dataToAdd: DocumentData = {
-//             ...orgData,
-//             active: orgData.active ?? false,
-//             createdAt: serverTimestamp(),
-//             updatedAt: serverTimestamp(),
-//             createdById: userId,
-//             updatedById: userId,
-//         };
-//
-//         const docRef = await addDoc(OrgsCol, dataToAdd);
-//         const newDocSnap = await getDoc(docRef);
-//
-//         return mapFirestoreDocToOrg(newDocSnap.id, newDocSnap.data());
-//     } catch (error) {
-//         console.error("6pHK68JX - Error adding Organisation:", error);
-//         throw error;
-//     }
-// };
 export const addOrg = async (
     orgData: Omit<
         Org,
@@ -101,36 +75,9 @@ export const addOrg = async (
     >,
     userId: string = "system",
 ): Promise<Org | null> => {
-    if (!orgData.name || orgData.name.trim() === "") {
-        throw new Error(
-            "ADD_ORG_ERR_NO_NAME - Organisation name cannot be empty.",
-        );
-    }
-
-    const orgName = orgData.name.trim();
-    // Generate ID: lowercase, spaces to underscores
-    const customDocId = orgName.toLowerCase().replace(/ /g, "_");
-    // Example further sanitization: .replace(/[^a-z0-9_]/g, '');
-
-    if (!customDocId) {
-        throw new Error(
-            `ADD_ORG_ERR_INVALID_ID - Could not generate a valid ID from name: "${orgName}"`,
-        );
-    }
-
-    const docRef = doc(OrgsCol, customDocId);
-
     try {
-        const existingDocSnap = await getDoc(docRef);
-        if (existingDocSnap.exists()) {
-            throw new Error(
-                `ADD_ORG_ERR_CONFLICT - An Organisation with the name "${orgName}" (ID: ${customDocId}) already exists.`,
-            );
-        }
-
         const dataToAdd: DocumentData = {
             ...orgData,
-            name: orgName, // Use trimmed name
             active: orgData.active ?? false,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
@@ -138,32 +85,12 @@ export const addOrg = async (
             updatedById: userId,
         };
 
-        await setDoc(docRef, dataToAdd);
-
+        const docRef = await addDoc(OrgsCol, dataToAdd);
         const newDocSnap = await getDoc(docRef);
-        if (!newDocSnap.exists()) {
-            throw new Error(
-                `ADD_ORG_ERR_FETCH_FAIL - Failed to retrieve newly created org (ID: ${customDocId}) immediately after creation.`,
-            );
-        }
 
-        const createdOrg = mapFirestoreDocToOrg(
-            newDocSnap.id,
-            newDocSnap.data(),
-        );
-
-        if (!createdOrg) {
-            throw new Error(
-                `ADD_ORG_ERR_MAP_FAIL - Failed to map newly created org data (ID: ${customDocId}).`,
-            );
-        }
-
-        return createdOrg;
+        return mapFirestoreDocToOrg(newDocSnap.id, newDocSnap.data());
     } catch (error) {
-        console.error(
-            `6pHK68JX - Error adding Organisation (Attempted ID: ${customDocId}):`,
-            error,
-        );
+        console.error("6pHK68JX - Error adding Organisation:", error);
         throw error;
     }
 };

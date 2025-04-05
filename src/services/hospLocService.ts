@@ -1,4 +1,5 @@
 import {
+    addDoc,
     collection,
     deleteDoc,
     doc,
@@ -8,7 +9,6 @@ import {
     getDocs,
     query,
     serverTimestamp,
-    setDoc,
     updateDoc,
     where,
 } from "firebase/firestore";
@@ -80,85 +80,87 @@ export async function getHospLoc(id: string): Promise<HospLoc | null> {
 }
 
 export async function createHospLoc(
-    hospLocData: Partial<HospLoc>,
+    // Input data, explicitly excluding fields we will set automatically
+    hospLocData: Omit<
+        Partial<HospLoc>,
+        | "id"
+        | "orgId"
+        | "hospId"
+        | "createdAt"
+        | "updatedAt"
+        | "createdBy"
+        | "updatedBy"
+    >,
     orgId: string,
     hospId: string,
     userId = "system",
 ): Promise<HospLoc> {
+    // 1. Validate essential inputs
     if (!orgId || !hospId) {
         throw new Error(
-            "bTJ7rHCD - Organization and hospital are required to create a hospital location",
+            "bTJ7rHCD - Organization ID and Hospital ID are required to create a hospital location.",
         );
     }
 
-    if (!hospLocData.name || hospLocData.name.trim() === "") {
+    if (!hospLocData.name) {
         throw new Error("3UDqJNnd - Hospital location name cannot be empty.");
     }
 
-    const hospLocName = hospLocData.name.trim();
-    const customDocId = hospLocName.toLowerCase().replace(/ /g, "_");
-
-    if (!customDocId) {
-        throw new Error(
-            `V4mEC64p - Could not generate a valid ID from name: "${hospLocName}"`,
-        );
-    }
-
-    const docRef = doc(hospLocCollection, customDocId);
-
     try {
-        const existingDocSnap = await getDoc(docRef);
-        if (existingDocSnap.exists()) {
-            const existingData = existingDocSnap.data();
-            if (existingData.orgId === orgId) {
-                throw new Error(
-                    `Hospital location with name "${hospLocName}" already exists. Please choose a different name.`,
-                );
-            } else {
-                console.warn(
-                    `CREATE_HOSP_LOC_WARN_ID_COLLISION - Hospital location ID ${customDocId} exists but belongs to a different org (${existingData?.orgId}). Proceeding, but consider ID strategy.`,
-                );
-            }
-        }
+        // No pre-check needed - addDoc handles unique ID generation
 
+        // 2. Prepare data for creation
         const dataToAdd: DocumentData = {
-            ...hospLocData,
-            name: hospLocName,
-            orgId: orgId,
-            hospId: hospId,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-            createdBy: userId,
-            updatedBy: userId,
+            ...hospLocData, // Spread the provided data (like address, etc.)
+            name: hospLocData.name, // Use the trimmed name
+            orgId: orgId, // Add the organization ID
+            hospId: hospId, // Add the hospital ID
+            createdAt: serverTimestamp(), // Set creation timestamp
+            updatedAt: serverTimestamp(), // Set initial update timestamp
+            createdBy: userId, // Track who created it
+            updatedBy: userId, // Track who last updated it (initially creator)
         };
 
-        await setDoc(docRef, dataToAdd);
+        // 3. Add the document to the collection - Firestore generates the ID
+        const newDocRef: DocumentReference = await addDoc(
+            hospLocCollection,
+            dataToAdd,
+        );
 
-        const newHospLocDoc = await getDoc(docRef);
+        // 4. Fetch the newly created document using the reference returned by addDoc
+        const newHospLocDoc = await getDoc(newDocRef);
+
         if (!newHospLocDoc.exists()) {
+            // This is highly unexpected if addDoc succeeded
             throw new Error(
-                `CREATE_HOSP_LOC_ERR_FETCH_FAIL - Failed to retrieve newly created hospital (ID: ${customDocId}) immediately after creation.`,
+                `CREATE_HOSP_LOC_ERR_FETCH_FAIL - Failed to retrieve newly created hospital location (ID: ${newDocRef.id}) immediately after creation.`,
             );
         }
 
+        // 5. Map the Firestore document data (including the auto-generated ID)
         const createdHospLoc = mapFirestoreDocToHospLoc(
-            newHospLocDoc.id,
+            newHospLocDoc.id, // Use the ID from the snapshot
             newHospLocDoc.data(),
         );
 
         if (!createdHospLoc) {
             throw new Error(
-                `CREATE_HOSP_LOC_ERR_MAP_FAIL - Failed to map newly created hospital data (ID: ${customDocId}).`,
+                `CREATE_HOSP_LOC_ERR_MAP_FAIL - Failed to map newly created hospital location data (ID: ${newHospLocDoc.id}). Check mapper logic and Firestore data.`,
             );
         }
 
-        return createdHospLoc;
+        console.log(
+            `Hospital Location created successfully with ID: ${createdHospLoc.id}`,
+        );
+        return createdHospLoc; // Return the complete mapped object
     } catch (error) {
+        // Updated error log message - no custom ID to reference here
         console.error(
-            `Nh1NLEbM - Error during hospital location creation process (Attempted ID: ${customDocId}, OrgID: ${orgId}):`,
+            `Nh1NLEbM - Error during hospital location creation process (OrgID: ${orgId}, HospID: ${hospId}):`,
             error,
         );
 
+        // Re-throw specific internal errors or a generic one
         if (
             error instanceof Error &&
             error.message.startsWith("CREATE_HOSP_LOC_ERR")
@@ -166,7 +168,7 @@ export async function createHospLoc(
             throw error;
         } else {
             throw new Error(
-                `Failed to create hospital Location. Reason: ${error instanceof Error ? error.message : String(error)}`,
+                `Failed to create hospital location. Reason: ${error instanceof Error ? error.message : String(error)}`,
             );
         }
     }
