@@ -143,6 +143,7 @@ export const mapFirestoreDocToHospLoc = (
         type: (data.type as string) ?? "",
         hospId: (data.hospId as string) ?? "",
         orgId: (data.orgId as string) ?? "",
+        description: (data.description as string) ?? "",
         address: (data.address as string) ?? "",
         contactEmail: (data.contactEmail as string) ?? "",
         contactPhone: (data.contactPhone as string) ?? "",

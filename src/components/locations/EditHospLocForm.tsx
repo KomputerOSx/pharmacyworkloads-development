@@ -1,4 +1,4 @@
-// src/components/locations/AddHospLocForm.tsx
+// src/components/locations/EditHospLocForm.tsx
 "use client";
 
 import * as React from "react";
@@ -26,31 +26,32 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea"; // <-- Import Textarea
+import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Your project imports
-import { useCreateHospLoc } from "@/hooks/useHospLoc";
+// *** IMPORTANT: Create and import the update hook ***
+import { useUpdateHospLoc } from "@/hooks/useHospLoc"; // Assuming you have this hook
 import { useHosps } from "@/hooks/useHosps";
 import { getHospLocTypes } from "@/types/hosLocTypes";
-import { HospLoc } from "@/types/hosLocTypes"; // Assuming description is in HospLoc
+import { HospLoc } from "@/types/hosLocTypes";
 
-// --- Zod Schema Definition ---
-const formSchema = z.object({
+// --- Zod Schema Definition (Can often be the same as Add form) ---
+// If validation rules differ for edit, create a separate schema
+const editFormSchema = z.object({
     name: z.string().min(2, {
         message: "Location name must be at least 2 characters.",
     }),
-    hospId: z.string().min(1, { message: "Please select a parent hospital." }),
+    // hospId might be non-editable in some scenarios, but keep validation for now
+    hospId: z.string().min(1, { message: "Parent hospital must be selected." }),
     type: z.string().min(1, { message: "Please select a location type." }),
-    // *** Add description field ***
     description: z
         .string()
-        .max(500, "Description cannot exceed 500 characters.") // Optional: Add max length
+        .max(500, "Description cannot exceed 500 characters.")
         .optional()
-        .or(z.literal("")), // Allow empty string
-    // **************************
+        .or(z.literal("")),
     address: z
         .string()
         .min(2, "Address must be at least 2 characters.")
@@ -66,22 +67,25 @@ const formSchema = z.object({
         .min(5, "Phone number seems too short.")
         .optional()
         .or(z.literal("")),
-    active: z.boolean().default(true),
+    active: z.boolean(), // No default needed here, comes from existing data
 });
 
 // --- Component Props Interface ---
-interface AddHospLocFormProps {
+interface EditHospLocFormProps {
     orgId: string;
+    locationToEdit: HospLoc; // Pass the full location object
     onSuccessfulSubmitAction: () => void;
 }
 
 // --- The Form Component ---
-export function AddHospLocForm({
+export function EditHospLocForm({
     orgId,
+    locationToEdit,
     onSuccessfulSubmitAction,
-}: AddHospLocFormProps) {
+}: EditHospLocFormProps) {
     const locationTypes = getHospLocTypes();
 
+    // Fetch hospitals for the dropdown (might be disabled depending on edit logic)
     const {
         data: hospitals,
         isLoading: isLoadingHosps,
@@ -89,68 +93,88 @@ export function AddHospLocForm({
         error: hospsError,
     } = useHosps(orgId);
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    // Initialize the form with existing data
+    const form = useForm<z.infer<typeof editFormSchema>>({
+        resolver: zodResolver(editFormSchema),
+        // *** Pre-populate with existing data ***
         defaultValues: {
-            name: "",
-            hospId: "",
-            type: "",
-            description: "", // <-- Add default value
-            address: "",
-            contactEmail: "",
-            contactPhone: "",
-            active: true,
+            name: locationToEdit.name || "",
+            hospId: locationToEdit.hospId || "", // Important: Use existing hospId
+            type: locationToEdit.type || "",
+            description: locationToEdit.description || "", // Assuming description is on HospLoc type
+            address: locationToEdit.address || "",
+            contactEmail: locationToEdit.contactEmail || "",
+            contactPhone: locationToEdit.contactPhone || "",
+            active: locationToEdit.active ?? true, // Default to true if undefined/null for some reason
         },
     });
 
-    const createHospLocMutation = useCreateHospLoc();
+    // *** Use the UPDATE mutation hook ***
+    const updateHospLocMutation = useUpdateHospLoc();
 
-    async function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log("Form values submitted:", values);
+    // --- Submission Handler ---
+    async function onEditSubmit(values: z.infer<typeof editFormSchema>) {
+        console.log("Form values submitted for update:", values);
 
-        const hospLocData: Partial<HospLoc> = {
+        // Prepare only the fields that can be updated
+        const hospLocUpdateData: Partial<HospLoc> = {
             name: values.name,
             type: values.type,
-            description: values.description || null, // <-- Add description, send null if empty
+            // hospId: values.hospId, // hospId is passed separately below, not usually in the 'data' object itself for updates
+            description: values.description || null,
             address: values.address || null,
             contactEmail: values.contactEmail || null,
             contactPhone: values.contactPhone || null,
             active: values.active,
         };
 
-        createHospLocMutation.mutate(
+        updateHospLocMutation.mutate(
             {
-                hospLocData,
-                orgId: orgId,
-                hospId: values.hospId,
+                // ***** CORRECTED PART *****
+                id: locationToEdit.id, // Use 'id' for the location being updated
+                hospId: values.hospId, // Add the parent 'hospId' from form values
+                // **************************
+                hospLocData: hospLocUpdateData, // The data payload
+                orgId: orgId, // The organization context
+                // userId: 'current-user-id', // Optional: if needed
             },
             {
                 onSuccess: (data) => {
-                    console.log("Hospital Location created:", data);
-                    form.reset();
-                    onSuccessfulSubmitAction();
+                    console.log("Hospital Location updated:", data);
+                    onSuccessfulSubmitAction(); // Close dialog / Signal success
                 },
                 onError: (error) => {
-                    console.error("Failed to create hospital location:", error);
+                    console.error("Failed to update hospital location:", error);
+                    // Error toast/message likely handled globally by the hook
+                    // Or set form error: form.setError('root', { message: error.message });
                 },
             },
         );
     }
 
+    // Determine if the Parent Hospital dropdown should be editable
+    // Example logic: Maybe it's only editable if there's more than one hospital
+    const canEditParentHospital =
+        (hospitals?.length ?? 0) > 0 && !isLoadingHosps;
+
     return (
         <Form {...form}>
-            {createHospLocMutation.isError && (
+            {/* Display top-level form error from mutation */}
+            {updateHospLocMutation.isError && (
                 <Alert variant="destructive" className="mb-4">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Creation Failed</AlertTitle>
+                    <AlertTitle>Update Failed</AlertTitle>
                     <AlertDescription>
-                        {createHospLocMutation.error?.message ||
+                        {updateHospLocMutation.error?.message ||
                             "An unexpected error occurred."}
                     </AlertDescription>
                 </Alert>
             )}
 
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form
+                onSubmit={form.handleSubmit(onEditSubmit)}
+                className="space-y-4"
+            >
                 {/* Location Name */}
                 <FormField
                     control={form.control}
@@ -162,7 +186,7 @@ export function AddHospLocForm({
                                 <Input
                                     placeholder="e.g., Ward 10B, Main Pharmacy"
                                     {...field}
-                                    disabled={createHospLocMutation.isPending}
+                                    disabled={updateHospLocMutation.isPending}
                                 />
                             </FormControl>
                             <FormMessage />
@@ -170,7 +194,7 @@ export function AddHospLocForm({
                     )}
                 />
 
-                {/* Parent Hospital Selection */}
+                {/* Parent Hospital Selection (Potentially Read-only or Disabled) */}
                 <FormField
                     control={form.control}
                     name="hospId"
@@ -189,24 +213,20 @@ export function AddHospLocForm({
                             {!isLoadingHosps && !isErrorHosps && hospitals && (
                                 <Select
                                     onValueChange={field.onChange}
-                                    defaultValue={field.value}
+                                    value={field.value} // Use value for controlled component in edit
                                     disabled={
-                                        createHospLocMutation.isPending ||
-                                        isLoadingHosps ||
-                                        !hospitals?.length
+                                        !canEditParentHospital || // Disable if logic dictates
+                                        updateHospLocMutation.isPending ||
+                                        isLoadingHosps
                                     }
                                 >
                                     <FormControl>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Select parent hospital" />
+                                            <SelectValue placeholder="Select the hospital this location belongs to" />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        {hospitals?.length === 0 && (
-                                            <SelectItem value="" disabled>
-                                                No hospitals found for this org
-                                            </SelectItem>
-                                        )}
+                                        {/* Ensure the current value exists as an option */}
                                         {hospitals?.map((hosp) => (
                                             <SelectItem
                                                 key={hosp.id}
@@ -215,9 +235,29 @@ export function AddHospLocForm({
                                                 {hosp.name}
                                             </SelectItem>
                                         ))}
+                                        {/* Handle case where locationToEdit.hospId isn't in the fetched list (rare) */}
+                                        {!hospitals?.some(
+                                            (h) => h.id === field.value,
+                                        ) &&
+                                            field.value && (
+                                                <SelectItem
+                                                    value={field.value}
+                                                    disabled
+                                                >
+                                                    {locationToEdit.name}{" "}
+                                                    (Current)
+                                                </SelectItem>
+                                            )}
                                     </SelectContent>
                                 </Select>
                             )}
+                            {!canEditParentHospital &&
+                                !isLoadingHosps &&
+                                !isErrorHosps && (
+                                    <p className="text-sm text-muted-foreground pt-2">
+                                        Parent hospital cannot be changed.
+                                    </p>
+                                )}
                             <FormMessage />
                         </FormItem>
                     )}
@@ -232,12 +272,12 @@ export function AddHospLocForm({
                             <FormLabel>Location Type *</FormLabel>
                             <Select
                                 onValueChange={field.onChange}
-                                defaultValue={field.value}
-                                disabled={createHospLocMutation.isPending}
+                                value={field.value} // Use value for controlled component
+                                disabled={updateHospLocMutation.isPending}
                             >
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select type" />
+                                        <SelectValue placeholder="Select location type" />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -256,7 +296,7 @@ export function AddHospLocForm({
                     )}
                 />
 
-                {/* *** Description Field (Using Textarea) *** */}
+                {/* Description Field */}
                 <FormField
                     control={form.control}
                     name="description"
@@ -265,10 +305,10 @@ export function AddHospLocForm({
                             <FormLabel>Description (Optional)</FormLabel>
                             <FormControl>
                                 <Textarea
-                                    placeholder="Description"
-                                    className="resize-y" // Allow vertical resize
+                                    placeholder="Enter a brief description..."
+                                    className="resize-y"
                                     {...field}
-                                    disabled={createHospLocMutation.isPending}
+                                    disabled={updateHospLocMutation.isPending}
                                 />
                             </FormControl>
                             <FormDescription>
@@ -278,7 +318,6 @@ export function AddHospLocForm({
                         </FormItem>
                     )}
                 />
-                {/* ******************************************* */}
 
                 {/* Address (Optional) */}
                 <FormField
@@ -286,19 +325,20 @@ export function AddHospLocForm({
                     name="address"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Address (Optional)</FormLabel>
+                            {" "}
+                            <FormLabel>Address (Optional)</FormLabel>{" "}
                             <FormControl>
                                 <Input
-                                    placeholder="Full address..."
+                                    placeholder="e.g., Floor 3, Building A, 123 Health St"
                                     {...field}
-                                    disabled={createHospLocMutation.isPending}
+                                    disabled={updateHospLocMutation.isPending}
                                 />
-                            </FormControl>
+                            </FormControl>{" "}
                             <FormDescription>
                                 Specific address within the hospital, if
                                 different.
-                            </FormDescription>
-                            <FormMessage />
+                            </FormDescription>{" "}
+                            <FormMessage />{" "}
                         </FormItem>
                     )}
                 />
@@ -309,16 +349,17 @@ export function AddHospLocForm({
                     name="contactEmail"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Contact Email (Optional)</FormLabel>
+                            {" "}
+                            <FormLabel>Contact Email (Optional)</FormLabel>{" "}
                             <FormControl>
                                 <Input
-                                    placeholder="mail@mail.com"
+                                    placeholder="ward10b@hospital.org"
                                     {...field}
                                     type="email"
-                                    disabled={createHospLocMutation.isPending}
+                                    disabled={updateHospLocMutation.isPending}
                                 />
-                            </FormControl>
-                            <FormMessage />
+                            </FormControl>{" "}
+                            <FormMessage />{" "}
                         </FormItem>
                     )}
                 />
@@ -329,16 +370,17 @@ export function AddHospLocForm({
                     name="contactPhone"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Contact Phone (Optional)</FormLabel>
+                            {" "}
+                            <FormLabel>Contact Phone (Optional)</FormLabel>{" "}
                             <FormControl>
                                 <Input
-                                    placeholder="0191 000 0000"
+                                    placeholder="Internal extension or direct line"
                                     {...field}
                                     type="tel"
-                                    disabled={createHospLocMutation.isPending}
+                                    disabled={updateHospLocMutation.isPending}
                                 />
-                            </FormControl>
-                            <FormMessage />
+                            </FormControl>{" "}
+                            <FormMessage />{" "}
                         </FormItem>
                     )}
                 />
@@ -353,12 +395,12 @@ export function AddHospLocForm({
                                 <Checkbox
                                     checked={field.value}
                                     onCheckedChange={field.onChange}
-                                    disabled={createHospLocMutation.isPending}
-                                    id="add-active-checkbox" // Unique ID
+                                    disabled={updateHospLocMutation.isPending}
+                                    id="edit-active-checkbox" // Unique ID
                                 />
                             </FormControl>
                             <div className="space-y-1 leading-none">
-                                <FormLabel htmlFor="add-active-checkbox">
+                                <FormLabel htmlFor="edit-active-checkbox">
                                     Active Location
                                 </FormLabel>
                                 <FormDescription>
@@ -370,14 +412,15 @@ export function AddHospLocForm({
                     )}
                 />
 
+                {/* Submit Button */}
                 <Button
                     type="submit"
-                    disabled={createHospLocMutation.isPending || isLoadingHosps}
+                    disabled={updateHospLocMutation.isPending || isLoadingHosps}
                     className="w-full sm:w-auto" // Responsive width
                 >
-                    {createHospLocMutation.isPending
-                        ? "Creating..."
-                        : "Create Location"}
+                    {updateHospLocMutation.isPending
+                        ? "Saving..."
+                        : "Save Changes"}
                 </Button>
             </form>
         </Form>

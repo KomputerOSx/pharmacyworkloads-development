@@ -40,9 +40,9 @@ export default function LocationsPage() {
 
     // Handle Refresh Button Click
     const handleRefresh = useCallback(() => {
-        // console.log("Refetching locations for org:", orgId);
+        console.log("Refetching locations for org:", orgId);
         void refetch(); // Use void for promises you don't need to await
-    }, [refetch]);
+    }, [refetch, orgId]);
 
     // Close dialog and refetch after successful form submission
     const handleSuccessfulCreate = useCallback(() => {
