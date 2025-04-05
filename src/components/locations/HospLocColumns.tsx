@@ -3,91 +3,207 @@
 
 import {
     ColumnDef,
-    Column, // Import the Column type
-    Table, // Import Table type for DataTableViewOptions
+    Column,
+    Table,
+    Row, // Import Row type for actions
 } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
-import { Timestamp } from "firebase/firestore"; // Keep for type casting if data source provides Timestamps
+import { ArrowUpDown, MoreHorizontal } from "lucide-react"; // Added MoreHorizontal
+import { Timestamp } from "firebase/firestore";
 
-import { Button } from "@/components/ui/button"; // Shadcn Button
-import { HospLoc } from "@/types/hosLocTypes"; // Adjust path if necessary
-import { formatDate } from "@/utils/utils"; // Ensure this utility handles Timestamps, Dates, strings, null
-
-// Shadcn UI Components for Column Visibility Toggle
+// Shadcn UI Imports for Checkbox and Action Dropdown
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox"; // Import Checkbox
 import {
     DropdownMenu,
-    DropdownMenuCheckboxItem,
     DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"; // Import Dropdown components
+
+// Project Specific Imports
+import { HospLoc } from "@/types/hosLocTypes"; // Adjust path if necessary
+import { formatDate } from "@/utils/utils"; // Ensure path is correct
+
+// Shadcn UI Imports for Column Visibility Dropdown (aliased)
+import {
+    DropdownMenu as ViewDropdownMenu,
+    DropdownMenuCheckboxItem as ViewDropdownMenuCheckboxItem,
+    DropdownMenuContent as ViewDropdownMenuContent,
+    DropdownMenuTrigger as ViewDropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MixerHorizontalIcon } from "@radix-ui/react-icons"; // Ensure @radix-ui/react-icons is installed
 
 // --- Reusable Header Component for Sorting ---
-// This component renders a button in the header cell to trigger sorting.
 const SortableHeader = ({
     column,
     title,
 }: {
-    // ***** CORRECTED TYPE HERE *****
-    // The 'column' prop passed by the header context is an instance of the Column class,
-    // not a part of the ColumnDef configuration object.
-    column: Column<HospLoc, unknown>; // Use Column<TData, TValue>
+    column: Column<HospLoc, unknown>;
     title: string;
 }) => (
     <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="-ml-4 h-8" // Adjust padding/margin as needed for alignment
+        className="-ml-4 h-8 data-[state=open]:bg-accent" // Basic style adjustments
     >
-        {title}
+        <span>{title}</span> {/* Wrap title for potential styling */}
         <ArrowUpDown className="ml-2 h-4 w-4" />
     </Button>
 );
 
-// --- Column Definitions ---
+// --- Action Buttons Component for Each Row ---
+// This component renders the dropdown menu with actions for a specific row.
+const DataTableRowActions = ({ row }: { row: Row<HospLoc> }) => {
+    const location = row.original; // Get the full data object for the row
+
+    // Placeholder functions - replace with your actual logic
+    const handleEdit = () => {
+        console.log("Trigger Edit for Location ID:", location.id);
+        // Example: openEditModal(location);
+        // Example: router.push(`/admin/${orgId}/locations/${location.id}/edit`);
+    };
+
+    const handleDelete = () => {
+        console.log("Trigger Delete for Location ID:", location.id);
+        // Example: openDeleteConfirmDialog(location.id);
+    };
+
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button
+                    variant="ghost"
+                    className="flex h-8 w-8 p-0 data-[state=open]:bg-muted" // Standard size and open state style
+                >
+                    <MoreHorizontal className="h-4 w-4" />
+                    <span className="sr-only">Open menu</span>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[160px]">
+                {" "}
+                {/* Adjust width as needed */}
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {/* Add more items as needed */}
+                <DropdownMenuItem onClick={handleEdit}>
+                    {/* Optionally add an icon: <Pencil className="mr-2 h-4 w-4" /> */}
+                    Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                    onClick={handleDelete}
+                    className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/50" // Destructive styling
+                >
+                    {/* Optionally add an icon: <Trash className="mr-2 h-4 w-4" /> */}
+                    Delete
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+};
+
+// --- Column Definitions Array ---
 export const columns: ColumnDef<HospLoc>[] = [
+    // 1. Select Column (Checkbox)
+    {
+        id: "select",
+        header: ({ table }) => (
+            <Checkbox
+                checked={
+                    table.getIsAllPageRowsSelected()
+                        ? true
+                        : table.getIsSomePageRowsSelected()
+                          ? "indeterminate"
+                          : false
+                }
+                onCheckedChange={(value) =>
+                    table.toggleAllPageRowsSelected(!!value)
+                }
+                aria-label="Select all rows on this page"
+                className="translate-y-[2px]" // Align checkbox nicely
+            />
+        ),
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                aria-label="Select this row"
+                className="translate-y-[2px]" // Align checkbox nicely
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+        size: 50, // Explicitly set size for narrow column
+    },
+
+    // 2. Name Column
     {
         accessorKey: "name",
-        // The header function receives a context object containing the 'column' instance
         header: ({ column }) => <SortableHeader column={column} title="Name" />,
         cell: ({ row }) => (
-            <div className="capitalize">{row.getValue("name")}</div>
-        ),
-        filterFn: "includesString", // Use built-in filter for basic text search
+            <div className="font-medium capitalize">{row.getValue("name")}</div>
+        ), // Added font-medium
+        filterFn: "includesString",
         enableSorting: true,
         enableHiding: true,
     },
+
+    // 3. Hospital Column (Using hospId)
+    // TODO: Consider fetching/displaying Hospital Name if available/needed
+    {
+        accessorKey: "hospId",
+        header: ({ column }) => (
+            <SortableHeader column={column} title="Hospital ID" />
+        ),
+        cell: ({ row }) => <div>{row.getValue("hospId")}</div>,
+        enableSorting: true,
+        enableHiding: true,
+        filterFn: "includesString", // Allow filtering by ID if desired
+    },
+
+    // 4. Type Column
     {
         accessorKey: "type",
         header: ({ column }) => <SortableHeader column={column} title="Type" />,
         cell: ({ row }) => <div>{row.getValue("type")}</div>,
-        filterFn: "equalsString", // Use built-in filter for exact match (good for selects)
+        filterFn: "equalsString",
         enableSorting: true,
         enableHiding: true,
     },
+
+    // 5. Address Column
     {
         accessorKey: "address",
-        header: "Address", // No sorting needed for this column
+        header: "Address",
         cell: ({ row }) => (
-            <div className="whitespace-nowrap">{row.getValue("address")}</div> // Prevent wrapping if needed
+            <div className="whitespace-nowrap">
+                {row.getValue("address") ?? "N/A"}
+            </div>
         ),
-        enableSorting: false, // Explicitly disable sorting if not needed
+        enableSorting: false, // Address sorting is usually not useful
         enableHiding: true,
     },
+
+    // 6. Email Column
     {
         accessorKey: "contactEmail",
         header: "Email",
-        cell: ({ row }) => <div>{row.getValue("contactEmail")}</div>,
+        cell: ({ row }) => <div>{row.getValue("contactEmail") ?? "N/A"}</div>,
         enableSorting: false,
         enableHiding: true,
     },
+
+    // 7. Phone Column
     {
         accessorKey: "contactPhone",
         header: "Phone",
-        cell: ({ row }) => <div>{row.getValue("contactPhone")}</div>,
+        cell: ({ row }) => <div>{row.getValue("contactPhone") ?? "N/A"}</div>,
         enableSorting: false,
         enableHiding: true,
     },
+
+    // 8. Active Status Column
     {
         accessorKey: "active",
         header: ({ column }) => (
@@ -97,10 +213,10 @@ export const columns: ColumnDef<HospLoc>[] = [
             const isActive = row.getValue("active");
             return (
                 <div
-                    className={`px-2 py-0.5 inline-block rounded-full text-xs font-medium ${
+                    className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${
                         isActive
-                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                            ? "border-transparent bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                            : "border-transparent bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
                     }`}
                 >
                     {isActive ? "Yes" : "No"}
@@ -110,17 +226,18 @@ export const columns: ColumnDef<HospLoc>[] = [
         filterFn: (row, id, filterValue) => {
             const rowValue = row.getValue(id) as boolean;
             const filterString = String(filterValue).toLowerCase();
-            if (filterString === "yes" || filterString === "true") {
+            if (filterString === "yes" || filterString === "true")
                 return rowValue;
-            }
-            if (filterString === "no" || filterString === "false") {
+            if (filterString === "no" || filterString === "false")
                 return !rowValue;
-            }
-            return true; // Show row if filter is not 'yes'/'no'/true/false
+            return true;
         },
         enableSorting: true,
         enableHiding: true,
+        size: 80, // Adjust size for status
     },
+
+    // 9. Created At Column
     {
         accessorKey: "createdAt",
         header: ({ column }) => (
@@ -134,14 +251,17 @@ export const columns: ColumnDef<HospLoc>[] = [
                 | null
                 | undefined;
             return (
-                <div className="whitespace-nowrap">{formatDate(dateVal)}</div>
-            );
+                <div className="whitespace-nowrap text-sm text-muted-foreground">
+                    {formatDate(dateVal)}
+                </div>
+            ); // Style date
         },
         enableSorting: true,
         enableHiding: true,
-        // Example: Set initial sort direction if desired (usually handled in table state)
-        // sortDescFirst: true,
+        sortDescFirst: true, // Common to sort newest first
     },
+
+    // 10. Updated At Column
     {
         accessorKey: "updatedAt",
         header: ({ column }) => (
@@ -155,58 +275,74 @@ export const columns: ColumnDef<HospLoc>[] = [
                 | null
                 | undefined;
             return (
-                <div className="whitespace-nowrap">{formatDate(dateVal)}</div>
-            );
+                <div className="whitespace-nowrap text-sm text-muted-foreground">
+                    {formatDate(dateVal)}
+                </div>
+            ); // Style date
         },
         enableSorting: true,
         enableHiding: true,
     },
-    // Add other columns like 'Actions' if needed
-    // {
-    //   id: "actions", // Use 'id' if no accessorKey
-    //   header: "Actions",
-    //   cell: ({ row }) => <DataTableRowActions row={row} />, // Define separately
-    //   enableSorting: false,
-    //   enableHiding: false,
-    // },
+
+    // 11. Actions Column
+    {
+        id: "actions",
+        header: () => <div className="text-right pr-4">Actions</div>, // Add padding for alignment
+        cell: ({ row }) => (
+            <div className="text-right">
+                {" "}
+                {/* Align content to the right */}
+                <DataTableRowActions row={row} />
+            </div>
+        ),
+        enableSorting: false,
+        enableHiding: false,
+        size: 80, // Adjust size as needed
+    },
 ];
 
 // --- Component for Column Visibility Toggle ---
-// This component renders a dropdown menu to show/hide columns.
 export function DataTableViewOptions<TData>({
     table,
 }: {
-    table: Table<TData>; // Use the imported Table type
+    table: Table<TData>;
 }) {
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+        <ViewDropdownMenu>
+            {" "}
+            {/* Using aliased import */}
+            <ViewDropdownMenuTrigger asChild>
                 <Button
                     variant="outline"
-                    size="sm" // Match size with other control buttons
-                    className="ml-auto hidden h-8 lg:flex" // Standard height, hide on small screens
+                    size="sm"
+                    className="ml-auto hidden h-9 lg:flex" // Match height with other controls
                 >
                     <MixerHorizontalIcon className="mr-2 h-4 w-4" />
                     View
                 </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[150px]">
+            </ViewDropdownMenuTrigger>
+            <ViewDropdownMenuContent align="end" className="w-[150px]">
+                {" "}
+                {/* Using aliased import */}
+                <div className="px-1 py-1 text-sm font-medium text-muted-foreground">
+                    Toggle Columns
+                </div>
+                <DropdownMenuSeparator />
                 {table
                     .getAllColumns()
-                    .filter(
-                        (column) =>
-                            typeof column.accessorFn !== "undefined" &&
-                            column.getCanHide(),
+                    .filter((column) =>
+                        // Check if column *can* be hidden (accessor exists and not explicitly disabled)
+                        column.getCanHide(),
                     )
                     .map((column) => {
                         // Attempt to get a readable header name, fall back to id
                         const headerText =
                             typeof column.columnDef.header === "string"
-                                ? column.columnDef.header // If header is a simple string
-                                : column.id; // Otherwise, use the column id
+                                ? column.columnDef.header
+                                : column.id; // Use id if header is a component
 
                         return (
-                            <DropdownMenuCheckboxItem
+                            <ViewDropdownMenuCheckboxItem // Using aliased import
                                 key={column.id}
                                 className="capitalize"
                                 checked={column.getIsVisible()}
@@ -214,12 +350,11 @@ export function DataTableViewOptions<TData>({
                                     column.toggleVisibility(value)
                                 }
                             >
-                                {/* Display readable name */}
                                 {headerText}
-                            </DropdownMenuCheckboxItem>
+                            </ViewDropdownMenuCheckboxItem>
                         );
                     })}
-            </DropdownMenuContent>
-        </DropdownMenu>
+            </ViewDropdownMenuContent>
+        </ViewDropdownMenu>
     );
 }

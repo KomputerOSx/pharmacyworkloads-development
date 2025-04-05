@@ -1,4 +1,4 @@
-// src/components/HospLocDataTable.tsx
+// src/components/locations/HospLocDataTable.tsx
 "use client";
 
 import React, { useState, useMemo } from "react";
@@ -8,15 +8,18 @@ import {
     getPaginationRowModel,
     getSortedRowModel,
     getFilteredRowModel,
+    getFacetedRowModel, // Added for potential faceted filters
+    getFacetedUniqueValues, // Added for potential faceted filters
     SortingState,
     ColumnFiltersState,
     VisibilityState,
+    RowSelectionState, // Import RowSelectionState
     flexRender,
 } from "@tanstack/react-table";
 
 // Shadcn UI Components
 import {
-    Table as ShadcnTable, // Renamed to avoid conflict with TanStack's Table type
+    Table, // Use Shadcn Table component
     TableBody,
     TableCell,
     TableHead,
@@ -32,77 +35,87 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"; // Optional: For horizontal scroll on small screens
 
-// Your project imports
-import { HospLoc } from "@/types/hosLocTypes"; // Adjust path if necessary
-import { columns, DataTableViewOptions } from "./HospLocColumns";
+// Project Imports
+import { HospLoc } from "@/types/hosLocTypes"; // Adjust path
+import { columns, DataTableViewOptions } from "./HospLocColumns"; // Import updated columns/options
 
 // --- Component Props Interface ---
 interface HospLocDataTableProps {
     locations: HospLoc[];
-    // Consider adding isLoading and isError props if you want skeleton/error states handled here
-    // isLoading?: boolean;
-    // isError?: boolean;
+    // Optional: Pass down functions for edit/delete if handled in parent
+    // onEdit?: (location: HospLoc) => void;
+    // onDelete?: (locationId: string) => void;
 }
 
 export function HospLocDataTable({
-    locations /*, isLoading, isError */,
+    locations,
+    // onEdit, // Example prop drilling
+    // onDelete,
 }: HospLocDataTableProps) {
-    // Memoize data to prevent unnecessary re-renders of the table internals
+    // Memoize data to prevent unnecessary recalculations
     const data = useMemo(() => locations ?? [], [locations]);
 
     // --- TanStack Table State ---
     const [sorting, setSorting] = useState<SortingState>(() => [
-        { id: "createdAt", desc: true }, // Default sort by 'Created At' descending
+        { id: "createdAt", desc: true }, // Default sort
     ]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-    // Note: globalFilter is initialized but not actively used if filtering is column-specific
-    // const [globalFilter, setGlobalFilter] = useState("");
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
         {},
     );
-    const [rowSelection, setRowSelection] = useState({});
+    const [rowSelection, setRowSelection] = useState<RowSelectionState>({}); // State for selected rows
 
     // --- Initialize TanStack Table ---
     const table = useReactTable({
         data,
-        columns,
+        columns, // Use the imported columns array
         // State Management
         state: {
             sorting,
             columnFilters,
-            // globalFilter, // Only include if using global filtering feature
             columnVisibility,
-            rowSelection,
+            rowSelection, // Include row selection state
         },
         // State Updaters
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
-        // onGlobalFilterChange: setGlobalFilter, // Only if using global filtering
         onColumnVisibilityChange: setColumnVisibility,
-        onRowSelectionChange: setRowSelection,
-        // Pipeline - Order matters for some features
-        getCoreRowModel: getCoreRowModel(),
-        getFilteredRowModel: getFilteredRowModel(), // Processes filters
-        getPaginationRowModel: getPaginationRowModel(), // Handles pagination
-        getSortedRowModel: getSortedRowModel(), // Handles sorting
+        onRowSelectionChange: setRowSelection, // Enable updating selection state
+        // Pipeline - Order can matter
+        getCoreRowModel: getCoreRowModel(), // Required
+        getFilteredRowModel: getFilteredRowModel(), // Handle filtering
+        getPaginationRowModel: getPaginationRowModel(), // Handle pagination
+        getSortedRowModel: getSortedRowModel(), // Handle sorting
+        getFacetedRowModel: getFacetedRowModel(), // Optional: For advanced filtering summary
+        getFacetedUniqueValues: getFacetedUniqueValues(), // Optional: For advanced filtering unique values
+
+        // **** Enable Row Selection Feature ****
+        enableRowSelection: true, // Master switch for row selection
+        // enableMultiRowSelection: true, // Default: true
+        // enableSubRowSelection: false, // Default: false (for nested rows)
+        // ***********************************
+
         // Default page size
         initialState: {
             pagination: {
                 pageSize: 20,
             },
         },
-        // You can define meta data to pass to column def functions if needed
-        // meta: { /* custom data */ }
+        // Optional: Pass metadata down to columns/cells if needed
+        // meta: {
+        //   onEdit, // Pass down handlers
+        //   onDelete,
+        // }
     });
 
     // --- External Control Logic ---
 
-    // Get distinct types for the filter dropdown, memoized for performance
+    // Get distinct types for the filter dropdown, memoized
     const distinctTypes = useMemo(() => {
         const types = new Set<string>();
         data.forEach((loc) => {
-            // Ensure type exists and is a non-empty string before adding
             if (loc.type && loc.type.trim() !== "") {
                 types.add(loc.type);
             }
@@ -110,71 +123,36 @@ export function HospLocDataTable({
         return Array.from(types).sort();
     }, [data]);
 
-    // Handler for the main search input (filters only the 'name' column)
+    // Handler for the 'Name' search input
     const handleNameSearchChange = (
         event: React.ChangeEvent<HTMLInputElement>,
     ) => {
-        const value = event.target.value;
-        // Set filter specifically for the 'name' column
-        table.getColumn("name")?.setFilterValue(value || undefined); // Set to undefined to remove filter if value is empty
+        table
+            .getColumn("name")
+            ?.setFilterValue(event.target.value || undefined);
     };
 
-    // Handler for the type filter select
+    // Handler for the 'Type' filter select
     const handleTypeFilterChange = (value: string) => {
-        // value is the selected type or "all"
         table
             .getColumn("type")
-            ?.setFilterValue(value === "all" ? undefined : value); // Set to undefined to remove filter
+            ?.setFilterValue(value === "all" ? undefined : value);
     };
 
     // --- Sorting Button Handlers ---
     const sortByNameAsc = () => setSorting([{ id: "name", desc: false }]);
     const sortByCreatedAtDesc = () =>
         setSorting([{ id: "createdAt", desc: true }]);
-    const resetSort = () => setSorting([]); // Clear sorting state
-
-    // --- Render Logic ---
-
-    // // Optional: Skeleton Loading State (if isLoading prop is passed)
-    // if (isLoading) {
-    //   return (
-    //     <div className="space-y-4">
-    //        {/* Basic Skeleton */}
-    //        <div className="flex items-center gap-4 rounded-md border p-4">
-    //          <Skeleton className="h-9 w-1/4" />
-    //          <Skeleton className="h-9 w-[180px]" />
-    //          <Skeleton className="h-8 w-20" />
-    //          <Skeleton className="h-8 w-28" />
-    //          <Skeleton className="h-8 w-24" />
-    //          <Skeleton className="ml-auto h-8 w-[70px]" />
-    //        </div>
-    //       <div className="rounded-md border">
-    //          <Skeleton className="h-[400px] w-full" /> {/* Placeholder for table body */}
-    //       </div>
-    //        <div className="flex items-center justify-between py-4">
-    //          <Skeleton className="h-5 w-28" />
-    //          <Skeleton className="h-8 w-[150px]" />
-    //          <Skeleton className="h-5 w-20" />
-    //          <div className="flex items-center space-x-2">
-    //             <Skeleton className="h-8 w-20" />
-    //             <Skeleton className="h-8 w-16" />
-    //          </div>
-    //        </div>
-    //     </div>
-    //   );
-    // }
-
-    // // Optional: Error State (if isError prop is passed)
-    // if (isError) {
-    //    return <Alert variant="destructive">Error loading data.</Alert>;
-    // }
+    const resetSort = () => setSorting([]); // Clear sorting
 
     return (
         <div className="w-full space-y-4">
-            {/* --- External Controls Section --- */}
-            <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-4 rounded-md border bg-card p-4 text-card-foreground">
+            {/* --- Toolbar: Filters, Sorting, View Options --- */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center rounded-md border bg-card p-4 text-card-foreground">
                 {/* Name Search */}
-                <div className="flex flex-col space-y-1 w-full sm:w-auto">
+                <div className="flex flex-col space-y-1 flex-grow sm:flex-grow-0 sm:basis-1/4">
+                    {" "}
+                    {/* Adjust basis */}
                     <label
                         htmlFor="name-search"
                         className="text-sm font-medium"
@@ -184,14 +162,13 @@ export function HospLocDataTable({
                     <Input
                         id="name-search"
                         placeholder="Filter by name..."
-                        // Controlled input: value comes from table state
                         value={
                             (table
                                 .getColumn("name")
                                 ?.getFilterValue() as string) ?? ""
                         }
                         onChange={handleNameSearchChange}
-                        className="h-9 max-w-full sm:max-w-xs" // Responsive width
+                        className="h-9"
                     />
                 </div>
 
@@ -205,34 +182,28 @@ export function HospLocDataTable({
                     </label>
                     <Select
                         value={
-                            // Controlled select
                             (table
                                 .getColumn("type")
-                                ?.getFilterValue() as string) ?? "all" // Default to 'all' if no filter
+                                ?.getFilterValue() as string) ?? "all"
                         }
                         onValueChange={handleTypeFilterChange}
                     >
                         <SelectTrigger className="h-9 w-full sm:w-[180px]">
-                            {" "}
-                            {/* Responsive width */}
                             <SelectValue placeholder="Select Type" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">All Types</SelectItem>
                             {distinctTypes.map((type) => (
                                 <SelectItem key={type} value={type}>
-                                    {type}{" "}
-                                    {/* Assuming type name is user-friendly */}
+                                    {type}
                                 </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
                 </div>
 
-                {/* Sorting Controls */}
+                {/* Sorting Controls Group */}
                 <div className="flex items-center gap-2 pt-2 sm:pt-0 sm:items-end sm:ml-4">
-                    {" "}
-                    {/* Adjust margin/padding */}
                     <span className="text-sm font-medium self-center pb-1 mr-1 hidden sm:inline">
                         Sort:
                     </span>
@@ -262,95 +233,100 @@ export function HospLocDataTable({
                     </Button>
                 </div>
 
-                {/* Column Visibility Toggle (Pushed to the right on larger screens) */}
-                <div className="ml-auto pt-2 sm:pt-0">
+                {/* Column Visibility (Pushed Right) */}
+                <div className="ml-0 sm:ml-auto pt-2 sm:pt-0">
                     <DataTableViewOptions table={table} />
                 </div>
             </div>
 
-            {/* --- The Data Table --- */}
+            {/* --- The Data Table (with optional horizontal scroll) --- */}
             <div className="rounded-md border">
-                <ShadcnTable>
-                    <TableHeader>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => (
-                                    <TableHead
-                                        key={header.id}
-                                        style={{
-                                            width:
-                                                header.getSize() !== 150
-                                                    ? header.getSize()
-                                                    : undefined,
-                                        }}
-                                    >
-                                        {" "}
-                                        {/* Optional: Use column sizing */}
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                  header.column.columnDef
-                                                      .header,
-                                                  header.getContext(),
-                                              )}
-                                    </TableHead>
-                                ))}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-                    <TableBody>
-                        {table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow
-                                    key={row.id}
-                                    data-state={
-                                        row.getIsSelected() && "selected"
-                                    }
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell
-                                            key={cell.id}
+                <ScrollArea className="w-full whitespace-nowrap">
+                    {" "}
+                    {/* Optional Scroll */}
+                    <Table>
+                        <TableHeader>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <TableRow key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => (
+                                        <TableHead
+                                            key={header.id}
                                             style={{
                                                 width:
-                                                    cell.column.getSize() !==
-                                                    150
-                                                        ? cell.column.getSize()
+                                                    header.getSize() !== 150
+                                                        ? header.getSize()
                                                         : undefined,
                                             }}
                                         >
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext(),
-                                            )}
-                                        </TableCell>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                      header.column.columnDef
+                                                          .header,
+                                                      header.getContext(),
+                                                  )}
+                                        </TableHead>
                                     ))}
                                 </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={table.getAllColumns().length} // Use table columns length
-                                    className="h-24 text-center"
-                                >
-                                    No results found.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </ShadcnTable>
+                            ))}
+                        </TableHeader>
+                        <TableBody>
+                            {table.getRowModel().rows?.length ? (
+                                table.getRowModel().rows.map((row) => (
+                                    <TableRow
+                                        key={row.id}
+                                        data-state={
+                                            row.getIsSelected() && "selected"
+                                        } // Highlight selected rows
+                                    >
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell
+                                                key={cell.id}
+                                                style={{
+                                                    width:
+                                                        cell.column.getSize() !==
+                                                        150
+                                                            ? cell.column.getSize()
+                                                            : undefined,
+                                                }}
+                                            >
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext(),
+                                                )}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={table.getAllColumns().length} // Use dynamic colSpan
+                                        className="h-24 text-center"
+                                    >
+                                        No results found.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                    <ScrollBar orientation="horizontal" />{" "}
+                    {/* Optional Scroll */}
+                </ScrollArea>
             </div>
 
-            {/* --- Pagination --- */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
-                {/* Row Selection Count (Optional) */}
-                <div className="text-sm text-muted-foreground order-3 sm:order-1">
+            {/* --- Pagination Controls --- */}
+            <div className="flex flex-col gap-4 sm:flex-row items-center justify-between py-4">
+                {/* Row Selection Count */}
+                <div className="text-sm text-muted-foreground order-last sm:order-first">
                     {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                    {table.getFilteredRowModel().rows.length} row(s) selected. (
-                    {data.length} total rows){" "}
-                    {/* Added total unfiltered count */}
+                    {table.getFilteredRowModel().rows.length} row(s) selected.
+                    {/* Optional: Show total count before filtering */}
+                    {/* ({data.length} total) */}
                 </div>
 
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 order-2 justify-center">
+                {/* Pagination Controls Group */}
+                <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 order-first sm:order-last">
                     {/* Page Size Selector */}
                     <div className="flex items-center space-x-2">
                         <p className="text-sm font-medium">Rows:</p>
@@ -381,7 +357,7 @@ export function HospLocDataTable({
                     </div>
 
                     {/* Page Number Display */}
-                    <div className="flex items-center justify-center text-sm font-medium">
+                    <div className="flex items-center justify-center text-sm font-medium px-2">
                         Page {table.getState().pagination.pageIndex + 1} of{" "}
                         {table.getPageCount()}
                     </div>
