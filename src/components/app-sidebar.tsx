@@ -3,8 +3,6 @@
 import * as React from "react";
 import {
     Bed,
-    BookOpen,
-    Bot,
     Frame,
     Hospital,
     PersonStanding,
@@ -12,7 +10,10 @@ import {
     SquareTerminal,
 } from "lucide-react";
 
-import { NavProjects } from "@/components/nav-projects";
+// Remove NavProjects and NavMain imports if no longer used elsewhere
+// import { NavProjects } from "@/components/nav-projects";
+// import { NavMain } from "@/components/nav-main";
+import { CombinedNav } from "@/components/CombinedNav"; // <-- Import the new component
 import { NavUser } from "@/components/nav-user";
 import { TeamSwitcher } from "@/components/team-switcher";
 import {
@@ -20,118 +21,95 @@ import {
     SidebarContent,
     SidebarFooter,
     SidebarHeader,
+    // SidebarMenuSub, // Likely not needed with Accordion
     SidebarRail,
 } from "@/components/ui/sidebar";
 import { useParams, useRouter } from "next/navigation";
 import { useOrgs } from "@/hooks/useOrgs";
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
+// Import the types if defined here, or from a shared file
+export interface NavLinkItem {
+    type: "link";
+    title: string;
+    url: string;
+    icon: React.ElementType;
+    disabled?: boolean;
+}
+export interface NavMenuItem {
+    type: "menu";
+    title: string;
+    url?: string;
+    icon: React.ElementType;
+    items: {
+        title: string;
+        url: string;
+        disabled?: boolean;
+    }[];
+    disabled?: boolean;
+}
+export type CombinedNavItem = NavLinkItem | NavMenuItem;
 
-const data = {
+// Updated sidebarLayout using the combined structure
+const sidebarLayout = {
     user: {
-        name: "shadcn",
+        /* ... user data ... */ name: "shadcn",
         email: "m@example.com",
         avatar: "https://github.com/shadcn.png",
     },
-    sections: [
+    navigationItems: [
         {
-            name: "Dashboard",
+            type: "link",
+            title: "Dashboard",
             url: "/",
             icon: SquareTerminal,
-        },
+        } as NavLinkItem,
         {
-            name: "Hospitals",
+            type: "link",
+            title: "Hospitals",
             url: "hospitals",
             icon: Hospital,
-        },
+        } as NavLinkItem,
         {
-            name: "Departments",
+            type: "link",
+            title: "Departments",
             url: "departments",
             icon: Frame,
-        },
+        } as NavLinkItem,
         {
-            name: "Wards",
-            url: "wards",
+            type: "link",
+            title: "Locations",
+            url: "locations",
             icon: Bed,
-        },
+        } as NavLinkItem,
         {
-            name: "Staff",
+            type: "link",
+            title: "Staff",
             url: "staff",
             icon: PersonStanding,
-        },
-    ],
-    navMain: [
+        } as NavLinkItem,
         {
-            title: "Hospitals",
-            url: "/hospitals",
-            icon: SquareTerminal,
-            isActive: true,
-        },
-        {
-            title: "Models",
-            url: "#",
-            icon: Bot,
+            type: "menu",
+            title: "Locations",
+            icon: Frame,
             items: [
-                {
-                    title: "Genesis",
-                    url: "#",
-                },
-                {
-                    title: "Explorer",
-                    url: "#",
-                },
-                {
-                    title: "Quantum",
-                    url: "#",
-                },
+                { title: "Wards", url: "wards" },
+                { title: "Clinics", url: "clinics" },
+                { title: "Pharmacy", url: "pharmacy" },
+                { title: "Other", url: "other-locations" },
             ],
-        },
+        } as NavMenuItem,
         {
-            title: "Documentation",
-            url: "#",
-            icon: BookOpen,
-            items: [
-                {
-                    title: "Introduction",
-                    url: "#",
-                },
-                {
-                    title: "Get Started",
-                    url: "#",
-                },
-                {
-                    title: "Tutorials",
-                    url: "#",
-                },
-                {
-                    title: "Changelog",
-                    url: "#",
-                },
-            ],
-        },
-        {
+            type: "menu",
             title: "Settings",
-            url: "#",
             icon: Settings2,
             items: [
-                {
-                    title: "General",
-                    url: "#",
-                },
-                {
-                    title: "Team",
-                    url: "#",
-                },
-                {
-                    title: "Billing",
-                    url: "#",
-                },
-                {
-                    title: "Limits",
-                    url: "#",
-                },
+                { title: "General", url: "settings/general" },
+                { title: "Team", url: "settings/team" },
+                { title: "Billing", url: "settings/billing" },
+                { title: "Limits", url: "settings/limits" },
             ],
-        },
-    ],
+        } as NavMenuItem,
+    ] as CombinedNavItem[],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -140,47 +118,52 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const router = useRouter();
 
     const handleNavigation = (url: string) => {
-        if (orgId && url) {
-            router.push(`/admin/${orgId}/${url}`);
+        if (orgId && url !== undefined) {
+            // Check url is defined
+            // Handle root navigation explicitly if needed
+            if (url === "/") {
+                router.push(`/admin/${orgId}`);
+            } else {
+                router.push(`/admin/${orgId}/${url.replace(/^\//, "")}`); // Ensure no leading slash from url
+            }
         } else {
-            console.warn("vWVn17Xq - orgId is not available. Cannot navigate.");
+            console.warn(
+                "vWVn17Xq - orgId or URL is not available. Cannot navigate.",
+                { orgId, url },
+            );
         }
     };
 
+    // --- Header loading/error logic remains the same ---
     let headerContent;
     if (isLoading) {
-        // Show a loading state in the header area
         headerContent = (
             <div className="p-4">
                 <LoadingSpinner size="sm" />
             </div>
         );
     } else if (isError || !orgs) {
-        // Show an error state or handle case where orgs is still undefined after loading
         headerContent = (
             <div className="p-4 text-xs text-destructive">
                 Error loading orgs.
             </div>
         );
     } else {
-        // Only render TeamSwitcher when data is loaded and valid
         headerContent = <TeamSwitcher orgs={orgs} />;
     }
+
     return (
         <Sidebar collapsible="offcanvas" {...props}>
-            <SidebarHeader>
-                {headerContent}{" "}
-                {/* Render the conditionally determined content */}
-            </SidebarHeader>
+            <SidebarHeader>{headerContent}</SidebarHeader>
             <SidebarContent>
-                {/* You might also want to conditionally render this based on loading/error */}
-                <NavProjects
-                    projects={data.sections}
+                {/* Render the new combined navigation component */}
+                <CombinedNav
+                    items={sidebarLayout.navigationItems}
                     onNavigate={handleNavigation}
                 />
             </SidebarContent>
             <SidebarFooter>
-                <NavUser user={data.user} />
+                <NavUser user={sidebarLayout.user} />
             </SidebarFooter>
             <SidebarRail />
         </Sidebar>

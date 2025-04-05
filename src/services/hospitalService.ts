@@ -2,15 +2,16 @@
 // noinspection ExceptionCaughtLocallyJS
 
 import {
-    addDoc,
     collection,
     deleteDoc,
     doc,
+    DocumentData,
     DocumentReference,
     getDoc,
     getDocs,
     query,
     serverTimestamp,
+    setDoc,
     updateDoc,
     where,
 } from "firebase/firestore";
@@ -74,26 +75,120 @@ export async function getHospital(id: string): Promise<Hosp | null> {
     }
 }
 
-// Add a new hospital
 // create the hospital
+// export async function createHospital(
+//     hospitalData: Partial<Hosp>,
+//     orgId: string,
+//     userId = "system",
+// ): Promise<Hosp> {
+//     // Validate organization is provided
+//     if (!orgId) {
+//         throw new Error(
+//             "1Gv4Jn6x - Organization is required to create a hospital",
+//         );
+//     }
+//
+//     const hospitalId: string | null = null;
+//
+//     try {
+//         // 2. Prepare data with timestamps and audit fields
+//         const dataToAdd = {
+//             ...hospitalData, // Directly spread the input data
+//             orgId: orgId,
+//             createdAt: serverTimestamp(),
+//             updatedAt: serverTimestamp(),
+//             createdById: userId,
+//             updatedById: userId,
+//         };
+//
+//         const docRef: DocumentReference = await addDoc(
+//             hospitalsCollection,
+//             dataToAdd,
+//         );
+//
+//         const newHospitalDoc = await getDoc(docRef); // Use the docRef we already have
+//         if (!newHospitalDoc.exists()) {
+//             // This should be extremely rare if addDoc succeeded, but handle defensively
+//             throw new Error(
+//                 `Wd9fGj4k - Failed to retrieve newly created hospital (ID: ${hospitalId}) immediately after creation.`,
+//             );
+//         }
+//
+//         const createdHospital = mapFirestoreDocToHosp(
+//             newHospitalDoc.id,
+//             newHospitalDoc.data(),
+//         );
+//
+//         if (!createdHospital) {
+//             // This implies the mapper function failed even though the doc exists
+//             throw new Error(
+//                 `Pq2sRz8m - Failed to map newly created hospital (ID: ${hospitalId}) data.`,
+//             );
+//         }
+//
+//         return createdHospital;
+//     } catch (error) {
+//         // 8. Handle any other errors (e.g., from initial addDoc, getDoc, or re-thrown errors)
+//         console.error(
+//             `eYLH58kQ - Error during hospital creation process (potential ID: ${hospitalId}):`,
+//             error,
+//         );
+//
+//         if (error instanceof Error && error.message.startsWith("Ab7LLjje")) {
+//             throw error;
+//         } else {
+//             throw new Error(
+//                 `Failed to create hospital. Reason: ${error instanceof Error ? error.message : String(error)}`,
+//             );
+//         }
+//     }
+// }
+
 export async function createHospital(
     hospitalData: Partial<Hosp>,
     orgId: string,
     userId = "system",
 ): Promise<Hosp> {
-    // Validate organization is provided
     if (!orgId) {
         throw new Error(
-            "1Gv4Jn6x - Organization is required to create a hospital",
+            "CREATE_HOSP_ERR_NO_ORGID - Organization ID is required to create a hospital.",
+        );
+    }
+    if (!hospitalData.name || hospitalData.name.trim() === "") {
+        throw new Error(
+            "CREATE_HOSP_ERR_NO_NAME - Hospital name cannot be empty.",
         );
     }
 
-    const hospitalId: string | null = null;
+    const hospitalName = hospitalData.name.trim();
+    const customDocId = hospitalName.toLowerCase().replace(/ /g, "_");
+
+    if (!customDocId) {
+        throw new Error(
+            `CREATE_HOSP_ERR_INVALID_ID - Could not generate a valid ID from name: "${hospitalName}"`,
+        );
+    }
+
+    const docRef = doc(hospitalsCollection, customDocId);
 
     try {
-        // 2. Prepare data with timestamps and audit fields
-        const dataToAdd = {
-            ...hospitalData, // Directly spread the input data
+        const existingDocSnap = await getDoc(docRef);
+        if (existingDocSnap.exists()) {
+            const existingData = existingDocSnap.data();
+            if (existingData?.orgId === orgId) {
+                throw new Error(
+                    `CREATE_HOSP_ERR_CONFLICT - A hospital with the name "${hospitalName}" (ID: ${customDocId}) already exists in this organisation.`,
+                );
+            } else {
+                console.warn(
+                    `CREATE_HOSP_WARN_ID_COLLISION - Hospital ID ${customDocId} exists but belongs to a different org (${existingData?.orgId}). Proceeding, but consider ID strategy.`,
+                );
+            }
+        }
+
+        const dataToAdd: DocumentData = {
+            ...hospitalData,
+            name: hospitalName,
             orgId: orgId,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
@@ -101,16 +196,12 @@ export async function createHospital(
             updatedById: userId,
         };
 
-        const docRef: DocumentReference = await addDoc(
-            hospitalsCollection,
-            dataToAdd,
-        );
+        await setDoc(docRef, dataToAdd);
 
-        const newHospitalDoc = await getDoc(docRef); // Use the docRef we already have
+        const newHospitalDoc = await getDoc(docRef);
         if (!newHospitalDoc.exists()) {
-            // This should be extremely rare if addDoc succeeded, but handle defensively
             throw new Error(
-                `Wd9fGj4k - Failed to retrieve newly created hospital (ID: ${hospitalId}) immediately after creation.`,
+                `CREATE_HOSP_ERR_FETCH_FAIL - Failed to retrieve newly created hospital (ID: ${customDocId}) immediately after creation.`,
             );
         }
 
@@ -120,21 +211,22 @@ export async function createHospital(
         );
 
         if (!createdHospital) {
-            // This implies the mapper function failed even though the doc exists
             throw new Error(
-                `Pq2sRz8m - Failed to map newly created hospital (ID: ${hospitalId}) data.`,
+                `CREATE_HOSP_ERR_MAP_FAIL - Failed to map newly created hospital data (ID: ${customDocId}).`,
             );
         }
 
         return createdHospital;
     } catch (error) {
-        // 8. Handle any other errors (e.g., from initial addDoc, getDoc, or re-thrown errors)
         console.error(
-            `eYLH58kQ - Error during hospital creation process (potential ID: ${hospitalId}):`,
+            `eYLH58kQ - Error during hospital creation process (Attempted ID: ${customDocId}, OrgID: ${orgId}):`,
             error,
         );
 
-        if (error instanceof Error && error.message.startsWith("Ab7LLjje")) {
+        if (
+            error instanceof Error &&
+            error.message.startsWith("CREATE_HOSP_ERR")
+        ) {
             throw error;
         } else {
             throw new Error(
