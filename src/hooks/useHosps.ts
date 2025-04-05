@@ -20,21 +20,7 @@ const hospKeys = {
 export function useHosps(orgId: string) {
     return useQuery<Hosp[], Error>({
         queryKey: hospKeys.listByOrg(orgId!),
-
-        // The queryFn now receives the context, including the queryKey
-        queryFn: async ({ queryKey }) => {
-            // Extract the orgId from the queryKey object structure
-            const keyObj = queryKey[2] as { orgId: string };
-            const currentOrgId = keyObj.orgId;
-
-            if (!currentOrgId) {
-                // Should not happen if 'enabled' is used correctly, but good practice
-                throw new Error(
-                    "5jgBg9Zc - Organisation ID is required but was not provided to queryFn.",
-                );
-            }
-            return getHospitals(currentOrgId);
-        },
+        queryFn: () => getHospitals(orgId),
         enabled: !!orgId,
 
         staleTime: 5 * 60 * 1000,

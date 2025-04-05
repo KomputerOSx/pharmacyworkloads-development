@@ -5,7 +5,8 @@ export type HospLoc = {
     id: string;
     name: string;
     type: string;
-    hospitalId: string;
+    hospId: string;
+    orgId: string;
     address: string | null;
     contactEmail: string | null;
     contactPhone: string | null;

@@ -1,13 +1,8 @@
-import {
-    doc,
-    DocumentData,
-    DocumentReference,
-    getDoc,
-    Timestamp,
-} from "firebase/firestore";
+import { doc, DocumentData, getDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/config/firebase";
 import { Org } from "@/types/orgTypes";
-import { Hosp, HospOrgAss } from "@/types/hospTypes";
+import { Hosp } from "@/types/hospTypes";
+import { HospLoc } from "@/types/hosLocTypes";
 
 export const formatFirestoreTimestamp = (timestamp: Timestamp) => {
     if (timestamp && typeof timestamp.toDate === "function") {
@@ -88,7 +83,7 @@ export const mapFirestoreDocToHosp = (
     // Ensure data exists
     if (!data) {
         console.warn(
-            `mapFirestoreDocToOrg: Received undefined data for ID ${id}.`,
+            `mapFirestoreDocToHosp: Received undefined data for ID ${id}.`,
         );
         return null;
     }
@@ -129,29 +124,50 @@ export const mapFirestoreDocToHosp = (
     return hospital;
 };
 
-export const mapFirestoreDocToHospOrgAss = (
+export const mapFirestoreDocToHospLoc = (
     id: string,
     data: DocumentData | undefined,
-): HospOrgAss | null => {
-    if (!data) return null;
-
-    // Basic validation
-    if (!data.hospital || !data.organisation) {
-        console.error(`Incomplete assignment data for ID ${id}`);
+): HospLoc | null => {
+    // Ensure data exists
+    if (!data) {
+        console.warn(
+            `mapFirestoreDocToHospLoc: Received undefined data for ID ${id}.`,
+        );
         return null;
     }
 
-    return {
+    // Construct the Org object using the shared mapping logic
+    const hospital: HospLoc = {
         id: id,
-        hospital: data.hospital as DocumentReference,
-        organisation: data.organisation as DocumentReference,
+        name: (data.name as string) ?? "",
+        type: (data.type as string) ?? "",
+        hospId: (data.hospId as string) ?? "",
+        orgId: (data.orgId as string) ?? "",
+        address: (data.address as string) ?? "",
+        contactEmail: (data.contactEmail as string) ?? "",
+        contactPhone: (data.contactPhone as string) ?? "",
+        active: (data.active as boolean) ?? false,
+        createdById: (data.createdById as string) ?? "system",
+        updatedById: (data.updatedById as string) ?? "system",
+
+        // Format timestamps safely
         createdAt: data.createdAt
             ? formatFirestoreTimestamp(data.createdAt as Timestamp)
             : null,
         updatedAt: data.updatedAt
             ? formatFirestoreTimestamp(data.updatedAt as Timestamp)
             : null,
-        createdById: (data.createdById as string) ?? "system",
-        updatedById: (data.updatedById as string) ?? "system",
+
+        // Add any other fields required by the Org type here
     };
+
+    if (!hospital.name || !hospital.id) {
+        console.error(
+            `mapFirestoreDocToHospLoc: Incomplete organisation data mapped for ID: ${id}. Missing name or type.`,
+        );
+        // Decide whether to return null or the incomplete object based on your needs
+        return null;
+    }
+
+    return hospital;
 };

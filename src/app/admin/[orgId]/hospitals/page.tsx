@@ -262,6 +262,8 @@ export default function HospitalsPage() {
     const orgId = params.orgId as string;
     const [open, setOpen] = useState(false); // Add Hosp Dialog
 
+    console.log(orgId);
+
     const {
         data: hosps,
         isLoading,
