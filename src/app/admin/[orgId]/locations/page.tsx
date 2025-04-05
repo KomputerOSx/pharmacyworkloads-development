@@ -19,14 +19,24 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, Terminal } from "lucide-react"; // Added Loader2 for loading state, Building for title icon
 
 // Custom Hooks and Components
-import { useHospLocs } from "@/hooks/useHospLoc"; // Ensure path is correct
+import { useDeleteHospLoc, useHospLocs } from "@/hooks/useHospLoc"; // Ensure path is correct
 import { AddHospLocForm } from "@/components/locations/AddHospLocForm"; // Ensure path is correct
-import { HospLocDataTable } from "@/components/locations/HospLocDataTable"; // *** IMPORT THE DATA TABLE COMPONENT ***
+import { HospLocDataTable } from "@/components/locations/HospLocDataTable";
+import { HospLoc } from "@/types/hosLocTypes"; // *** IMPORT THE DATA TABLE COMPONENT ***
+import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
+import { EditHospLocForm } from "@/components/locations/EditHospLocForm";
 
 export default function LocationsPage() {
     const params = useParams();
     const orgId = params.orgId as string; // Assert type as orgId should be present
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [hospLocForEdit, setHospLocForEdit] = useState<HospLoc | null>(null);
+    const [hospLocForDelete, setHospLocForDelete] = useState<HospLoc | null>(
+        null,
+    );
 
     // Fetch data using your React Query hook
     const {
@@ -37,6 +47,32 @@ export default function LocationsPage() {
         refetch,
         isRefetching, // Use isRefetching for refresh button state
     } = useHospLocs(orgId);
+
+    const deleteHospLocMutation = useDeleteHospLoc();
+
+    const handleOpenEditDialog = useCallback((location: HospLoc) => {
+        console.log("Opening edit dialog for:", location.name);
+        setHospLocForEdit(location);
+        setIsEditDialogOpen(true);
+    }, []);
+
+    const handleCloseEditDialog = useCallback(() => {
+        setIsEditDialogOpen(false);
+        // Optionally clear selection after a short delay to avoid UI flicker
+        setTimeout(() => setHospLocForEdit(null), 150);
+    }, []);
+
+    const handleOpenDeleteDialog = useCallback((location: HospLoc) => {
+        console.log("Opening delete dialog for:", location.name);
+        setHospLocForDelete(location);
+        setIsDeleteDialogOpen(true);
+    }, []);
+
+    const handleCloseDeleteDialog = useCallback(() => {
+        setIsDeleteDialogOpen(false);
+        // Optionally clear selection after a short delay
+        setTimeout(() => setHospLocForDelete(null), 150);
+    }, []);
 
     // Handle Refresh Button Click
     const handleRefresh = useCallback(() => {
@@ -49,6 +85,46 @@ export default function LocationsPage() {
         setIsCreateDialogOpen(false);
         void refetch(); // Refresh data after adding a new location
     }, [refetch]);
+
+    const handleSuccessfulEdit = useCallback(() => {
+        handleCloseEditDialog();
+        void refetch();
+    }, [refetch, handleCloseEditDialog]);
+
+    const handleConfirmDelete = useCallback(() => {
+        if (!hospLocForDelete || !orgId) return;
+
+        console.log("Confirming delete for:", hospLocForDelete.id);
+        deleteHospLocMutation.mutate(
+            {
+                id: hospLocForDelete.id,
+                orgId: orgId, // Needed by the hook for cache invalidation
+                // No hospId needed here based on the hook definition
+            },
+            {
+                onSuccess: () => {
+                    console.log(
+                        "Location deleted successfully (via page callback, hook also runs)",
+                    );
+                    handleCloseDeleteDialog();
+                    void refetch();
+                },
+                onError: (error) => {
+                    console.error(
+                        "Failed to delete location (via page callback, hook also runs):",
+                        error,
+                    );
+                    handleCloseDeleteDialog();
+                },
+            },
+        );
+    }, [
+        hospLocForDelete,
+        orgId,
+        deleteHospLocMutation,
+        handleCloseDeleteDialog,
+        refetch,
+    ]);
 
     // --- Rendering Logic ---
     const renderContent = () => {
@@ -112,7 +188,13 @@ export default function LocationsPage() {
 
         // Render the actual data table when data is ready
         // Pass the locations array (or an empty array if undefined/null)
-        return <HospLocDataTable locations={locations ?? []} />;
+        return (
+            <HospLocDataTable
+                locations={locations ?? []}
+                onEditRequest={handleOpenEditDialog}
+                onDeleteRequest={handleOpenDeleteDialog}
+            />
+        );
     };
 
     return (
@@ -166,6 +248,45 @@ export default function LocationsPage() {
             </div>
             {/* Render the appropriate content (loading, error, or table) */}
             {renderContent()}
+            {/* --- Edit Dialog --- */}
+            {/* Render only when a location is selected */}
+            {hospLocForEdit && (
+                <Dialog
+                    open={isEditDialogOpen}
+                    onOpenChange={(open) => {
+                        if (!open) handleCloseEditDialog();
+                    }}
+                >
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Edit Location</DialogTitle>
+                            <DialogDescription>
+                                Make changes to {hospLocForEdit.name}.
+                            </DialogDescription>
+                        </DialogHeader>
+                        {/* Important: Ensure locationToEdit is not null before rendering */}
+                        <EditHospLocForm
+                            orgId={orgId}
+                            locationToEdit={hospLocForEdit}
+                            onSuccessfulSubmitAction={handleSuccessfulEdit}
+                        />
+                    </DialogContent>
+                </Dialog>
+            )}
+            {/* --- Delete Confirmation Dialog --- */}
+            {/* Render only when a location is selected for deletion */}
+            {hospLocForDelete && (
+                <DeleteConfirmationDialog
+                    open={isDeleteDialogOpen}
+                    onOpenChange={(open) => {
+                        if (!open) handleCloseDeleteDialog();
+                    }}
+                    itemName={hospLocForDelete.name ?? "this location"} // Provide a fallback name
+                    itemType="location"
+                    onConfirm={handleConfirmDelete}
+                    isPending={deleteHospLocMutation.isPending} // Pass loading state
+                />
+            )}
         </div>
     );
 }

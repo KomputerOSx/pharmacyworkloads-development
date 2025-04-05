@@ -15,6 +15,7 @@ import {
     VisibilityState,
     RowSelectionState, // Import RowSelectionState
     flexRender,
+    TableMeta,
 } from "@tanstack/react-table";
 
 // Shadcn UI Components
@@ -42,17 +43,23 @@ import { HospLoc } from "@/types/hosLocTypes"; // Adjust path
 import { columns, DataTableViewOptions } from "./HospLocColumns"; // Import updated columns/options
 
 // --- Component Props Interface ---
+
+interface HospLocTableMeta extends TableMeta<HospLoc> {
+    openEditDialog: (location: HospLoc) => void;
+    openDeleteDialog: (location: HospLoc) => void;
+    // Add other functions/data needed by columns here
+}
+
 interface HospLocDataTableProps {
     locations: HospLoc[];
-    // Optional: Pass down functions for edit/delete if handled in parent
-    // onEdit?: (location: HospLoc) => void;
-    // onDelete?: (locationId: string) => void;
+    onEditRequest: (location: HospLoc) => void;
+    onDeleteRequest: (location: HospLoc) => void;
 }
 
 export function HospLocDataTable({
     locations,
-    // onEdit, // Example prop drilling
-    // onDelete,
+    onEditRequest,
+    onDeleteRequest,
 }: HospLocDataTableProps) {
     // Memoize data to prevent unnecessary recalculations
     const data = useMemo(() => locations ?? [], [locations]);
@@ -92,7 +99,7 @@ export function HospLocDataTable({
         getFacetedUniqueValues: getFacetedUniqueValues(), // Optional: For advanced filtering unique values
 
         // **** Enable Row Selection Feature ****
-        enableRowSelection: true, // Master switch for row selection
+        enableRowSelection: false, // Master switch for row selection
         // enableMultiRowSelection: true, // Default: true
         // enableSubRowSelection: false, // Default: false (for nested rows)
         // ***********************************
@@ -103,11 +110,12 @@ export function HospLocDataTable({
                 pageSize: 20,
             },
         },
-        // Optional: Pass metadata down to columns/cells if needed
-        // meta: {
-        //   onEdit, // Pass down handlers
-        //   onDelete,
         // }
+
+        meta: {
+            openEditDialog: onEditRequest,
+            openDeleteDialog: onDeleteRequest,
+        } as HospLocTableMeta,
     });
 
     // --- External Control Logic ---
