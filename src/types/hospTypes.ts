@@ -3,6 +3,7 @@ import { DocumentReference, Timestamp } from "firebase/firestore";
 export type Hosp = {
     id: string;
     name: string;
+    orgId: string;
     address: string;
     city: string;
     postCode: string;
@@ -15,15 +16,15 @@ export type Hosp = {
     updatedById: string;
 };
 
-export type HospOrgAss = {
-    id: string;
-    hospital: DocumentReference;
-    organisation: DocumentReference;
-    createdAt: Timestamp | string | null;
-    updatedAt: Timestamp | string | null;
-    createdById: string;
-    updatedById: string;
-};
+// export type HospOrgAss = {
+//     id: string;
+//     hospital: DocumentReference;
+//     organisation: DocumentReference;
+//     createdAt: Timestamp | string | null;
+//     updatedAt: Timestamp | string | null;
+//     createdById: string;
+//     updatedById: string;
+// };
 
 export type HospContextType = {
     hosps: Hosp[];

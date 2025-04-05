@@ -15,81 +15,36 @@ import {
     where,
 } from "firebase/firestore";
 import { db } from "@/config/firebase";
-import {
-    assignHospitalToOrganisation,
-    getHospitalOrganisationAssignment,
-    removeHospitalAssignment,
-} from "./hospitalAssignmentService";
 import { mapFirestoreDocToHosp } from "@/utils/firestoreUtil";
-import { Hosp, HospOrgAss } from "@/types/hospTypes";
+import { Hosp } from "@/types/hospTypes";
 
 const hospitalsCollection = collection(db, "hospitals");
 
-// Helper function to safely format Firestore timestamps
-
 export async function getHospitals(orgId: string): Promise<Hosp[]> {
     try {
-        const organisationRef = doc(db, "organisations", orgId);
-
-        const assignmentsQuery = query(
-            collection(db, "hospital_organisation_assignments"),
-            where("organisation", "==", organisationRef),
+        const hospitalsQuery = query(
+            collection(db, "hospitals"),
+            where("orgId", "==", orgId),
         );
 
-        const assignmentsSnapshot = await getDocs(assignmentsQuery);
-
-        const hospitalPromises = assignmentsSnapshot.docs.map(
-            async (assignmentDoc) => {
-                const data = assignmentDoc.data();
-                // Add type assertion or check for hospitalRef type
-                const hospitalRef = data.hospital as
-                    | DocumentReference
-                    | undefined;
-                if (hospitalRef) {
-                    try {
-                        // Add inner try-catch for individual hospital fetch/map errors
-                        const hospitalDoc = await getDoc(hospitalRef);
-
-                        if (hospitalDoc.exists()) {
-                            // Ensure the hospital document actually exists
-                            const hospitalData = hospitalDoc.data();
-
-                            // Call the CORRECT mapping function and let TS infer Hosp | null
-                            // mapFirestoreDocToHosp returns Hosp | null, so we return it directly
-                            return mapFirestoreDocToHosp(
-                                hospitalDoc.id,
-                                hospitalData,
-                            );
-                        } else {
-                            console.warn(
-                                `Hospital document referenced in assignment ${assignmentDoc.id} (path: ${hospitalRef.path}) does not exist.`,
-                            );
-                            return null; // Hospital doc not found
-                        }
-                    } catch (hospitalError) {
-                        console.error(
-                            `Error fetching/mapping hospital with ref ${hospitalRef.path}:`,
-                            hospitalError,
-                        );
-                        return null; // Return null if fetching/mapping this specific hospital fails
-                    }
-                } else {
-                    console.warn(
-                        `Assignment document ${assignmentDoc.id} is missing the hospital reference.`,
+        const hospitalsSnapshot = await getDocs(hospitalsQuery);
+        return hospitalsSnapshot.docs
+            .map((doc) => {
+                try {
+                    return mapFirestoreDocToHosp(doc.id, doc.data());
+                } catch (mapError) {
+                    console.error(
+                        `Error mapping hospital document ${doc.id}:`,
+                        mapError,
                     );
-                    return null; // No hospital reference found in the assignment
+                    return null;
                 }
-            },
-        );
-
-        const resolvedHospitals = await Promise.all(hospitalPromises);
-
-        // Filter out any null results (from missing refs, non-existent docs, or mapping failures)
-        // Use a type predicate 'h is Hosp' to satisfy TypeScript that the result is Hosp[]
-        return resolvedHospitals.filter((h): h is Hosp => h !== null);
+            })
+            .filter((h): h is Hosp => h !== null);
     } catch (error) {
         console.error("rsr8WJdQ - Error getting hospitals:", error);
         throw error;
+        // return []; // Alternative: return empty array on error
     }
 }
 
@@ -121,7 +76,6 @@ export async function getHospital(id: string): Promise<Hosp | null> {
 
 // Add a new hospital
 // create the hospital
-// create a new organisation assignment
 export async function createHospital(
     hospitalData: Partial<Hosp>,
     orgId: string,
@@ -134,12 +88,13 @@ export async function createHospital(
         );
     }
 
-    let hospitalId: string | null = null;
+    const hospitalId: string | null = null;
 
     try {
         // 2. Prepare data with timestamps and audit fields
         const dataToAdd = {
             ...hospitalData, // Directly spread the input data
+            orgId: orgId,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
             createdById: userId,
@@ -150,26 +105,6 @@ export async function createHospital(
             hospitalsCollection,
             dataToAdd,
         );
-        hospitalId = docRef.id;
-
-        try {
-            await assignHospitalToOrganisation(hospitalId, orgId, userId);
-        } catch (assignmentError) {
-            // 5. ROLLBACK: Assignment failed, delete the created hospital
-            console.error(
-                `sWWY9LQh - Error assigning hospital ${hospitalId} to org ${orgId}. Rolling back hospital creation.`,
-                assignmentError,
-            );
-            // Attempt to delete the orphaned hospital document
-            if (hospitalId) {
-                // Ensure we have an ID before trying to delete
-                await deleteDoc(doc(db, "hospitals", hospitalId));
-            }
-            // Throw a specific error indicating the assignment failure
-            throw new Error(
-                `Ab7LLjje - Failed to assign hospital to organization (ID: ${orgId}). Hospital creation aborted.`,
-            );
-        }
 
         const newHospitalDoc = await getDoc(docRef); // Use the docRef we already have
         if (!newHospitalDoc.exists()) {
@@ -295,32 +230,6 @@ export async function deleteHospital(
     console.log(`gEY7XZzd - Attempting to delete hospital with ID: ${id}`);
 
     try {
-        const assignments: HospOrgAss[] =
-            await getHospitalOrganisationAssignment(id);
-
-        console.log(
-            `cWn6Vygr - Found ${assignments.length} assignments for hospital ${id}.`,
-        );
-
-        const deleteAssignmentPromises = assignments.map((assignment) => {
-            if (!assignment?.id) {
-                console.warn(
-                    `cKsKxDK9 - Skipping assignment deletion due to missing ID for hospital: ${id}`,
-                );
-                return Promise.resolve();
-            }
-            console.log(
-                `S5dxCu8C - Deleting assignment ${assignment.id} for hospital ${id}...`,
-            );
-            // Assuming removeHospitalAssignment deletes the doc and returns a Promise
-            return removeHospitalAssignment(assignment.id);
-        });
-
-        await Promise.all(deleteAssignmentPromises);
-        console.log(
-            `XUN15PuS - Successfully deleted ${assignments.length} assignments for hospital ${id}.`,
-        );
-
         const hospitalRef = doc(db, "hospitals", id);
         console.log(`9dhsUT5S - Deleting hospital document ${id}...`);
         await deleteDoc(hospitalRef);

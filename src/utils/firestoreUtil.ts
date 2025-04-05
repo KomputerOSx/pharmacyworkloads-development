@@ -97,6 +97,7 @@ export const mapFirestoreDocToHosp = (
     const hospital: Hosp = {
         id: id,
         name: (data.name as string) ?? "",
+        orgId: (data.orgId as string) ?? "",
         address: (data.address as string) ?? "",
         city: (data.city as string) ?? "",
         postCode: (data.postCode as string) ?? "",
