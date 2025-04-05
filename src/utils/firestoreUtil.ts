@@ -54,15 +54,9 @@ export const mapFirestoreDocToOrg = (
         createdById: (data.createdById as string) ?? "system",
         updatedById: (data.updatedById as string) ?? "system",
 
-        // Format timestamps safely
-        createdAt: data.createdAt
-            ? formatFirestoreTimestamp(data.createdAt as Timestamp)
-            : null,
-        updatedAt: data.updatedAt
-            ? formatFirestoreTimestamp(data.updatedAt as Timestamp)
-            : null,
+        createdAt: (data.createdAt as Timestamp) ?? null,
 
-        // Add any other fields required by the Org type here
+        updatedAt: (data.updatedAt as Timestamp) ?? null,
     };
 
     if (!organisation.name || !organisation.type) {
@@ -102,15 +96,9 @@ export const mapFirestoreDocToHosp = (
         createdById: (data.createdById as string) ?? "system",
         updatedById: (data.updatedById as string) ?? "system",
 
-        // Format timestamps safely
-        createdAt: data.createdAt
-            ? formatFirestoreTimestamp(data.createdAt as Timestamp)
-            : null,
-        updatedAt: data.updatedAt
-            ? formatFirestoreTimestamp(data.updatedAt as Timestamp)
-            : null,
+        createdAt: (data.createdAt as Timestamp) ?? null,
 
-        // Add any other fields required by the Org type here
+        updatedAt: (data.updatedAt as Timestamp) ?? null,
     };
 
     if (!hospital.name || !hospital.id) {
@@ -151,15 +139,11 @@ export const mapFirestoreDocToHospLoc = (
         createdById: (data.createdById as string) ?? "system",
         updatedById: (data.updatedById as string) ?? "system",
 
-        // Format timestamps safely
-        createdAt: data.createdAt
-            ? formatFirestoreTimestamp(data.createdAt as Timestamp)
-            : null,
-        updatedAt: data.updatedAt
-            ? formatFirestoreTimestamp(data.updatedAt as Timestamp)
-            : null,
+        createdAt: (data.createdAt as Timestamp) ?? null,
+        // OR if you prefer JS Date:
+        // createdAt: data.createdAt ? (data.createdAt as Timestamp).toDate() : null,
 
-        // Add any other fields required by the Org type here
+        updatedAt: (data.updatedAt as Timestamp) ?? null,
     };
 
     if (!hospital.name || !hospital.id) {

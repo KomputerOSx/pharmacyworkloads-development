@@ -10,8 +10,8 @@ export type Hosp = {
     contactEmail: string;
     contactPhone: string;
     active: boolean;
-    createdAt: Timestamp | string | null;
-    updatedAt: Timestamp | string | null;
+    createdAt: Timestamp | Date | null;
+    updatedAt: Timestamp | Date | null;
     createdById: string;
     updatedById: string;
 };

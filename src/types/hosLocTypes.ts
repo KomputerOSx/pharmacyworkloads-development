@@ -12,8 +12,8 @@ export type HospLoc = {
     contactEmail: string | null;
     contactPhone: string | null;
     active: boolean;
-    createdAt: Timestamp | string | null;
-    updatedAt: Timestamp | string | null;
+    createdAt: Timestamp | Date | null;
+    updatedAt: Timestamp | Date | null;
     createdById: string;
     updatedById: string;
 };
@@ -22,7 +22,7 @@ export const getHospLocTypes = () => {
     return [
         { id: "ward", name: "Ward" },
         { id: "clinic", name: "Clinic" },
-        { id: "pharmacy", name: "pharmacy" },
+        { id: "pharmacy", name: "Pharmacy" },
         { id: "supplies", name: "Supplies" },
         { id: "manufacturing", name: "Manufacturing" },
         { id: "other", name: "Other" },
