@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import {
-    Bed,
+    Building,
     Frame,
     Hospital,
     PersonStanding,
@@ -79,7 +79,7 @@ const sidebarLayout = {
             type: "link",
             title: "Locations",
             url: "locations",
-            icon: Bed,
+            icon: Building,
         } as NavLinkItem,
         {
             type: "link",

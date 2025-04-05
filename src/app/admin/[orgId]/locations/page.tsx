@@ -1,265 +1,10 @@
-// "use client";
-//
-// import React, { useState, useMemo, useCallback } from "react";
-// import { useParams } from "next/navigation";
-//
-// // Shadcn UI Imports
-// import {
-//     Dialog,
-//     DialogContent,
-//     DialogDescription,
-//     DialogHeader,
-//     DialogTitle,
-//     DialogTrigger,
-// } from "@/components/ui/dialog";
-// import { Button } from "@/components/ui/button";
-// import { AddHospLocForm } from "@/components/locations/AddHospLocForm";
-// import { Skeleton } from "@/components/ui/skeleton"; // For loading state
-// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // For error state
-// import { Terminal } from "lucide-react"; // Icon for Alert
-//
-// // AG Grid Imports
-// import { AgGridReact } from "ag-grid-react";
-// import { themeQuartz } from "ag-grid-community";
-// import { ColDef, ValueFormatterParams } from "ag-grid-community"; // AG Grid types
-// import { ClientSideRowModelModule } from "ag-grid-community";
-//
-// // Your project imports
-// import { useHospLocs } from "@/hooks/useHospLoc"; // Adjust path if needed
-// import { HospLoc } from "@/types/hosLocTypes"; // Adjust path if needed
-// import { Timestamp } from "firebase/firestore"; // Import Timestamp if needed for formatting
-//
-// // Helper function for date formatting
-// const formatDate = (
-//     dateInput: Timestamp | string | Date | null | undefined,
-// ): string => {
-//     if (!dateInput) return "";
-//     try {
-//         let date: Date;
-//         if (dateInput instanceof Timestamp) {
-//             date = dateInput.toDate();
-//         } else if (typeof dateInput === "string") {
-//             date = new Date(dateInput);
-//         } else {
-//             date = dateInput;
-//         }
-//         // Check if date is valid after conversion
-//         if (isNaN(date.getTime())) {
-//             return "Invalid Date";
-//         }
-//         return date.toLocaleDateString(undefined, {
-//             // Use locale-specific format
-//             year: "numeric",
-//             month: "short",
-//             day: "numeric",
-//             hour: "2-digit",
-//             minute: "2-digit",
-//         });
-//     } catch (error) {
-//         console.error("Error formatting date:", dateInput, error);
-//         return "Error";
-//     }
-// };
-//
-// export default function LocationsPage() {
-//     const params = useParams();
-//     const orgId = params.orgId as string;
-//     const [open, setOpen] = useState(false);
-//
-//     const myTheme = themeQuartz.withParams({
-//         browserColorScheme: "light",
-//         headerFontSize: 14,
-//     });
-//
-//     // Fetch data using your React Query hook
-//     const {
-//         data: locations,
-//         isLoading,
-//         isError,
-//         error,
-//         refetch,
-//     } = useHospLocs(orgId);
-//
-//     // Define AG Grid Column Definitions
-//     const colDefs = useMemo<ColDef<HospLoc>[]>(
-//         () => [
-//             // { field: "id", headerName: "ID", width: 150, filter: true }, // Often hidden or less prominent
-//             { field: "name", headerName: "Name", filter: true, flex: 2 },
-//             { field: "type", headerName: "Type", filter: true, width: 120 },
-//             { field: "address", headerName: "Address", filter: true, flex: 3 },
-//             {
-//                 field: "contactEmail",
-//                 headerName: "Email",
-//                 filter: true,
-//                 flex: 2,
-//             },
-//             {
-//                 field: "contactPhone",
-//                 headerName: "Phone",
-//                 filter: true,
-//                 width: 150,
-//             },
-//             {
-//                 field: "active",
-//                 headerName: "Active",
-//                 width: 100,
-//                 filter: true,
-//                 valueFormatter: (
-//                     params: ValueFormatterParams<HospLoc, boolean>,
-//                 ) => (params.value ? "Yes" : "No"),
-//                 cellStyle: (params) => ({
-//                     fontWeight: params.value ? "bold" : "normal",
-//                     color: params.value ? "green" : "red",
-//                 }),
-//             },
-//             {
-//                 field: "createdAt",
-//                 headerName: "Created At",
-//                 filter: "agDateColumnFilter", // Use AG Grid's date filter
-//                 valueFormatter: (
-//                     params: ValueFormatterParams<
-//                         HospLoc,
-//                         Timestamp | string | null
-//                     >,
-//                 ) => formatDate(params.value),
-//                 width: 180,
-//             },
-//             {
-//                 field: "updatedAt",
-//                 headerName: "Updated At",
-//                 filter: "agDateColumnFilter",
-//                 valueFormatter: (
-//                     params: ValueFormatterParams<
-//                         HospLoc,
-//                         Timestamp | string | null
-//                     >,
-//                 ) => formatDate(params.value),
-//                 width: 180,
-//             },
-//             // You might want to hide IDs unless necessary for debugging/admin tasks
-//             { field: "hospId", headerName: "Hospital ID", hide: true },
-//             { field: "orgId", headerName: "Org ID", hide: true },
-//             { field: "createdById", headerName: "Created By ID", hide: true },
-//             { field: "updatedById", headerName: "Updated By ID", hide: true },
-//         ],
-//         [],
-//     );
-//
-//     // Define Default Column Options
-//     const defaultColDef = useMemo<ColDef>(
-//         () => ({
-//             sortable: true,
-//             resizable: true,
-//             // filter: true, // Enable filtering by default on all columns if desired
-//             floatingFilter: true, // Adds filter input below header
-//             flex: 1, // Default flex value
-//             minWidth: 100, // Minimum width for columns
-//         }),
-//         [],
-//     );
-//
-//     // Handle Refresh Button Click
-//     const handleRefresh = useCallback(() => {
-//         console.log("Refetching locations for org:", orgId);
-//         refetch().then();
-//     }, [refetch, orgId]);
-//
-//     // --- Rendering Logic ---
-//
-//     const renderGrid = () => {
-//         if (isLoading) {
-//             // Show skeleton loaders matching grid structure (optional but good UX)
-//             return (
-//                 <div className="space-y-2 mt-4">
-//                     <Skeleton className="h-10 w-full" />
-//                     <Skeleton className="h-8 w-full" />
-//                     <Skeleton className="h-8 w-full" />
-//                     <Skeleton className="h-8 w-full" />
-//                 </div>
-//             );
-//         }
-//
-//         if (isError) {
-//             return (
-//                 <Alert variant="destructive" className="mt-4">
-//                     <Terminal className="h-4 w-4" />
-//                     <AlertTitle>Error Fetching Locations</AlertTitle>
-//                     <AlertDescription>
-//                         {error?.message || "An unknown error occurred."}
-//                     </AlertDescription>
-//                 </Alert>
-//             );
-//         }
-//
-//         // AG Grid component
-//         return (
-//             <div
-//                 className="ag-theme-quartz mt-4" // Apply AG Grid theme
-//                 style={{ height: 600, width: "100%" }} // Set container dimensions
-//             >
-//                 <AgGridReact<HospLoc>
-//                     theme={myTheme}
-//                     rowData={locations ?? []} // Provide data, default to empty array if undefined
-//                     columnDefs={colDefs} // Provide column definitions
-//                     defaultColDef={defaultColDef} // Provide default column options
-//                     pagination={true} // Enable pagination
-//                     paginationPageSize={20} // Set page size
-//                     paginationPageSizeSelector={[10, 20, 50, 100]} // Page size options
-//                     domLayout="autoHeight" // Adjust grid height to content (alternative to fixed height)
-//                     // Or keep fixed height: style={{ height: 600, width: '100%' }} on the container div
-//                     animateRows={true} // Enable row animations
-//                     modules={[ClientSideRowModelModule]}
-//                 />
-//             </div>
-//         );
-//     };
-//
-//     return (
-//         <div className="container">
-//             {" "}
-//             {/* Add some padding */}
-//             <div className="flex items-center gap-2">
-//                 {" "}
-//                 {/* Container for buttons */}
-//                 <Dialog open={open} onOpenChange={setOpen}>
-//                     <DialogTrigger asChild>
-//                         <Button>Create Location</Button>
-//                     </DialogTrigger>
-//                     <DialogContent>
-//                         <DialogHeader>
-//                             <DialogTitle>Create Location</DialogTitle>
-//                             <DialogDescription>
-//                                 Enter the details for your new location
-//                             </DialogDescription>
-//                         </DialogHeader>
-//                         {/* Pass orgId and close handler */}
-//                         <AddHospLocForm
-//                             onSuccessfulSubmitAction={() => setOpen(false)} // Close dialog on success
-//                             orgId={orgId}
-//                             // You might need hospId here depending on AddHospForm logic
-//                             // hospId={"some-default-or-selected-hospId"}
-//                         />
-//                     </DialogContent>
-//                 </Dialog>
-//                 {/* Refresh Button - Use the handler */}
-//                 <Button
-//                     variant={"outline"}
-//                     onClick={handleRefresh}
-//                     disabled={isLoading}
-//                 >
-//                     {isLoading ? "Refreshing..." : "Refresh"}
-//                 </Button>
-//             </div>
-//             {/* Render the AG Grid or loading/error state */}
-//             {renderGrid()}
-//         </div>
-//     );
-// }
-
-// Shadcn UI Imports
-
+// src/app/admin/[orgId]/locations/page.tsx
 "use client";
 
+import { useCallback, useState } from "react";
+import { useParams } from "next/navigation";
+
+// UI Components
 import {
     Dialog,
     DialogContent,
@@ -271,47 +16,74 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal } from "lucide-react";
+import { Loader2, Terminal } from "lucide-react"; // Added Loader2 for loading state, Building for title icon
 
-// Your project imports
-import { useHospLocs } from "@/hooks/useHospLoc";
-import { AddHospLocForm } from "@/components/locations/AddHospLocForm"; // Corrected form import path
-import { HospLocGrid } from "@/components/locations/HospLocGrid";
-import { useParams } from "next/navigation";
-import { useCallback, useState } from "react"; // Import the new Grid component
-
-// AG Grid related imports are removed from here unless needed elsewhere
+// Custom Hooks and Components
+import { useHospLocs } from "@/hooks/useHospLoc"; // Ensure path is correct
+import { AddHospLocForm } from "@/components/locations/AddHospLocForm"; // Ensure path is correct
+import { HospLocDataTable } from "@/components/locations/HospLocDataTable"; // *** IMPORT THE DATA TABLE COMPONENT ***
 
 export default function LocationsPage() {
     const params = useParams();
-    const orgId = params.orgId as string;
-    const [open, setOpen] = useState(false);
+    const orgId = params.orgId as string; // Assert type as orgId should be present
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
     // Fetch data using your React Query hook
     const {
-        data: locations,
+        data: locations, // locations will be HospLoc[] | undefined
         isLoading,
         isError,
         error,
         refetch,
+        isRefetching, // Use isRefetching for refresh button state
     } = useHospLocs(orgId);
 
-    // Handle Refresh Button Click (Remains the same)
+    // Handle Refresh Button Click
     const handleRefresh = useCallback(() => {
-        console.log("Refetching locations for org:", orgId);
-        void refetch();
-    }, [refetch, orgId]);
+        // console.log("Refetching locations for org:", orgId);
+        void refetch(); // Use void for promises you don't need to await
+    }, [refetch]);
+
+    // Close dialog and refetch after successful form submission
+    const handleSuccessfulCreate = useCallback(() => {
+        setIsCreateDialogOpen(false);
+        void refetch(); // Refresh data after adding a new location
+    }, [refetch]);
 
     // --- Rendering Logic ---
-    const renderGridContent = () => {
+    const renderContent = () => {
         if (isLoading) {
-            // Show skeleton loaders matching grid structure
+            // Show skeleton loaders matching table structure more closely
             return (
-                <div className="space-y-2 mt-4">
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-8 w-full" />
-                    <Skeleton className="h-8 w-full" />
-                    <Skeleton className="h-8 w-full" />
+                <div className="space-y-4 mt-4">
+                    {/* Skeleton for Controls */}
+                    <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-4 rounded-md border p-4">
+                        <Skeleton className="h-9 w-full sm:w-1/3" />
+                        <Skeleton className="h-9 w-full sm:w-[180px]" />
+                        <div className="flex items-center gap-2 pt-2 sm:pt-0">
+                            <Skeleton className="h-9 w-20" />
+                            <Skeleton className="h-9 w-28" />
+                            <Skeleton className="h-9 w-20" />
+                        </div>
+                        <Skeleton className="ml-auto h-9 w-[75px]" />
+                    </div>
+                    {/* Skeleton for Table */}
+                    <div className="rounded-md border p-4 space-y-2">
+                        <Skeleton className="h-10 w-full" /> {/* Header */}
+                        <Skeleton className="h-8 w-full" /> {/* Row 1 */}
+                        <Skeleton className="h-8 w-full" /> {/* Row 2 */}
+                        <Skeleton className="h-8 w-full" /> {/* Row 3 */}
+                        <Skeleton className="h-8 w-full" /> {/* Row 4 */}
+                    </div>
+                    {/* Skeleton for Pagination */}
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
+                        <Skeleton className="h-5 w-32" />
+                        <div className="flex flex-wrap items-center gap-4">
+                            <Skeleton className="h-8 w-24" />
+                            <Skeleton className="h-8 w-20" />
+                            <Skeleton className="h-8 w-32" />
+                        </div>
+                    </div>
                 </div>
             );
         }
@@ -322,55 +94,78 @@ export default function LocationsPage() {
                     <Terminal className="h-4 w-4" />
                     <AlertTitle>Error Fetching Locations</AlertTitle>
                     <AlertDescription>
-                        {error?.message || "An unknown error occurred."}
+                        {error instanceof Error
+                            ? error.message
+                            : "An unknown error occurred."}
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={handleRefresh}
+                            className="ml-4"
+                        >
+                            Retry
+                        </Button>
                     </AlertDescription>
                 </Alert>
             );
         }
 
-        // Render the dedicated Grid component when data is ready
-        return <HospLocGrid locations={locations ?? []} />; // Pass locations data
+        // Render the actual data table when data is ready
+        // Pass the locations array (or an empty array if undefined/null)
+        return <HospLocDataTable locations={locations ?? []} />;
     };
 
     return (
-        <div className="container py-6">
+        <div className="mx-auto py-6 px-4 sm:px-6 lg:px-8">
             {" "}
-            {/* Added padding */}
-            <div className="flex justify-between items-center mb-4">
+            {/* Added container and padding */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 {" "}
                 {/* Improved header layout */}
-                {/* Added Title */}
-                <div className="flex items-center gap-2">
-                    <Dialog open={open} onOpenChange={setOpen}>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                    {" "}
+                    {/* Buttons group */}
+                    <Dialog
+                        open={isCreateDialogOpen}
+                        onOpenChange={setIsCreateDialogOpen}
+                    >
                         <DialogTrigger asChild>
-                            <Button>Create Location</Button>
+                            <Button size="sm">Create Location</Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent className="sm:max-w-[425px]">
+                            {" "}
+                            {/* Adjust width as needed */}
                             <DialogHeader>
-                                <DialogTitle>Create Location</DialogTitle>
+                                <DialogTitle>Create New Location</DialogTitle>
                                 <DialogDescription>
-                                    Enter the details for your new location
+                                    Fill in the details below. Click save when
+                                    you&#39;re done.
                                 </DialogDescription>
                             </DialogHeader>
                             <AddHospLocForm
-                                // Rename prop to avoid TS error if needed, or suppress error
-                                onSuccessfulSubmitAction={() => setOpen(false)} // Standard callback name
-                                // onSuccessfulSubmitAction={() => setOpen(false)} // Alternative if TS insists
                                 orgId={orgId}
+                                // Pass the callback to handle success
+                                onSuccessfulSubmitAction={
+                                    handleSuccessfulCreate
+                                }
                             />
                         </DialogContent>
                     </Dialog>
                     <Button
                         variant={"outline"}
+                        size="sm"
                         onClick={handleRefresh}
-                        disabled={isLoading}
+                        disabled={isLoading || isRefetching} // Disable while loading or refetching
                     >
-                        {isLoading ? "Refreshing..." : "Refresh"}
+                        {isRefetching ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : null}
+                        {isRefetching ? "Refreshing..." : "Refresh"}
                     </Button>
                 </div>
             </div>
-            {/* Render the appropriate content (loading, error, or grid) */}
-            {renderGridContent()}
+            {/* Render the appropriate content (loading, error, or table) */}
+            {renderContent()}
         </div>
     );
 }

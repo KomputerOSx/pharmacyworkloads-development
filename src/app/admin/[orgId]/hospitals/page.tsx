@@ -355,7 +355,7 @@ export default function HospitalsPage() {
 
     return (
         <>
-            <div className={"container"}>
+            <div className={""}>
                 {/* Dialog for Creating a New Hospital */}
                 <Dialog open={open} onOpenChange={setOpen}>
                     {/* ... DialogTrigger, DialogContent, AddHospForm ... */}
