@@ -1,9 +1,9 @@
-import { doc, DocumentData, getDoc, Timestamp } from "firebase/firestore";
+import { doc, DocumentData, getDoc, Timestamp } from "firebase/firestore"; // Make sure Timestamp is imported
 import { db } from "@/config/firebase";
 import { Org } from "@/types/orgTypes";
 import { Hosp } from "@/types/hospTypes";
 import { HospLoc } from "@/types/hosLocTypes";
-import { Department } from "@/types/depTypes";
+import { Department, DepHospLocAss } from "@/types/depTypes"; // Adjust path if needed
 
 export const formatFirestoreTimestamp = (timestamp: Timestamp) => {
     if (timestamp && typeof timestamp.toDate === "function") {
@@ -39,7 +39,7 @@ export const mapFirestoreDocToOrg = (
     // Ensure data exists
     if (!data) {
         console.warn(
-            `mapFirestoreDocToOrg: Received undefined data for ID ${id}.`,
+            `jGfLm45C - mapFirestoreDocToOrg: Received undefined data for ID ${id}.`,
         );
         return null;
     }
@@ -62,7 +62,7 @@ export const mapFirestoreDocToOrg = (
 
     if (!organisation.name || !organisation.type) {
         console.error(
-            `mapFirestoreDocToOrg: Incomplete organisation data mapped for ID: ${id}. Missing name or type.`,
+            `hmDLEyN5 - mapFirestoreDocToOrg: Incomplete organisation data mapped for ID: ${id}. Missing name or type.`,
         );
         // Decide whether to return null or the incomplete object based on your needs
         return null;
@@ -78,7 +78,7 @@ export const mapFirestoreDocToHosp = (
     // Ensure data exists
     if (!data) {
         console.warn(
-            `mapFirestoreDocToHosp: Received undefined data for ID ${id}.`,
+            `dXT5qmpR - mapFirestoreDocToHosp: Received undefined data for ID ${id}.`,
         );
         return null;
     }
@@ -104,7 +104,7 @@ export const mapFirestoreDocToHosp = (
 
     if (!hospital.name || !hospital.id) {
         console.error(
-            `mapFirestoreDocToOrg: Incomplete organisation data mapped for ID: ${id}. Missing name or type.`,
+            `rgegfqM2 - mapFirestoreDocToOrg: Incomplete organisation data mapped for ID: ${id}. Missing name or type.`,
         );
         // Decide whether to return null or the incomplete object based on your needs
         return null;
@@ -120,7 +120,7 @@ export const mapFirestoreDocToHospLoc = (
     // Ensure data exists
     if (!data) {
         console.warn(
-            `mapFirestoreDocToHospLoc: Received undefined data for ID ${id}.`,
+            `rA6qdDsF - mapFirestoreDocToHospLoc: Received undefined data for ID ${id}.`,
         );
         return null;
     }
@@ -149,7 +149,7 @@ export const mapFirestoreDocToHospLoc = (
 
     if (!hospLoc.name || !hospLoc.id) {
         console.error(
-            `mapFirestoreDocToHospLoc: Incomplete organisation data mapped for ID: ${id}. Missing name or type.`,
+            `XJYM3rzB - mapFirestoreDocToHospLoc: Incomplete organisation data mapped for ID: ${id}. Missing name or type.`,
         );
         // Decide whether to return null or the incomplete object based on your needs
         return null;
@@ -165,7 +165,7 @@ export const mapFirestoreDocToDep = (
     // Ensure data exists
     if (!data) {
         console.warn(
-            `mapFirestoreDocToDep: Received undefined data for ID ${id}.`,
+            `V4hMDzH6 - mapFirestoreDocToDep: Received undefined data for ID ${id}.`,
         );
         return null;
     }
@@ -186,11 +186,40 @@ export const mapFirestoreDocToDep = (
 
     if (!department.name || !department.id) {
         console.error(
-            `mapFirestoreDocToDep: Incomplete organisation data mapped for ID: ${id}. Missing name or id.`,
+            `nMshR884 - mapFirestoreDocToDep: Incomplete organisation data mapped for ID: ${id}. Missing name or id.`,
         );
-        // Decide whether to return null or the incomplete object based on your needs
         return null;
     }
 
     return department;
+};
+
+export const mapFirestoreDocToDepHospLocAss = (
+    id: string,
+    data: DocumentData | undefined,
+): DepHospLocAss | null => {
+    // Ensure data exists
+    if (!data) {
+        console.warn(
+            `8PRQJd2k - mapFirestoreDocToDepHospLocAss: Received undefined data for ID ${id}.`,
+        );
+        return null;
+    }
+
+    if (!data.departmentId || !data.locationId) {
+        console.error(
+            `uDXu4caW - mapFirestoreDocToDepHospLocAss: Firestore data for assignment ID ${id} is missing required 'departmentId' or 'locationId' field.`,
+            data,
+        );
+        return null;
+    }
+    return {
+        id: id,
+        departmentId: data.departmentId as string,
+        locationId: data.locationId as string,
+        createdById: (data.createdById as string) ?? "system",
+        updatedById: (data.updatedById as string) ?? "system",
+        createdAt: (data.createdAt as Timestamp)?.toDate() ?? new Date(0),
+        updatedAt: (data.updatedAt as Timestamp)?.toDate() ?? new Date(0),
+    };
 };

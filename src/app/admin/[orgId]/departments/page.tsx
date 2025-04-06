@@ -228,7 +228,6 @@ export default function DepartmentsPage() {
                 }
             >
                 {(deps ?? []).map((department) => (
-                    // Removed the extra div wrapper unless DepCard requires it
                     <DepCard
                         key={department.id}
                         department={department}

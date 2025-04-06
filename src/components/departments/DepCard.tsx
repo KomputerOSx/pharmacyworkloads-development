@@ -20,16 +20,9 @@ interface DepCardProps {
     onEdit: (department: Department) => void;
     onDelete: (departmentId: string, departmentName: string) => void;
     // Add a new handler prop for the Assignments button if needed
-    onAssignmentsClick: (department: Department) => void;
 }
 
-export function DepCard({
-    department,
-    orgId,
-    onEdit,
-    onDelete,
-    onAssignmentsClick, // Use the new handler
-}: DepCardProps) {
+export function DepCard({ department, orgId, onEdit, onDelete }: DepCardProps) {
     const assignmentsUrl = `/admin/${orgId}/departments/${department.id}`;
 
     const handleEditClick = () => {
@@ -38,13 +31,6 @@ export function DepCard({
 
     const handleDeleteClick = () => {
         onDelete(department.id, department.name);
-    };
-
-    // Handler for the new Assignments button
-    const handleAssignmentsButtonClick = () => {
-        if (onAssignmentsClick) {
-            onAssignmentsClick(department);
-        }
     };
 
     return (
@@ -63,7 +49,6 @@ export function DepCard({
                     <Button
                         variant="outline"
                         size="sm" // Keep size small as requested
-                        onClick={handleAssignmentsButtonClick} // Use the new handler
                         aria-label={`Assignments for ${department.name}`}
                         className="flex-shrink-0" // Prevent shrinking if title is long
                     >

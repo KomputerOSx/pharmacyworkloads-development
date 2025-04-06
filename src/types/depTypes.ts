@@ -10,3 +10,13 @@ export type Department = {
     createdById: string;
     updatedById: string;
 };
+
+export type DepHospLocAss = {
+    id: string;
+    departmentId: string;
+    locationId: string;
+    createdAt: Timestamp | Date | null;
+    updatedAt: Timestamp | Date | null;
+    createdById: string;
+    updatedById: string;
+};

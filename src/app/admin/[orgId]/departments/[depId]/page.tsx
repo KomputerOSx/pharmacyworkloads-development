@@ -1,5 +1,6 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import {
     Dialog,
     DialogContent,
@@ -9,54 +10,85 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { AddHospForm } from "@/components/hosp/AddHospForm";
-import { Loader2 } from "lucide-react";
-import React from "react";
+import { useDepHospLocAssignments } from "@/hooks/useDepAss";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { LoadingSpinner } from "@/components/ui/loadingSpinner";
+import { Loader2, Plus } from "lucide-react";
+import { useDep } from "@/hooks/useDeps";
+import { useState } from "react";
+import { AddDepAssForm } from "@/components/departments/AddDepAssForm";
 
-export default function DepAssignmentsPage() {
+export default function DepartmentAssignmentPage() {
     const params = useParams();
     const orgId = params.orgId as string;
+    const depId = params.depId as string;
+
+    const {
+        data: depHospLocAssignments,
+        isLoading,
+        refetch,
+        isRefetching,
+    } = useDepHospLocAssignments(depId);
+
+    const { data: currentDep, isLoading: isLoadingDep } = useDep(depId);
+
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+
+    if (isLoading || isLoadingDep) {
+        return (
+            <div className="flex h-screen items-center justify-center">
+                <LoadingSpinner text="Loading data..." size="lg" />
+            </div>
+        );
+    }
     return (
-        <div>
-            <h1>Assignments</h1>
+        <div className="mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <h1>
+                <strong>{currentDep?.name}</strong> Assignment Page
+            </h1>
+            <p>Organisation ID: {orgId}</p>
+            <p>Department ID: {depId}</p>
 
             <div className="flex items-center gap-2 flex-shrink-0">
-                {/* Dialog for Creating a New Hospital */}
-                {/*<Dialog open={open} onOpenChange={setOpen}>*/}
-                {/*    /!* ... DialogTrigger, DialogContent, AddHospForm ... *!/*/}
-                {/*    <DialogTrigger asChild>*/}
-                {/*        <Button size="sm">Create Hospital</Button>*/}
-                {/*    </DialogTrigger>*/}
-                {/*    <DialogContent>*/}
-                {/*        <DialogHeader>*/}
-                {/*            <DialogTitle>Create Hospital</DialogTitle>*/}
-                {/*            <DialogDescription>*/}
-                {/*                Enter the details for your new hospital.*/}
-                {/*            </DialogDescription>*/}
-                {/*        </DialogHeader>*/}
-                {/*        <AddHospForm onOpenChange={setOpen} orgId={orgId} />*/}
-                {/*    </DialogContent>*/}
-                {/*</Dialog>*/}
-
-                {/* Refresh Button */}
+                {" "}
+                {/* Buttons group */}
+                <Dialog
+                    open={isCreateDialogOpen}
+                    onOpenChange={setIsCreateDialogOpen}
+                >
+                    <DialogTrigger asChild>
+                        <Button size="sm">
+                            <Plus className="" />
+                            Assign Location
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                        {" "}
+                        {/* Adjust width as needed */}
+                        <DialogHeader>
+                            <DialogTitle>Create New Location</DialogTitle>
+                            <DialogDescription>
+                                Fill in the details below. Click save when
+                                you&#39;re done.
+                            </DialogDescription>
+                            <AddDepAssForm onSuccess={() => refetch()} />
+                        </DialogHeader>
+                    </DialogContent>
+                </Dialog>
                 <Button
                     variant={"outline"}
                     size="sm"
-                    // onClick={() => refetchHosps()}
-                    // disabled={isLoading || isRefetching} // Disable while loading or refetching
+                    onClick={() => refetch()}
+                    disabled={isLoading || isRefetching} // Disable while loading or refetching
                 >
-                    {/*{isRefetching ? (*/}
-                    {/*    <Loader2 className="mr-2 h-4 w-4 animate-spin" />*/}
-                    {/*) : null}*/}
-                    {/*{isRefetching ? "Refreshing..." : "Refresh"}*/}
+                    {isRefetching ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : null}
+                    {isRefetching ? "Refreshing..." : "Refresh"}
                 </Button>
-
-                <Link href={`/admin/${orgId}/departments`}>
-                    <Button variant={"default"} size="sm">
-                        {" "}
-                        Go Back
+                <Link href={`/admin/${orgId}/departments/`}>
+                    <Button size="sm" variant={"secondary"}>
+                        Back to Departments
                     </Button>
                 </Link>
             </div>
