@@ -396,6 +396,9 @@ export function DataTableViewOptions<TData>({
                                 onCheckedChange={
                                     (value) => column.toggleVisibility(value) // Ensure boolean value
                                 }
+                                onSelect={(event) => {
+                                    event.preventDefault(); // Prevent the menu from closing
+                                }}
                             >
                                 {headerText}
                             </ViewDropdownMenuCheckboxItem>
