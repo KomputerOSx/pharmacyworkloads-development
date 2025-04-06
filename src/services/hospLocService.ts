@@ -176,29 +176,25 @@ export async function createHospLoc(
 
 export async function updateHospLoc(
     id: string,
-    data: Partial<HospLoc>,
+    data: Omit<Partial<HospLoc>, "id" | "orgId" | "createdAt" | "createdBy">,
     userId = "system",
 ): Promise<HospLoc> {
     if (!id) {
         throw new Error(
-            "updateHospLoc error: Hospital ID is required for update.",
+            "updateHospLoc error: Hospital Location ID is required for update.",
         );
     }
     if (!data || Object.keys(data).length === 0) {
         console.warn(
-            `ycETLNy9 - updateHospLoc warning: No specific fields provided for update on hospital ${id}. Only timestamps/audit fields will be updated.`,
+            `ycETLNy9 - updateHospLoc warning: No specific fields provided for update on Hospital Location ${id}. Only timestamps/audit fields will be updated.`,
         );
     }
 
     try {
         const hospLocRef: DocumentReference = doc(db, "hospital_locations", id);
 
-        // 3. Prepare data for update - *exclude* immutable/ID fields
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { id: dataId, createdAt, createdById, ...updatePayload } = data;
-
         const dataToUpdate = {
-            ...updatePayload, // Spread the actual fields to update
+            ...data, // Spread the actual fields to update
             updatedAt: serverTimestamp(),
             updatedById: userId,
         };
@@ -207,7 +203,7 @@ export async function updateHospLoc(
         const checkSnap = await getDoc(hospLocRef);
         if (!checkSnap.exists()) {
             throw new Error(
-                `updateHospLoc error: Hospital with ID ${id} not found.`,
+                `updateHospLoc error: Hospital Location with ID ${id} not found.`,
             );
         }
 
@@ -217,7 +213,7 @@ export async function updateHospLoc(
 
         if (!updatedHospLocDoc.exists()) {
             throw new Error(
-                `Consistency error: Hospital with ID ${id} not found immediately after successful update.`,
+                `Consistency error: Hospital Location with ID ${id} not found immediately after successful update.`,
             );
         }
 
@@ -229,17 +225,17 @@ export async function updateHospLoc(
         if (!updatedHospLoc) {
             // This implies the mapper function
             throw new Error(
-                `Data integrity error: Failed to map updated hospital data for ID: ${id}. Check mapper logic and Firestore data.`,
+                `Data integrity error: Failed to map updated Hospital Location data for ID: ${id}. Check mapper logic and Firestore data.`,
             );
         }
         return updatedHospLoc;
     } catch (error) {
         console.error(
-            `NsfNu5pM - Error updating hospital with ID ${id}:`,
+            `NsfNu5pM - Error updating Hospital Location with ID ${id}:`,
             error,
         );
         throw new Error(
-            `Failed to update hospital (ID: ${id}). Reason: ${error instanceof Error ? error.message : String(error)}`,
+            `Failed to update Hospital Location (ID: ${id}). Reason: ${error instanceof Error ? error.message : String(error)}`,
         );
     }
 }

@@ -3,6 +3,7 @@ import { db } from "@/config/firebase";
 import { Org } from "@/types/orgTypes";
 import { Hosp } from "@/types/hospTypes";
 import { HospLoc } from "@/types/hosLocTypes";
+import { Department } from "@/types/depTypes";
 
 export const formatFirestoreTimestamp = (timestamp: Timestamp) => {
     if (timestamp && typeof timestamp.toDate === "function") {
@@ -125,7 +126,7 @@ export const mapFirestoreDocToHospLoc = (
     }
 
     // Construct the Org object using the shared mapping logic
-    const hospital: HospLoc = {
+    const hospLoc: HospLoc = {
         id: id,
         name: (data.name as string) ?? "",
         type: (data.type as string) ?? "",
@@ -146,7 +147,7 @@ export const mapFirestoreDocToHospLoc = (
         updatedAt: (data.updatedAt as Timestamp) ?? null,
     };
 
-    if (!hospital.name || !hospital.id) {
+    if (!hospLoc.name || !hospLoc.id) {
         console.error(
             `mapFirestoreDocToHospLoc: Incomplete organisation data mapped for ID: ${id}. Missing name or type.`,
         );
@@ -154,5 +155,42 @@ export const mapFirestoreDocToHospLoc = (
         return null;
     }
 
-    return hospital;
+    return hospLoc;
+};
+
+export const mapFirestoreDocToDep = (
+    id: string,
+    data: DocumentData | undefined,
+): Department | null => {
+    // Ensure data exists
+    if (!data) {
+        console.warn(
+            `mapFirestoreDocToDep: Received undefined data for ID ${id}.`,
+        );
+        return null;
+    }
+
+    // Construct the Org object using the shared mapping logic
+    const department: Department = {
+        id: id,
+        name: (data.name as string) ?? "",
+        orgId: (data.orgId as string) ?? "",
+        active: (data.active as boolean) ?? false,
+        createdById: (data.createdById as string) ?? "system",
+        updatedById: (data.updatedById as string) ?? "system",
+
+        createdAt: (data.createdAt as Timestamp) ?? null,
+
+        updatedAt: (data.updatedAt as Timestamp) ?? null,
+    };
+
+    if (!department.name || !department.id) {
+        console.error(
+            `mapFirestoreDocToDep: Incomplete organisation data mapped for ID: ${id}. Missing name or id.`,
+        );
+        // Decide whether to return null or the incomplete object based on your needs
+        return null;
+    }
+
+    return department;
 };
