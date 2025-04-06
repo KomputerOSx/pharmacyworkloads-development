@@ -66,7 +66,9 @@ export function EditDepForm({
         // Prepare the data for the mutation
         // Adjust based on what your useUpdateDep hook expects
         const depUpdateData: Partial<Department> = {
-            name: values.name,
+            name:
+                values.name?.charAt(0).toUpperCase() +
+                values.name?.slice(1).toLowerCase(),
             active: values.active,
             // Include other fields if your hook/backend expects them for update
         };

@@ -181,10 +181,10 @@ export function EditHospLocForm({
                     name="name"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Location Name *</FormLabel>
+                            <FormLabel>Department Name *</FormLabel>
                             <FormControl>
                                 <Input
-                                    placeholder="e.g., Ward 10B, Main Pharmacy"
+                                    placeholder="Department Name ... "
                                     {...field}
                                     disabled={updateHospLocMutation.isPending}
                                 />

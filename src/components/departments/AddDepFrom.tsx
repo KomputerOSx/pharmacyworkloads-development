@@ -59,7 +59,9 @@ export function AddDepFrom({ orgId, onOpenChange }: AddDepFormProps) {
         console.log("Form values submitted:", values);
 
         const departmentData: Partial<Department> = {
-            name: values.name,
+            name:
+                values.name?.charAt(0).toUpperCase() +
+                values.name?.slice(1).toLowerCase(),
             active: values.active,
         };
 
@@ -101,10 +103,10 @@ export function AddDepFrom({ orgId, onOpenChange }: AddDepFormProps) {
                     name="name"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Location Name *</FormLabel>
+                            <FormLabel>Department Name *</FormLabel>
                             <FormControl>
                                 <Input
-                                    placeholder="e.g., Ward 10B, Main Pharmacy"
+                                    placeholder="Department Name ... "
                                     {...field}
                                     disabled={createHospLocMutation.isPending}
                                 />
