@@ -44,6 +44,7 @@ import {
 import { useDeps } from "@/hooks/useDeps";
 import { useHospLocs } from "@/hooks/useHospLoc";
 import { useParams } from "next/navigation";
+import { useHosp, useHosps } from "@/hooks/useHosps";
 
 // Define the form schema
 const formSchema = z.object({
@@ -67,7 +68,7 @@ export function AddDepAssForm({ onSuccess, onCancel }: AddDepAssFormProps) {
     const [openDeptPopover, setOpenDeptPopover] = useState(false);
     const [openLocationPopover, setOpenLocationPopover] = useState(false);
 
-    // Get departments and locations data
+    const { data: hosps } = useHosps(orgId);
     const { data: departments } = useDeps(orgId);
     const { data: locations, isLoading: isLoadingLocations } =
         useHospLocs(orgId);
@@ -134,6 +135,12 @@ export function AddDepAssForm({ onSuccess, onCancel }: AddDepAssFormProps) {
         return dept?.name || id;
     };
 
+    const getHospitalName = (locationId: string) => {
+        const location = locations?.find((l) => l.id === locationId);
+        const hospital = hosps?.find((h) => h.id === location?.hospId);
+        return hospital?.name || locationId;
+    };
+
     // Helper to get location name by ID
     const getLocationName = (id: string) => {
         const loc = locations?.find((l) => l.id === id);
@@ -141,7 +148,7 @@ export function AddDepAssForm({ onSuccess, onCancel }: AddDepAssFormProps) {
     };
 
     return (
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md ">
             <CardHeader>
                 <CardTitle>Create Department-Location Assignment</CardTitle>
             </CardHeader>
@@ -156,7 +163,7 @@ export function AddDepAssForm({ onSuccess, onCancel }: AddDepAssFormProps) {
                             control={form.control}
                             name="locationId"
                             render={({ field }) => (
-                                <FormItem className="flex flex-col">
+                                <FormItem className="flex flex-col ">
                                     <FormLabel>Hospital Location</FormLabel>
                                     <Popover
                                         open={openLocationPopover}
@@ -234,6 +241,13 @@ export function AddDepAssForm({ onSuccess, onCancel }: AddDepAssFormProps) {
                                                                     )}
                                                                 />
                                                                 {location.name}
+                                                                <span className="ml-auto text-xs text-muted-foreground">
+                                                                    (
+                                                                    {getHospitalName(
+                                                                        location.id,
+                                                                    )}
+                                                                    )
+                                                                </span>
                                                             </CommandItem>
                                                         ),
                                                     )}
