@@ -16,18 +16,22 @@ import Link from "next/link";
 
 interface DepCardProps {
     department: Department;
+    orgId: string;
     onEdit: (department: Department) => void;
     onDelete: (departmentId: string, departmentName: string) => void;
     // Add a new handler prop for the Assignments button if needed
-    onAssignmentsClick?: (department: Department) => void;
+    onAssignmentsClick: (department: Department) => void;
 }
 
 export function DepCard({
     department,
+    orgId,
     onEdit,
     onDelete,
     onAssignmentsClick, // Use the new handler
 }: DepCardProps) {
+    const assignmentsUrl = `/admin/${orgId}/departments/${department.id}`;
+
     const handleEditClick = () => {
         onEdit(department);
     };
@@ -40,9 +44,6 @@ export function DepCard({
     const handleAssignmentsButtonClick = () => {
         if (onAssignmentsClick) {
             onAssignmentsClick(department);
-        } else {
-            console.warn("onAssignmentsClick handler not provided to DepCard");
-            // Optionally implement default behavior or navigate here
         }
     };
 
@@ -58,7 +59,7 @@ export function DepCard({
                     {department.name}
                 </CardTitle>
                 {/* Assignments Button - Small size, top right */}
-                <Link href="#">
+                <Link href={assignmentsUrl} passHref legacyBehavior>
                     <Button
                         variant="outline"
                         size="sm" // Keep size small as requested
