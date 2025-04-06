@@ -111,17 +111,17 @@ export function TeamSwitcher({
                             </DropdownMenuItem>
                         ))}
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="gap-2 p-2">
-                            <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
-                                <House className="size-4" />
-                            </div>
-                            <Link
-                                href="/admin/orgsConsole"
-                                className="text-muted-foreground font-medium"
-                            >
+                        <Link
+                            href="/admin/orgsConsole"
+                            className="text-muted-foreground font-medium"
+                        >
+                            <DropdownMenuItem className="gap-2 p-2">
+                                <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
+                                    <House className="size-4" />
+                                </div>
                                 Return to Orgs Console
-                            </Link>
-                        </DropdownMenuItem>
+                            </DropdownMenuItem>
+                        </Link>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </SidebarMenuItem>
