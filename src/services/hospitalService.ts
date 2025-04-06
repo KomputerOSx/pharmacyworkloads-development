@@ -6,9 +6,11 @@ import {
     collection,
     deleteDoc,
     doc,
+    documentId,
     DocumentReference,
     getDoc,
     getDocs,
+    limit,
     query,
     serverTimestamp,
     updateDoc,
@@ -75,24 +77,124 @@ export async function getHospital(id: string): Promise<Hosp | null> {
 }
 
 // create the hospital
+// export async function createHospital(
+//     hospitalData: Partial<Hosp>,
+//     orgId: string,
+//     userId = "system",
+// ): Promise<Hosp> {
+//     // Validate organization is provided
+//     if (!orgId) {
+//         throw new Error(
+//             "1Gv4Jn6x - Organization is required to create a hospital",
+//         );
+//     }
+//
+//     const hospitalId: string | null = null;
+//
+//     try {
+//         // 2. Prepare data with timestamps and audit fields
+//         const dataToAdd = {
+//             ...hospitalData, // Directly spread the input data
+//             orgId: orgId,
+//             createdAt: serverTimestamp(),
+//             updatedAt: serverTimestamp(),
+//             createdById: userId,
+//             updatedById: userId,
+//         };
+//
+//         const docRef: DocumentReference = await addDoc(
+//             hospitalsCollection,
+//             dataToAdd,
+//         );
+//
+//         const newHospitalDoc = await getDoc(docRef); // Use the docRef we already have
+//         if (!newHospitalDoc.exists()) {
+//             // This should be extremely rare if addDoc succeeded, but handle defensively
+//             throw new Error(
+//                 `Wd9fGj4k - Failed to retrieve newly created hospital (ID: ${hospitalId}) immediately after creation.`,
+//             );
+//         }
+//
+//         const createdHospital = mapFirestoreDocToHosp(
+//             newHospitalDoc.id,
+//             newHospitalDoc.data(),
+//         );
+//
+//         if (!createdHospital) {
+//             // This implies the mapper function failed even though the doc exists
+//             throw new Error(
+//                 `Pq2sRz8m - Failed to map newly created hospital (ID: ${hospitalId}) data.`,
+//             );
+//         }
+//
+//         return createdHospital;
+//     } catch (error) {
+//         // 8. Handle any other errors (e.g., from initial addDoc, getDoc, or re-thrown errors)
+//         console.error(
+//             `eYLH58kQ - Error during hospital creation process (potential ID: ${hospitalId}):`,
+//             error,
+//         );
+//
+//         if (error instanceof Error && error.message.startsWith("Ab7LLjje")) {
+//             throw error;
+//         } else {
+//             throw new Error(
+//                 `Failed to create hospital. Reason: ${error instanceof Error ? error.message : String(error)}`,
+//             );
+//         }
+//     }
+// }
+
 export async function createHospital(
     hospitalData: Partial<Hosp>,
     orgId: string,
     userId = "system",
 ): Promise<Hosp> {
-    // Validate organization is provided
+    // 1. Validate essential inputs
     if (!orgId) {
         throw new Error(
-            "1Gv4Jn6x - Organization is required to create a hospital",
+            "1Gv4Jn6x - Organization ID is required to create a hospital",
         );
     }
+    if (!hospitalData.name || hospitalData.name.trim() === "") {
+        throw new Error("Hospital name is required and cannot be empty.");
+    }
 
-    const hospitalId: string | null = null;
+    // Normalize the name for checking (e.g., trim whitespace)
+    const hospitalName = hospitalData.name.trim();
 
     try {
-        // 2. Prepare data with timestamps and audit fields
+        // 2. Check for existing hospital with the same name in the same organization
+        const duplicateCheckQuery = query(
+            hospitalsCollection,
+            where("orgId", "==", orgId),
+            where("name", "==", hospitalName), // Check against the normalized name
+            limit(1), // We only need to know if at least one exists
+        );
+
+        console.log(
+            `Checking for duplicate hospital name "${hospitalName}" in org "${orgId}"...`,
+        );
+        const duplicateSnapshot = await getDocs(duplicateCheckQuery);
+
+        if (!duplicateSnapshot.empty) {
+            // Found a duplicate
+            const existingDocId = duplicateSnapshot.docs[0].id;
+            console.warn(
+                `DUPLICATE_HOSPITAL: Attempted to create hospital with name "${hospitalName}" but it already exists (ID: ${existingDocId}) in organization "${orgId}".`,
+            );
+            throw new Error(
+                `DUPLICATE_HOSPITAL_NAME: A hospital with the name "${hospitalName}" already exists in this organization.`,
+            );
+        }
+        console.log(
+            `No duplicate found for "${hospitalName}" in org "${orgId}". Proceeding with creation.`,
+        );
+
+        // 3. Prepare data with timestamps and audit fields
         const dataToAdd = {
-            ...hospitalData, // Directly spread the input data
+            ...hospitalData, // Spread the input data
+            name: hospitalName, // Use the trimmed name
             orgId: orgId,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
@@ -100,19 +202,27 @@ export async function createHospital(
             updatedById: userId,
         };
 
+        // 4. Add the new hospital document
         const docRef: DocumentReference = await addDoc(
             hospitalsCollection,
             dataToAdd,
         );
+        const newHospitalId = docRef.id; // Get the ID from the returned DocumentReference
 
-        const newHospitalDoc = await getDoc(docRef); // Use the docRef we already have
+        // 5. Fetch the newly created document to ensure consistency and get server timestamp values
+        // It's generally better to fetch after creation to get accurate data including server timestamps
+        const newHospitalDoc = await getDoc(docRef);
         if (!newHospitalDoc.exists()) {
             // This should be extremely rare if addDoc succeeded, but handle defensively
+            console.error(
+                `Wd9fGj4k - Failed to retrieve newly created hospital (ID: ${newHospitalId}) immediately after creation. This indicates a potential Firestore inconsistency.`,
+            );
             throw new Error(
-                `Wd9fGj4k - Failed to retrieve newly created hospital (ID: ${hospitalId}) immediately after creation.`,
+                `Wd9fGj4k - Failed to retrieve newly created hospital (ID: ${newHospitalId}) immediately after creation.`,
             );
         }
 
+        // 6. Map Firestore data to Hosp type
         const createdHospital = mapFirestoreDocToHosp(
             newHospitalDoc.id,
             newHospitalDoc.data(),
@@ -120,21 +230,32 @@ export async function createHospital(
 
         if (!createdHospital) {
             // This implies the mapper function failed even though the doc exists
+            console.error(
+                `Pq2sRz8m - Failed to map newly created hospital (ID: ${newHospitalId}) data. Check mapping function and Firestore data structure.`,
+                newHospitalDoc.data(),
+            );
             throw new Error(
-                `Pq2sRz8m - Failed to map newly created hospital (ID: ${hospitalId}) data.`,
+                `Pq2sRz8m - Failed to map newly created hospital (ID: ${newHospitalId}) data.`,
             );
         }
 
+        console.log(
+            `Successfully created hospital "${createdHospital.name}" with ID: ${createdHospital.id} in org "${orgId}"`,
+        );
         return createdHospital;
     } catch (error) {
-        // 8. Handle any other errors (e.g., from initial addDoc, getDoc, or re-thrown errors)
+        // 7. Handle specific errors (like duplicate check) and general errors
         console.error(
-            `eYLH58kQ - Error during hospital creation process (potential ID: ${hospitalId}):`,
+            `eYLH58kQ - Error during hospital creation process for name "${hospitalName}" in org "${orgId}":`,
             error,
         );
 
-        if (error instanceof Error && error.message.startsWith("Ab7LLjje")) {
-            throw error;
+        // Re-throw specific errors or a generic one
+        if (
+            error instanceof Error &&
+            error.message.startsWith("DUPLICATE_HOSPITAL_NAME")
+        ) {
+            throw error; // Re-throw the specific duplicate error
         } else {
             throw new Error(
                 `Failed to create hospital. Reason: ${error instanceof Error ? error.message : String(error)}`,
@@ -145,7 +266,7 @@ export async function createHospital(
 
 export async function updateHospital(
     id: string,
-    data: Partial<Hosp>,
+    data: Omit<Partial<Hosp>, "id" | "createdAt" | "createdById">,
     userId = "system",
 ): Promise<Hosp> {
     // 1. Validate essential inputs
@@ -165,12 +286,8 @@ export async function updateHospital(
         // 2. Create Firestore Document Reference
         const hospitalRef: DocumentReference = doc(db, "hospitals", id);
 
-        // 3. Prepare data for update - *exclude* immutable/ID fields
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { id: dataId, createdAt, createdById, ...updatePayload } = data;
-
         const dataToUpdate = {
-            ...updatePayload, // Spread the actual fields to update
+            ...data, // Spread the actual fields to update
             updatedAt: serverTimestamp(),
             updatedById: userId,
         };
