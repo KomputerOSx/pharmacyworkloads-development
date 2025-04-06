@@ -19,119 +19,63 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea"; // <-- Import Textarea
-import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Your project imports
-import { useCreateHospLoc } from "@/hooks/useHospLoc";
-import { useHosps } from "@/hooks/useHosps";
-import { getHospLocTypes } from "@/types/hosLocTypes";
-import { HospLoc } from "@/types/hosLocTypes"; // Assuming description is in HospLoc
+
+import { useCreateDep, useDeps } from "@/hooks/useDeps";
+import { Department } from "@/types/depTypes"; // Assuming description is in HospLoc
 
 // --- Zod Schema Definition ---
 const formSchema = z.object({
     name: z.string().min(2, {
         message: "Location name must be at least 2 characters.",
     }),
-    hospId: z.string().min(1, { message: "Please select a parent hospital." }),
-    type: z.string().min(1, { message: "Please select a location type." }),
-    // *** Add description field ***
-    description: z
-        .string()
-        .max(500, "Description cannot exceed 500 characters.") // Optional: Add max length
-        .optional()
-        .or(z.literal("")), // Allow empty string
-    // **************************
-    address: z
-        .string()
-        .min(2, "Address must be at least 2 characters.")
-        .optional()
-        .or(z.literal("")),
-    contactEmail: z
-        .string()
-        .email("Invalid email format.")
-        .optional()
-        .or(z.literal("")),
-    contactPhone: z
-        .string()
-        .min(5, "Phone number seems too short.")
-        .optional()
-        .or(z.literal("")),
     active: z.boolean().default(true),
 });
 
 // --- Component Props Interface ---
-interface AddHospLocFormProps {
+interface AddDepFormProps {
     orgId: string;
-    onSuccessfulSubmitAction: () => void;
+    onOpenChange: (open: boolean) => void;
 }
 
 // --- The Form Component ---
-export function AddDepFrom({
-    orgId,
-    onSuccessfulSubmitAction,
-}: AddHospLocFormProps) {
-    const locationTypes = getHospLocTypes();
-
-    const {
-        data: hospitals,
-        isLoading: isLoadingHosps,
-        isError: isErrorHosps,
-        error: hospsError,
-    } = useHosps(orgId);
+export function AddDepFrom({ orgId, onOpenChange }: AddDepFormProps) {
+    const { isLoading: isLoadingDeps } = useDeps(orgId);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: "",
-            hospId: "",
-            type: "",
-            description: "", // <-- Add default value
-            address: "",
-            contactEmail: "",
-            contactPhone: "",
             active: true,
         },
     });
 
-    const createHospLocMutation = useCreateHospLoc();
+    const createHospLocMutation = useCreateDep();
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         console.log("Form values submitted:", values);
 
-        const hospLocData: Partial<HospLoc> = {
+        const departmentData: Partial<Department> = {
             name: values.name,
-            type: values.type,
-            description: values.description || null, // <-- Add description, send null if empty
-            address: values.address || null,
-            contactEmail: values.contactEmail || null,
-            contactPhone: values.contactPhone || null,
             active: values.active,
         };
 
         createHospLocMutation.mutate(
             {
-                hospLocData,
+                departmentData,
                 orgId: orgId,
-                hospId: values.hospId,
             },
             {
                 onSuccess: (data) => {
-                    console.log("Hospital Location created:", data);
+                    console.log("Department created:", data);
                     form.reset();
-                    onSuccessfulSubmitAction();
+                    onOpenChange(false);
                 },
                 onError: (error) => {
-                    console.error("Failed to create hospital location:", error);
+                    console.error("Failed to create Department:", error);
                 },
             },
         );
@@ -170,179 +114,6 @@ export function AddDepFrom({
                     )}
                 />
 
-                {/* Parent Hospital Selection */}
-                <FormField
-                    control={form.control}
-                    name="hospId"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Parent Hospital *</FormLabel>
-                            {isLoadingHosps && (
-                                <Skeleton className="h-10 w-full" />
-                            )}
-                            {isErrorHosps && !isLoadingHosps && (
-                                <p className="text-sm text-red-600">
-                                    Error loading hospitals:{" "}
-                                    {hospsError?.message}
-                                </p>
-                            )}
-                            {!isLoadingHosps && !isErrorHosps && hospitals && (
-                                <Select
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                    disabled={
-                                        createHospLocMutation.isPending ||
-                                        isLoadingHosps ||
-                                        !hospitals?.length
-                                    }
-                                >
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select parent hospital" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {hospitals?.length === 0 && (
-                                            <SelectItem value="" disabled>
-                                                No hospitals found for this org
-                                            </SelectItem>
-                                        )}
-                                        {hospitals?.map((hosp) => (
-                                            <SelectItem
-                                                key={hosp.id}
-                                                value={hosp.id}
-                                            >
-                                                {hosp.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            )}
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                {/* Location Type Selection */}
-                <FormField
-                    control={form.control}
-                    name="type"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Location Type *</FormLabel>
-                            <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                                disabled={createHospLocMutation.isPending}
-                            >
-                                <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select type" />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    {locationTypes.map((type) => (
-                                        <SelectItem
-                                            key={type.id}
-                                            value={type.id}
-                                        >
-                                            {type.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                {/* *** Description Field (Using Textarea) *** */}
-                <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Description (Optional)</FormLabel>
-                            <FormControl>
-                                <Textarea
-                                    placeholder="Description"
-                                    className="resize-y" // Allow vertical resize
-                                    {...field}
-                                    disabled={createHospLocMutation.isPending}
-                                />
-                            </FormControl>
-                            <FormDescription>
-                                Additional details about this location.
-                            </FormDescription>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                {/* ******************************************* */}
-
-                {/* Address (Optional) */}
-                <FormField
-                    control={form.control}
-                    name="address"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Address (Optional)</FormLabel>
-                            <FormControl>
-                                <Input
-                                    placeholder="Full address..."
-                                    {...field}
-                                    disabled={createHospLocMutation.isPending}
-                                />
-                            </FormControl>
-                            <FormDescription>
-                                Specific address within the hospital, if
-                                different.
-                            </FormDescription>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                {/* Contact Email (Optional) */}
-                <FormField
-                    control={form.control}
-                    name="contactEmail"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Contact Email (Optional)</FormLabel>
-                            <FormControl>
-                                <Input
-                                    placeholder="mail@mail.com"
-                                    {...field}
-                                    type="email"
-                                    disabled={createHospLocMutation.isPending}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                {/* Contact Phone (Optional) */}
-                <FormField
-                    control={form.control}
-                    name="contactPhone"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Contact Phone (Optional)</FormLabel>
-                            <FormControl>
-                                <Input
-                                    placeholder="0191 000 0000"
-                                    {...field}
-                                    type="tel"
-                                    disabled={createHospLocMutation.isPending}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
                 {/* Active Checkbox */}
                 <FormField
                     control={form.control}
@@ -372,7 +143,7 @@ export function AddDepFrom({
 
                 <Button
                     type="submit"
-                    disabled={createHospLocMutation.isPending || isLoadingHosps}
+                    disabled={createHospLocMutation.isPending || isLoadingDeps}
                     className="w-full sm:w-auto" // Responsive width
                 >
                     {createHospLocMutation.isPending
