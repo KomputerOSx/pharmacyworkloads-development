@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 function formatRouteSegments(segments: string[]): string {
     if (segments.length === 0) {
@@ -57,14 +58,30 @@ export function SiteHeader() {
                         size="sm"
                         className="hidden sm:flex"
                     >
-                        <a
-                            href="https://github.com/shadcn-ui/ui/tree/main/apps/v4/app/(examples)/dashboard"
+                        <Link
+                            href="#"
                             rel="noopener noreferrer"
                             target="_blank"
                             className="dark:text-foreground"
                         >
-                            GitHub
-                        </a>
+                            Users Portal
+                        </Link>
+                    </Button>
+
+                    <Button
+                        variant="ghost"
+                        asChild
+                        size="sm"
+                        className="hidden sm:flex"
+                    >
+                        <Link
+                            href="#"
+                            rel="noopener noreferrer"
+                            target="_blank"
+                            className="dark:text-foreground"
+                        >
+                            Manager Portal
+                        </Link>
                     </Button>
                 </div>
             </div>

@@ -21,7 +21,7 @@ export default function OrgLayout({ children }: { children: ReactNode }) {
                     <AppSidebar variant="inset" />
                     <SidebarInset>
                         <SiteHeader />
-                        <main className="container flex-1">{children}</main>
+                        <main className="">{children}</main>
                     </SidebarInset>
                 </SidebarProvider>
             </div>
