@@ -41,10 +41,9 @@ import {
     useCreateDepHospLocAssignment,
     useDepHospLocAssignments,
 } from "@/hooks/useDepAss";
-import { useDeps } from "@/hooks/useDeps";
 import { useHospLocs } from "@/hooks/useHospLoc";
 import { useParams } from "next/navigation";
-import { useHosp, useHosps } from "@/hooks/useHosps";
+import { useHosps } from "@/hooks/useHosps";
 
 // Define the form schema
 const formSchema = z.object({
@@ -65,11 +64,9 @@ export function AddDepAssForm({ onSuccess, onCancel }: AddDepAssFormProps) {
     const orgId = params.orgId as string;
     const depId = params.depId as string;
 
-    const [openDeptPopover, setOpenDeptPopover] = useState(false);
     const [openLocationPopover, setOpenLocationPopover] = useState(false);
 
     const { data: hosps } = useHosps(orgId);
-    const { data: departments } = useDeps(orgId);
     const { data: locations, isLoading: isLoadingLocations } =
         useHospLocs(orgId);
 
@@ -87,11 +84,10 @@ export function AddDepAssForm({ onSuccess, onCancel }: AddDepAssFormProps) {
             assignedLocations.map((assLoc) => assLoc.locationId),
         );
 
-        const filtered = locations.filter((location) => {
+        return locations.filter((location) => {
             const isAssigned = assignedLocationIds.has(location.id);
             return !isAssigned;
         });
-        return filtered;
     }, [locations, assignedLocations]); // Dependencies are correct
 
     // Create department assignment mutation
@@ -112,7 +108,7 @@ export function AddDepAssForm({ onSuccess, onCancel }: AddDepAssFormProps) {
             {
                 departmentId: depId,
                 locationId: values.locationId,
-                userId: "current-user-id", // Replace with actual user ID if available
+                userId: "system", // Replace with actual user ID if available
             },
             {
                 onSuccess: async () => {
@@ -130,10 +126,10 @@ export function AddDepAssForm({ onSuccess, onCancel }: AddDepAssFormProps) {
     };
 
     // Helper to get department name by ID
-    const getDepartmentName = (id: string) => {
-        const dept = departments?.find((d) => d.id === id);
-        return dept?.name || id;
-    };
+    // const getDepartmentName = (id: string) => {
+    //     const dept = departments?.find((d) => d.id === id);
+    //     return dept?.name || id;
+    // };
 
     const getHospitalName = (locationId: string) => {
         const location = locations?.find((l) => l.id === locationId);

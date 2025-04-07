@@ -7,9 +7,7 @@ import {
     getCoreRowModel,
     getPaginationRowModel,
     getSortedRowModel,
-    getFilteredRowModel, // Keep if you might add filtering later
     SortingState,
-    ColumnFiltersState, // Keep if you might add filtering later
     flexRender,
     TableMeta,
 } from "@tanstack/react-table";
@@ -24,7 +22,6 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; // Keep if adding search
 import {
     Select,
     SelectContent,
@@ -48,7 +45,8 @@ interface DepAssignedLocTableProps {
         locationName: string | null,
     ) => void;
     isLoadingLocations: boolean; // Pass loading state for location names
-    // Add other props like isLoadingAssignments if needed for internal states
+    hospitalNameMap: Map<string, string>;
+    isLoadingHospitals: boolean;
 }
 
 // --- Table Meta Interface --- (Should match the one in Columns)
@@ -58,67 +56,49 @@ interface DepAssignedLocTableMeta extends TableMeta<AssignedLocationData> {
         locationName: string | null,
     ) => void;
     isLoadingLocations: boolean;
+    hospitalNameMap: Map<string, string>;
+    isLoadingHospitals: boolean;
 }
 
 export function DepAssignedLocTable({
     assignments,
     onDeleteRequest,
     isLoadingLocations,
+    hospitalNameMap,
+    isLoadingHospitals,
 }: DepAssignedLocTableProps) {
-    // Memoize data
     const data = useMemo(() => assignments ?? [], [assignments]);
 
-    // --- TanStack Table State ---
     const [sorting, setSorting] = useState<SortingState>(() => [
         { id: "assignedAt", desc: true }, // Default sort by assigned date
     ]);
-    // Add filtering state if needed
-    // const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
     // --- Initialize TanStack Table ---
     const table = useReactTable({
         data,
         columns,
-        // State Management
         state: {
             sorting,
-            // columnFilters, // Add if filtering
         },
-        // State Updaters
         onSortingChange: setSorting,
-        // onColumnFiltersChange: setColumnFilters, // Add if filtering
-        // Pipeline
         getCoreRowModel: getCoreRowModel(),
-        // getFilteredRowModel: getFilteredRowModel(), // Add if filtering
         getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
-        // Default page size
         initialState: {
             pagination: {
-                pageSize: 10, // Adjust as needed
+                pageSize: 10,
             },
         },
-        // Pass meta data/functions to columns
         meta: {
             openDeleteDialog: onDeleteRequest,
             isLoadingLocations: isLoadingLocations,
-        } as DepAssignedLocTableMeta, // Cast to ensure type safety
+            hospitalNameMap: hospitalNameMap,
+            isLoadingHospitals: isLoadingHospitals,
+        } as DepAssignedLocTableMeta,
     });
 
     return (
         <div className="w-full space-y-4">
-            {/* --- Toolbar (Optional: Add Search/Filters later if needed) --- */}
-            {/*
-            <div className="flex items-center py-4">
-                <Input
-                    placeholder="Filter locations..."
-                    // Add filter logic here if needed
-                    className="max-w-sm h-9"
-                />
-                 <DataTableViewOptions table={table} /> // Add if using View Options
-            </div>
-            */}
-
             {/* --- The Data Table --- */}
             <div className="rounded-md border">
                 <ScrollArea className="w-full whitespace-nowrap">

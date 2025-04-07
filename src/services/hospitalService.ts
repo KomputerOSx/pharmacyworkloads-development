@@ -6,7 +6,6 @@ import {
     collection,
     deleteDoc,
     doc,
-    documentId,
     DocumentReference,
     getDoc,
     getDocs,

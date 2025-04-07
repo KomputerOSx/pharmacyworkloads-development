@@ -3,9 +3,10 @@
 
 import React from "react";
 import { ColumnDef, Column, Row, CellContext } from "@tanstack/react-table";
-import { ArrowUpDown, Trash } from "lucide-react";
+// Make sure these icons are imported
+import { ArrowUpDown, MoreHorizontal, Trash } from "lucide-react";
 
-// Shadcn UI Imports
+// Shadcn UI Imports - Double-check these
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -15,11 +16,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Project Specific Imports
-import { AssignedLocationData } from "@/types/depTypes"; // Use the processed data type
-import { formatDate } from "@/utils/utils"; // Assuming you have this utility
+import { AssignedLocationData } from "@/types/depTypes";
+import { formatDate } from "@/utils/utils";
 
 // --- Table Meta Interface ---
 interface DepAssignedLocTableMeta {
@@ -28,7 +29,9 @@ interface DepAssignedLocTableMeta {
         assignmentId: string,
         locationName: string | null,
     ) => void;
-    isLoadingLocations: boolean; // To show skeleton for location name
+    isLoadingLocations: boolean;
+    hospitalNameMap: Map<string, string>;
+    isLoadingHospitals: boolean;
 }
 
 // --- Action Row Component Props ---
@@ -45,7 +48,7 @@ const SortableHeader = ({
     column,
     title,
 }: {
-    column: Column<AssignedLocationData, unknown>;
+    column: Column<AssignedLocationData>;
     title: string;
 }) => (
     <Button
@@ -63,31 +66,41 @@ const SortableHeader = ({
 // --- Action Buttons Component for Each Row ---
 const DataTableRowActions: React.FC<DataTableRowActionsProps> = ({
     row,
-    openDeleteDialog, // Use the prop
+    openDeleteDialog, // Receive the handler via props
 }) => {
-    const assignment = row.original;
+    const assignment = row.original; // Get data for this specific row
 
     return (
         <DropdownMenu>
+            {/* The Trigger wraps the button and requires asChild */}
             <DropdownMenuTrigger asChild>
-                {/* ... trigger button ... */}
+                <Button
+                    variant="ghost"
+                    className="flex h-8 w-8 p-0 data-[state=open]:bg-muted" // Standard icon button style
+                >
+                    <MoreHorizontal className="h-4 w-4" />{" "}
+                    {/* The 3 dots icon */}
+                    <span className="sr-only">Open menu</span>
+                </Button>
             </DropdownMenuTrigger>
+            {/* The Content of the dropdown */}
             <DropdownMenuContent align="end" className="w-[160px]">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                    // Call the function passed via props
+                    // Call the passed handler on click
                     onClick={() =>
                         openDeleteDialog(
                             assignment.assignmentId,
                             assignment.locationName,
                         )
                     }
-                    className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/50"
+                    className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/50" // Destructive action styling
                 >
-                    <Trash className="mr-2 h-4 w-4" />
+                    <Trash className="mr-2 h-4 w-4" /> {/* Delete Icon */}
                     Delete Assignment
                 </DropdownMenuItem>
+                {/* Add more DropdownMenuItems here for future actions like 'Edit' */}
             </DropdownMenuContent>
         </DropdownMenu>
     );
@@ -123,8 +136,38 @@ export const columns: ColumnDef<AssignedLocationData>[] = [
         enableSorting: true,
         enableHiding: true,
     },
+    // 2. Hospital Column
+    {
+        accessorKey: "hospId", // Access the ID, lookup name in cell
+        header: ({ column }) => (
+            <SortableHeader column={column} title="Hospital" />
+        ),
+        cell: ({ row, table }: CellContext<AssignedLocationData, unknown>) => {
+            const hospId = row.getValue("hospId") as string | null;
+            const meta = table.options.meta as DepAssignedLocTableMeta;
 
-    // 2. Assigned At Column
+            // Show skeleton if hospitals are loading
+            if (meta.isLoadingHospitals) {
+                return <Skeleton className="h-5 w-24 md:w-32" />; // Responsive width
+            }
+
+            // Show name from map or fallback
+            const hospName = hospId ? meta.hospitalNameMap.get(hospId) : null;
+            return (
+                <div className="">
+                    {hospName ?? (
+                        <span className="text-muted-foreground">N/A</span>
+                    )}
+                </div>
+            );
+        },
+        // Sorting by name requires custom sort function or enable sorting on hospId
+        enableSorting: true, // Sorts by hospId by default
+        enableHiding: true,
+        // Add filter function later if needed (would filter by hospId)
+    },
+
+    // 3. Assigned At Column
     {
         accessorKey: "assignedAt", // Use the processed 'assignedAt' field
         header: ({ column }) => (
@@ -143,35 +186,28 @@ export const columns: ColumnDef<AssignedLocationData>[] = [
         sortDescFirst: true, // Default sort newest first
     },
 
-    // 3. Actions Column
+    // 4. Actions Column
     {
-        id: "actions",
-        header: () => <div className="text-right pr-4">Actions</div>,
-        // Use CellContext here to get 'table' and 'row'
+        id: "actions", // Unique id for this column
+        header: () => <div className="text-right pr-4">Actions</div>, // Right-aligned header text
+        // Cell renderer function: gets row and table context
         cell: ({ row, table }: CellContext<AssignedLocationData, unknown>) => {
-            // Access meta information via the 'table' instance from context
             const meta = table.options.meta as DepAssignedLocTableMeta;
 
-            // Render the custom component, passing required props
+            // Render the custom DataTableRowActions component for this row
             return (
                 <div className="text-right">
                     {" "}
-                    {/* Optional: Keep alignment */}
+                    {/* Align content within the cell */}
                     <DataTableRowActions
-                        row={row}
-                        openDeleteDialog={meta.openDeleteDialog} // Pass the function down
+                        row={row} // Pass the current row data
+                        openDeleteDialog={meta.openDeleteDialog} // Pass the delete handler from meta
                     />
                 </div>
             );
         },
-        enableSorting: false,
-        enableHiding: false,
-        size: 80,
+        enableSorting: false, // Typically actions aren't sortable
+        enableHiding: false, // Typically actions column is always visible
+        size: 80, // Fixed width for the column
     },
 ];
-
-// --- (Optional) Column Visibility Toggle ---
-// You can reuse the DataTableViewOptions component from your HospLoc example
-// just ensure it receives the correct table instance.
-// If you don't need it, you can omit it.
-// export { DataTableViewOptions } from "@/components/locations/HospLocColumns"; // Example re-export
