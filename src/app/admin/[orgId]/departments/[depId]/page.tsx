@@ -99,7 +99,7 @@
 // src/app/(your-path)/[orgId]/departments/[depId]/page.tsx (Example Path)
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { Loader2, Terminal } from "lucide-react"; // Import icons
 
@@ -109,7 +109,7 @@ import {
     useDeleteDepHospLocAssignment,
 } from "@/hooks/useDepAss";
 import { useHospLocs } from "@/hooks/useHospLoc"; // To get location names
-import { useDep, useDeps } from "@/hooks/useDeps"; // To get department name (optional)
+import { useDep } from "@/hooks/useDeps"; // To get department name (optional)
 
 // Your Components
 import { AddDepAssForm } from "@/components/departments/AddDepAssForm"; // Your existing form
@@ -121,6 +121,7 @@ import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmation
 import { AssignedLocationData } from "@/types/depTypes"; // Import the processed type
 import { toast } from "sonner";
 import { Timestamp } from "firebase/firestore";
+import Link from "next/link";
 
 // --- Page Component ---
 export default function DepartmentAssignmentsPage() {
@@ -139,6 +140,8 @@ export default function DepartmentAssignmentsPage() {
     const {
         data: department, // Fetch single department info if needed for title
         isLoading: isLoadingDept,
+        isError: isErrorDept,
+        error: errorDept,
     } = useDep(depId); // Assuming useDeps can fetch a single one
 
     const {
@@ -167,11 +170,10 @@ export default function DepartmentAssignmentsPage() {
         );
     }, [locations]);
 
-    // Process assigned locations to include the name for the table
     const processedAssignments = useMemo((): AssignedLocationData[] => {
         if (!assignedRaw) return [];
 
-        assignedRaw.map((ass) => {
+        return assignedRaw.map((ass) => {
             // Ensure createdAt is a Date object
             let assignedAtDate: Date | null = null;
             if (ass.createdAt) {
@@ -193,6 +195,9 @@ export default function DepartmentAssignmentsPage() {
                 locationName:
                     locationNameMap.get(ass.locationId) ?? "Unnamed Location",
                 assignedAt: assignedAtDate,
+                id: ass.id, // Add this property
+                createdAt: ass.createdAt, // Add this property
+                updatedAt: ass.updatedAt, // Add this property
             };
         });
     }, [assignedRaw, locationNameMap]);
@@ -312,17 +317,24 @@ export default function DepartmentAssignmentsPage() {
                 <h1 className="text-2xl font-semibold tracking-tight">
                     Assignments for: {currentDepartmentName}
                 </h1>
-                <Button
-                    variant={"outline"}
-                    size="sm"
-                    onClick={handleRefresh}
-                    disabled={isLoadingAssignments || isLoadingLocations} // Adjust disabling logic
-                >
-                    {(isLoadingAssignments || isLoadingLocations) && (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
-                    Refresh Data
-                </Button>
+                <div className={"flex gap-2"}>
+                    <Button
+                        variant={"outline"}
+                        size="sm"
+                        onClick={handleRefresh}
+                        disabled={isLoadingAssignments || isLoadingLocations} // Adjust disabling logic
+                    >
+                        {(isLoadingAssignments || isLoadingLocations) && (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
+                        Refresh Data
+                    </Button>
+                    <Link href={`/admin/${orgId}/departments/`}>
+                        <Button size="sm" variant={"default"}>
+                            Back to Departments
+                        </Button>
+                    </Link>
+                </div>
             </div>
 
             {/* Add Assignment Form */}

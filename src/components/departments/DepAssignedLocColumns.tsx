@@ -3,7 +3,7 @@
 
 import React from "react";
 import { ColumnDef, Column, Row, CellContext } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal, Trash } from "lucide-react";
+import { ArrowUpDown, Trash } from "lucide-react";
 
 // Shadcn UI Imports
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,10 @@ interface DepAssignedLocTableMeta {
 // --- Action Row Component Props ---
 interface DataTableRowActionsProps {
     row: Row<AssignedLocationData>;
+    openDeleteDialog: (
+        assignmentId: string,
+        locationName: string | null,
+    ) => void; // Accept the function
 }
 
 // --- Reusable Header Component for Sorting ---
@@ -57,28 +61,24 @@ const SortableHeader = ({
 );
 
 // --- Action Buttons Component for Each Row ---
-const DataTableRowActions: React.FC<DataTableRowActionsProps> = ({ row }) => {
-    const assignment = row.original; // Contains assignmentId, locationName, etc.
-    const table = row.getContext().table; // Get table context
-    const meta = table.options.meta as DepAssignedLocTableMeta; // Access meta
+const DataTableRowActions: React.FC<DataTableRowActionsProps> = ({
+    row,
+    openDeleteDialog, // Use the prop
+}) => {
+    const assignment = row.original;
 
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button
-                    variant="ghost"
-                    className="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
-                >
-                    <MoreHorizontal className="h-4 w-4" />
-                    <span className="sr-only">Open menu</span>
-                </Button>
+                {/* ... trigger button ... */}
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[160px]">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
+                    // Call the function passed via props
                     onClick={() =>
-                        meta.openDeleteDialog(
+                        openDeleteDialog(
                             assignment.assignmentId,
                             assignment.locationName,
                         )
@@ -147,10 +147,26 @@ export const columns: ColumnDef<AssignedLocationData>[] = [
     {
         id: "actions",
         header: () => <div className="text-right pr-4">Actions</div>,
-        cell: DataTableRowActions, // Use the dedicated component
+        // Use CellContext here to get 'table' and 'row'
+        cell: ({ row, table }: CellContext<AssignedLocationData, unknown>) => {
+            // Access meta information via the 'table' instance from context
+            const meta = table.options.meta as DepAssignedLocTableMeta;
+
+            // Render the custom component, passing required props
+            return (
+                <div className="text-right">
+                    {" "}
+                    {/* Optional: Keep alignment */}
+                    <DataTableRowActions
+                        row={row}
+                        openDeleteDialog={meta.openDeleteDialog} // Pass the function down
+                    />
+                </div>
+            );
+        },
         enableSorting: false,
         enableHiding: false,
-        size: 80, // Fixed size
+        size: 80,
     },
 ];
 
