@@ -344,6 +344,14 @@ export async function deleteHospital(
 
     console.log(`gEY7XZzd - Attempting to delete hospital with ID: ${id}`);
 
+    const hospitalHasLocations = await checkIfHospitalHasLocations(id);
+
+    if (hospitalHasLocations) {
+        throw new Error(
+            "\nCannot Delete Hospital as it has locations.\nAll associated locations must be deleted first, or changed to another hospital.",
+        );
+    }
+
     try {
         const hospitalRef = doc(db, "hospitals", id);
         console.log(`9dhsUT5S - Deleting hospital document ${id}...`);
@@ -360,5 +368,23 @@ export async function deleteHospital(
         throw new Error(
             `Failed to delete hospital (ID: ${id}). Reason: ${error instanceof Error ? error.message : String(error)}`,
         );
+    }
+}
+
+async function checkIfHospitalHasLocations(
+    hospitalId: string,
+): Promise<boolean> {
+    try {
+        const locationsRef = collection(db, "hospital_locations");
+        const querySnapshot = await getDocs(
+            query(locationsRef, where("hospId", "==", hospitalId)),
+        );
+        return !querySnapshot.empty;
+    } catch (error) {
+        console.error(
+            `Error checking if hospital ${hospitalId} has locations:`,
+            error,
+        );
+        return false;
     }
 }

@@ -101,7 +101,6 @@ export function useUpdateHospLoc() {
             id: string;
             hospLocData: Partial<HospLoc>;
             orgId: string;
-            hospId: string;
             userId?: string;
         }) =>
             updateHospLoc(

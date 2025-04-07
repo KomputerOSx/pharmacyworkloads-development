@@ -99,7 +99,7 @@ export function EditHospLocForm({
         // *** Pre-populate with existing data ***
         defaultValues: {
             name: locationToEdit.name || "",
-            hospId: locationToEdit.hospId || "", // Important: Use existing hospId
+            hospId: locationToEdit.hospId || "",
             type: locationToEdit.type || "",
             description: locationToEdit.description || "", // Assuming description is on HospLoc type
             address: locationToEdit.address || "",
@@ -120,7 +120,7 @@ export function EditHospLocForm({
         const hospLocUpdateData: Partial<HospLoc> = {
             name: values.name,
             type: values.type,
-            // hospId: values.hospId, // hospId is passed separately below, not usually in the 'data' object itself for updates
+            hospId: values.hospId,
             description: values.description || null,
             address: values.address || null,
             contactEmail: values.contactEmail || null,
@@ -130,13 +130,9 @@ export function EditHospLocForm({
 
         updateHospLocMutation.mutate(
             {
-                // ***** CORRECTED PART *****
-                id: locationToEdit.id, // Use 'id' for the location being updated
-                hospId: values.hospId, // Add the parent 'hospId' from form values
-                // **************************
-                hospLocData: hospLocUpdateData, // The data payload
-                orgId: orgId, // The organization context
-                // userId: 'current-user-id', // Optional: if needed
+                id: locationToEdit.id,
+                hospLocData: hospLocUpdateData,
+                orgId: orgId,
             },
             {
                 onSuccess: (data) => {
