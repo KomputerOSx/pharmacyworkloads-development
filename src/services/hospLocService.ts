@@ -249,6 +249,13 @@ export async function deleteHospLoc(id: string): Promise<void> {
 
     console.log("U5BH6JJb - Attempting to delete hospital with ID:", id);
 
+    const hasAssignments = await checkHospLocHasAssignments(id);
+    if (hasAssignments) {
+        throw new Error(
+            `Cannot delete a Hospital Location that is assigned to a department. All assignments to any department must be deleted first.`,
+        );
+    }
+
     try {
         const hospLocRef = doc(db, "hospital_locations", id);
         console.log("s1V7gtwS - Deleting hospital document:", id);
@@ -263,4 +270,17 @@ export async function deleteHospLoc(id: string): Promise<void> {
             `Failed to delete hospital (ID: ${id}). Reason: ${error instanceof Error ? error.message : String(error)}`,
         );
     }
+}
+
+async function checkHospLocHasAssignments(
+    locationId: string,
+): Promise<boolean> {
+    const depAssCollection = collection(db, "department_location_assignments");
+
+    const assignmentsQuery = query(
+        depAssCollection,
+        where("locationId", "==", locationId),
+    );
+    const assignmentsSnapshot = await getDocs(assignmentsQuery);
+    return !assignmentsSnapshot.empty;
 }

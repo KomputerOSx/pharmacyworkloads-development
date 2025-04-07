@@ -282,72 +282,6 @@ export async function createDep(
     }
 }
 
-// export async function updateDep(
-//     id: string,
-//     data: Omit<Partial<Department>, "id" | "orgId" | "createdAt" | "createdBy">,
-//     userId = "system",
-// ): Promise<Department> {
-//     if (!id) {
-//         throw new Error(
-//             "updateDep error: Department ID is required for update.",
-//         );
-//     }
-//     if (!data || Object.keys(data).length === 0) {
-//         console.warn(
-//             `g3u2aESf - updateDepartment warning: No specific fields provided for update on department ${id}. Only timestamps/audit fields will be updated.`,
-//         );
-//     }
-//
-//     try {
-//         const departmentRef: DocumentReference = doc(db, "departments", id);
-//
-//         const dataToUpdate = {
-//             ...data, // Spread the actual fields to update
-//             updatedAt: serverTimestamp(),
-//             updatedById: userId,
-//         };
-//
-//         // Check if document exists *before* updating if desired (optional optimization)
-//         const checkSnap = await getDoc(departmentRef);
-//         if (!checkSnap.exists()) {
-//             throw new Error(
-//                 `updateDepartment error: Department with ID ${id} not found.`,
-//             );
-//         }
-//
-//         await updateDoc(departmentRef, dataToUpdate);
-//
-//         const updatedDepartmentDoc = await getDoc(departmentRef);
-//
-//         if (!updatedDepartmentDoc.exists()) {
-//             throw new Error(
-//                 `Consistency error: Department with ID ${id} not found immediately after successful update.`,
-//             );
-//         }
-//
-//         const updatedDepartment = mapFirestoreDocToDep(
-//             updatedDepartmentDoc.id,
-//             updatedDepartmentDoc.data(),
-//         );
-//
-//         if (!updatedDepartment) {
-//             // This implies the mapper function
-//             throw new Error(
-//                 `Data integrity error: Failed to map updated department data for ID: ${id}. Check mapper logic and Firestore data.`,
-//             );
-//         }
-//         return updatedDepartment;
-//     } catch (error) {
-//         console.error(
-//             `g3u2aESf - Error updating department with ID ${id}:`,
-//             error,
-//         );
-//         throw new Error(
-//             `Failed to update department (ID: ${id}). Reason: ${error instanceof Error ? error.message : String(error)}`,
-//         );
-//     }
-// }
-
 export async function updateDep(
     id: string,
     // Data contains the fields to potentially update
@@ -549,6 +483,13 @@ export async function deleteDep(id: string): Promise<void> {
 
     console.log("fpBqeu8X - Attempting to delete Department with ID:", id);
 
+    const hasAssignments = await checkDepHasAssignments(id);
+    if (hasAssignments) {
+        throw new Error(
+            `Cannot delete a department with assigned locations. All Location Assignments must be deleted first.`,
+        );
+    }
+
     try {
         const departmentRef = doc(db, "departments", id);
         console.log("Cq2CkYZb - Deleting Department document:", id);
@@ -563,4 +504,15 @@ export async function deleteDep(id: string): Promise<void> {
             `Failed to delete Department (ID: ${id}). Reason: ${error instanceof Error ? error.message : String(error)}`,
         );
     }
+}
+
+async function checkDepHasAssignments(departmentId: string): Promise<boolean> {
+    const depAssCollection = collection(db, "department_location_assignments");
+
+    const assignmentsQuery = query(
+        depAssCollection,
+        where("departmentId", "==", departmentId),
+    );
+    const assignmentsSnapshot = await getDocs(assignmentsQuery);
+    return !assignmentsSnapshot.empty;
 }

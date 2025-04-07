@@ -214,9 +214,10 @@ export function AddDepAssForm({ onSuccess, onCancel }: AddDepAssFormProps) {
                                                                 key={
                                                                     location.id
                                                                 }
-                                                                value={
-                                                                    location.name
-                                                                }
+                                                                // value={
+                                                                //     location.name
+                                                                // }
+                                                                value={`${location.name} ::: ${location.id}`}
                                                                 onSelect={() => {
                                                                     form.setValue(
                                                                         "locationId",
