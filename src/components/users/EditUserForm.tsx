@@ -24,7 +24,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 
 import { useUpdateUser } from "@/hooks/useUsers"; // Adjust path

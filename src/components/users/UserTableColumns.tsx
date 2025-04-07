@@ -1,14 +1,302 @@
+// // src/components/users/columns.tsx
+// "use client";
+//
+// import { ColumnDef, Row, CellContext } from "@tanstack/react-table"; // Import CellContext
+// import { ArrowUpDown, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+// import { formatDate } from "@/lib/utils"; // Keep your formatter
+//
+// import { Button } from "@/components/ui/button";
+// import { Checkbox } from "@/components/ui/checkbox";
+// import {
+//     DropdownMenu,
+//     DropdownMenuContent,
+//     DropdownMenuItem,
+//     DropdownMenuLabel,
+//     DropdownMenuSeparator,
+//     DropdownMenuTrigger,
+// } from "@/components/ui/dropdown-menu";
+// import { Badge } from "@/components/ui/badge";
+// import { User } from "@/types/userTypes";
+//
+// // Define the type for your custom meta data
+// interface UserTableMeta {
+//     departmentNameMap: Map<string, string>;
+//     isLoadingDepartmentMap: boolean;
+//     onEditRequest: (user: User) => void;
+//     onDeleteRequest: (user: User) => void;
+// }
+//
+// // --- Column Definitions ---
+// // Use the standard ColumnDef<User>
+// export const columns: ColumnDef<User>[] = [
+//     // --- Selection Column ---
+//     {
+//         id: "select",
+//         header: ({ table }) => (
+//             <Checkbox
+//                 checked={
+//                     table.getIsAllPageRowsSelected() ||
+//                     (table.getIsSomePageRowsSelected() && "indeterminate")
+//                 }
+//                 onCheckedChange={(value) =>
+//                     table.toggleAllPageRowsSelected(!!value)
+//                 }
+//                 aria-label="Select all"
+//                 className="translate-y-[2px]"
+//             />
+//         ),
+//         cell: ({ row }) => (
+//             <Checkbox
+//                 checked={row.getIsSelected()}
+//                 onCheckedChange={(value) => row.toggleSelected(!!value)}
+//                 aria-label="Select row"
+//                 className="translate-y-[2px]"
+//             />
+//         ),
+//         enableSorting: false,
+//         enableHiding: false,
+//     },
+//
+//     // --- User Name ---
+//     {
+//         accessorFn: (row) => `${row.firstName} ${row.lastName}`,
+//         id: "fullName",
+//         header: ({ column }) => (
+//             <Button
+//                 variant="ghost"
+//                 onClick={() =>
+//                     column.toggleSorting(column.getIsSorted() === "asc")
+//                 }
+//             >
+//                 Name
+//                 <ArrowUpDown className="ml-2 h-4 w-4" />
+//             </Button>
+//         ),
+//         cell: ({ row }) => (
+//             <div className="font-medium">{`${row.original.firstName} ${row.original.lastName}`}</div>
+//         ),
+//         enableColumnFilter: false,
+//     },
+//     // Hidden supporting columns
+//     {
+//         accessorKey: "lastName",
+//         header: "Last Name",
+//         enableHiding: true,
+//         enableSorting: false,
+//         enableColumnFilter: false,
+//     },
+//     {
+//         accessorKey: "firstName",
+//         header: "First Name",
+//         enableHiding: true,
+//         enableSorting: false,
+//         enableColumnFilter: false,
+//     },
+//
+//     // --- Email ---
+//     {
+//         accessorKey: "email",
+//         header: ({ column }) => (
+//             <Button
+//                 variant="ghost"
+//                 onClick={() =>
+//                     column.toggleSorting(column.getIsSorted() === "asc")
+//                 }
+//             >
+//                 Email
+//                 <ArrowUpDown className="ml-2 h-4 w-4" />
+//             </Button>
+//         ),
+//         cell: ({ row }) => (
+//             <div className="lowercase">{row.getValue("email")}</div>
+//         ),
+//         enableColumnFilter: false,
+//     },
+//
+//     {
+//         accessorKey: "departmentId",
+//         header: "Department",
+//         cell: ({ row, table }: CellContext<User, unknown>) => {
+//             const departmentId = row.getValue("departmentId") as string;
+//             const meta = table.options.meta as UserTableMeta | undefined;
+//             if (meta?.isLoadingDepartmentMap) {
+//                 return (
+//                     <span className="text-xs text-muted-foreground">
+//                         Loading...
+//                     </span>
+//                 );
+//             }
+//             const departmentName = meta?.departmentNameMap?.get(departmentId);
+//             return (
+//                 <div>
+//                     {departmentName || (
+//                         <span className="text-xs text-muted-foreground">
+//                             N/A
+//                         </span>
+//                     )}
+//                 </div>
+//             );
+//         },
+//         // *** UPDATED FILTER FN: Filter by ID ***
+//         filterFn: (row: Row<User>, columnId: string, filterValue: any) => {
+//             // Filter based on the raw departmentId
+//             const departmentId = row.original.departmentId;
+//             // Use exact match or includes depending on how your filter UI sends the value
+//             // Example: Exact match (assuming filterValue is the ID string)
+//             return departmentId === String(filterValue);
+//             // Example: Includes (if filterValue might be part of an ID - less likely)
+//             // return departmentId.includes(String(filterValue));
+//         },
+//         enableSorting: false,
+//     },
+//
+//     // --- Role ---
+//     {
+//         accessorKey: "role",
+//         header: "Role",
+//         cell: ({ row }) => <div>{row.getValue("role")}</div>,
+//         filterFn: "equalsString",
+//         enableSorting: true,
+//     },
+//
+//     // --- Status (Active/Inactive) ---
+//     {
+//         accessorKey: "active",
+//         header: ({ column }) => (
+//             <Button
+//                 variant="ghost"
+//                 size="sm"
+//                 onClick={() =>
+//                     column.toggleSorting(column.getIsSorted() === "asc")
+//                 }
+//             >
+//                 {" "}
+//                 Status <ArrowUpDown className="ml-2 h-4 w-4" />{" "}
+//             </Button>
+//         ),
+//         cell: ({ row }) => {
+//             const isActive = row.getValue("active");
+//             return (
+//                 <Badge
+//                     variant={isActive ? "success" : "destructive"}
+//                     className="text-xs"
+//                 >
+//                     {" "}
+//                     {isActive ? "Active" : "Inactive"}{" "}
+//                 </Badge>
+//             );
+//         },
+//         filterFn: (row, columnId, filterValue) => {
+//             const isActive = row.getValue(columnId);
+//             const filterString = String(filterValue).toLowerCase();
+//             if (filterString === "active") return isActive === true;
+//             if (filterString === "inactive") return isActive === false;
+//             return true;
+//         },
+//     },
+//
+//     // --- Optional Columns ---
+//     {
+//         accessorKey: "phoneNumber",
+//         header: "Phone Number",
+//         cell: ({ row }) => <div>{row.getValue("phoneNumber") || "-"}</div>,
+//         enableSorting: false,
+//         enableColumnFilter: false,
+//     },
+//     {
+//         accessorKey: "jobTitle",
+//         header: "Job Title",
+//         cell: ({ row }) => <div>{row.getValue("jobTitle") || "-"}</div>,
+//         enableSorting: true,
+//         enableColumnFilter: false,
+//     },
+//     {
+//         accessorKey: "specialty",
+//         header: "Specialty",
+//         cell: ({ row }) => <div>{row.getValue("specialty") || "-"}</div>,
+//         enableSorting: true,
+//         enableColumnFilter: false,
+//     },
+//     {
+//         accessorKey: "lastLogin",
+//         header: ({ column }) => (
+//             <Button
+//                 variant="ghost"
+//                 size="sm"
+//                 onClick={() =>
+//                     column.toggleSorting(column.getIsSorted() === "asc")
+//                 }
+//             >
+//                 {" "}
+//                 Last Login <ArrowUpDown className="ml-2 h-4 w-4" />{" "}
+//             </Button>
+//         ),
+//         cell: ({ row }) => {
+//             const lastLogin = row.getValue("lastLogin") as Date | null;
+//             // Use your formatDate function
+//             return <div>{lastLogin ? formatDate(lastLogin) : "-"}</div>;
+//         },
+//         enableColumnFilter: false,
+//     },
+//
+//     // --- Actions Column ---
+//     {
+//         id: "actions",
+//         enableHiding: false,
+//         enableSorting: false,
+//         // Use standard CellContext type from React Table
+//         cell: ({ row, table }: CellContext<User, unknown>) => {
+//             const user = row.original;
+//             // *** FIX: Cast meta inside the function ***
+//             const meta = table.options.meta as UserTableMeta | undefined;
+//
+//             return (
+//                 <DropdownMenu>
+//                     <DropdownMenuTrigger asChild>
+//                         <Button variant="ghost" className="h-8 w-8 p-0">
+//                             {" "}
+//                             <span className="sr-only">Open menu</span>{" "}
+//                             <MoreHorizontal className="h-4 w-4" />{" "}
+//                         </Button>
+//                     </DropdownMenuTrigger>
+//                     <DropdownMenuContent align="end">
+//                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
+//                         <DropdownMenuItem
+//                             onClick={() =>
+//                                 navigator.clipboard.writeText(user.email)
+//                             }
+//                         >
+//                             {" "}
+//                             Copy Email{" "}
+//                         </DropdownMenuItem>
+//                         <DropdownMenuSeparator />
+//                         {/* Use optional chaining for safety */}
+//                         <DropdownMenuItem
+//                             onClick={() => meta?.onEditRequest(user)}
+//                         >
+//                             {" "}
+//                             <Pencil className="mr-2 h-4 w-4" /> Edit User{" "}
+//                         </DropdownMenuItem>
+//                         <DropdownMenuItem
+//                             className="text-red-600 focus:text-red-700 focus:bg-red-50"
+//                             onClick={() => meta?.onDeleteRequest(user)}
+//                         >
+//                             {" "}
+//                             <Trash2 className="mr-2 h-4 w-4" /> Delete User{" "}
+//                         </DropdownMenuItem>
+//                     </DropdownMenuContent>
+//                 </DropdownMenu>
+//             );
+//         },
+//     },
+// ];
+
 // src/components/users/columns.tsx
 "use client";
 
-import {
-    ColumnDef,
-    FilterFn,
-    SortingFn,
-    sortingFns,
-} from "@tanstack/react-table";
+import { ColumnDef, Row, CellContext } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import { formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils"; // Keep your formatter
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -21,11 +309,9 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { User } from "@/types/userTypes"; // Adjust path as needed
-import { cn } from "@/lib/utils"; // For conditional classNames
+import { User } from "@/types/userTypes";
 
-// Define a type for the custom meta passed to columns
-// This makes accessing the passed functions/data type-safe
+// Define the type for your custom meta data
 interface UserTableMeta {
     departmentNameMap: Map<string, string>;
     isLoadingDepartmentMap: boolean;
@@ -33,18 +319,9 @@ interface UserTableMeta {
     onDeleteRequest: (user: User) => void;
 }
 
-// Helper function for basic case-insensitive filtering
-const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
-    // Rank the item
-    const itemRank = sortingFns.fuzzy(row, columnId, value, addMeta);
-
-    // Return if the item should be filtered in/out
-    return itemRank > 0; // Use threshold greater than 0 for fuzzy match
-};
-
 // --- Column Definitions ---
-export const columns: ColumnDef<User, UserTableMeta>[] = [
-    // --- Selection Column ---
+export const columns: ColumnDef<User>[] = [
+    // --- Selection Column --- (no changes)
     {
         id: "select",
         header: ({ table }) => (
@@ -72,41 +349,43 @@ export const columns: ColumnDef<User, UserTableMeta>[] = [
         enableHiding: false,
     },
 
-    // --- User Name ---
+    // --- User Name --- (no changes needed here for name-only global search)
     {
-        accessorKey: "firstName", // Can sort/filter by first name
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() =>
-                        column.toggleSorting(column.getIsSorted() === "asc")
-                    }
-                >
-                    Name
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-            );
-        },
-        cell: ({ row }) => {
-            const firstName = row.original.firstName;
-            const lastName = row.original.lastName;
-            return (
-                <div className="font-medium">{`${firstName} ${lastName}`}</div>
-            );
-        },
-        filterFn: fuzzyFilter, // Enable fuzzy filtering on this combined name concept if needed elsewhere
+        accessorFn: (row) => `${row.firstName} ${row.lastName}`,
+        id: "fullName",
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() =>
+                    column.toggleSorting(column.getIsSorted() === "asc")
+                }
+            >
+                {" "}
+                Name <ArrowUpDown className="ml-2 h-4 w-4" />{" "}
+            </Button>
+        ),
+        cell: ({ row }) => (
+            <div className="font-medium">{`${row.original.firstName} ${row.original.lastName}`}</div>
+        ),
+        enableColumnFilter: false, // Still handled globally
     },
-    // We hide lastName by default but keep it for filtering/data
+    // Hidden supporting columns (no changes)
     {
         accessorKey: "lastName",
-        header: "Last Name", // Simple header, no sorting UI needed if hiding
-        cell: ({ row }) => row.original.lastName,
-        enableHiding: true, // Can be hidden
-        enableSorting: false, // Usually sort by full name or first name
+        header: "Last Name",
+        enableHiding: true,
+        enableSorting: false,
+        enableColumnFilter: false,
+    },
+    {
+        accessorKey: "firstName",
+        header: "First Name",
+        enableHiding: true,
+        enableSorting: false,
+        enableColumnFilter: false,
     },
 
-    // --- Email ---
+    // --- Email --- (no changes needed here)
     {
         accessorKey: "email",
         header: ({ column }) => (
@@ -116,24 +395,24 @@ export const columns: ColumnDef<User, UserTableMeta>[] = [
                     column.toggleSorting(column.getIsSorted() === "asc")
                 }
             >
-                Email
-                <ArrowUpDown className="ml-2 h-4 w-4" />
+                {" "}
+                Email <ArrowUpDown className="ml-2 h-4 w-4" />{" "}
             </Button>
         ),
         cell: ({ row }) => (
             <div className="lowercase">{row.getValue("email")}</div>
         ),
-        filterFn: fuzzyFilter,
+        enableColumnFilter: false, // Still handled globally (though less relevant now)
     },
 
     // --- Department ---
     {
         accessorKey: "departmentId",
         header: "Department",
-        cell: ({ row, table }) => {
+        // Cell rendering remains the same
+        cell: ({ row, table }: CellContext<User, unknown>) => {
             const departmentId = row.getValue("departmentId") as string;
-            // Access map and loading state from meta
-            const meta = table.options.meta;
+            const meta = table.options.meta as UserTableMeta | undefined;
             if (meta?.isLoadingDepartmentMap) {
                 return (
                     <span className="text-xs text-muted-foreground">
@@ -152,28 +431,33 @@ export const columns: ColumnDef<User, UserTableMeta>[] = [
                 </div>
             );
         },
-        // Enable filtering using the *displayed name* rather than the ID
-        filterFn: (row, columnId, filterValue) => {
+        // *** UPDATED FILTER FN: Handles ID matching and "All" case ***
+        filterFn: (
+            row: Row<User>,
+            columnId: string,
+            filterValue: string | undefined,
+        ) => {
+            // If filterValue is empty or undefined (our "All" case), show the row
+            if (!filterValue) {
+                return true;
+            }
+            // Otherwise, compare the row's departmentId with the filterValue (which is the selected ID)
             const departmentId = row.original.departmentId;
-            const meta = row.table.options.meta as UserTableMeta | undefined; // Cast meta
-            const departmentName =
-                meta?.departmentNameMap?.get(departmentId) ?? "";
-            return departmentName
-                .toLowerCase()
-                .includes(String(filterValue).toLowerCase());
+            return departmentId === filterValue;
         },
-        enableSorting: false, // Sorting by name requires joining data or denormalizing name onto user doc
+        enableSorting: false,
     },
 
-    // --- Role ---
+    // --- Role --- (no changes)
     {
         accessorKey: "role",
         header: "Role",
         cell: ({ row }) => <div>{row.getValue("role")}</div>,
-        filterFn: "equalsString", // Exact match filter might be better for roles
+        filterFn: "equalsString",
+        enableSorting: true,
     },
 
-    // --- Status (Active/Inactive) ---
+    // --- Status (Active/Inactive) --- (no changes)
     {
         accessorKey: "active",
         header: ({ column }) => (
@@ -184,8 +468,8 @@ export const columns: ColumnDef<User, UserTableMeta>[] = [
                     column.toggleSorting(column.getIsSorted() === "asc")
                 }
             >
-                Status
-                <ArrowUpDown className="ml-2 h-4 w-4" />
+                {" "}
+                Status <ArrowUpDown className="ml-2 h-4 w-4" />{" "}
             </Button>
         ),
         cell: ({ row }) => {
@@ -195,38 +479,41 @@ export const columns: ColumnDef<User, UserTableMeta>[] = [
                     variant={isActive ? "success" : "destructive"}
                     className="text-xs"
                 >
-                    {isActive ? "Active" : "Inactive"}
+                    {" "}
+                    {isActive ? "Active" : "Inactive"}{" "}
                 </Badge>
             );
         },
         filterFn: (row, columnId, filterValue) => {
-            // Filter for true/false based on string 'active'/'inactive'
             const isActive = row.getValue(columnId);
             const filterString = String(filterValue).toLowerCase();
             if (filterString === "active") return isActive === true;
             if (filterString === "inactive") return isActive === false;
-            return true; // Show all if filter doesn't match 'active' or 'inactive'
+            return true;
         },
     },
 
-    // --- Optional Columns (Initially hidden potentially) ---
+    // --- Optional Columns --- (no changes)
     {
         accessorKey: "phoneNumber",
         header: "Phone Number",
         cell: ({ row }) => <div>{row.getValue("phoneNumber") || "-"}</div>,
         enableSorting: false,
+        enableColumnFilter: false,
     },
     {
         accessorKey: "jobTitle",
         header: "Job Title",
         cell: ({ row }) => <div>{row.getValue("jobTitle") || "-"}</div>,
-        enableSorting: false,
+        enableSorting: true,
+        enableColumnFilter: false,
     },
     {
         accessorKey: "specialty",
         header: "Specialty",
         cell: ({ row }) => <div>{row.getValue("specialty") || "-"}</div>,
-        enableSorting: false,
+        enableSorting: true,
+        enableColumnFilter: false,
     },
     {
         accessorKey: "lastLogin",
@@ -238,33 +525,38 @@ export const columns: ColumnDef<User, UserTableMeta>[] = [
                     column.toggleSorting(column.getIsSorted() === "asc")
                 }
             >
-                Last Login
-                <ArrowUpDown className="ml-2 h-4 w-4" />
+                {" "}
+                Last Login <ArrowUpDown className="ml-2 h-4 w-4" />{" "}
             </Button>
         ),
         cell: ({ row }) => {
             const lastLogin = row.getValue("lastLogin") as Date | null;
-            return <div>{lastLogin ? formatDate(lastLogin) : "-"}</div>; // Format: Sep 19, 2023, 11:05:30 AM
+            return <div>{lastLogin ? formatDate(lastLogin) : "-"}</div>;
         },
+        enableColumnFilter: false,
     },
 
-    // --- Actions Column ---
+    // --- Actions Column --- (no changes)
     {
         id: "actions",
         enableHiding: false,
-        cell: ({ row, table }) => {
+        enableSorting: false,
+        cell: ({ row, table }: CellContext<User, unknown>) => {
             const user = row.original;
-            // Access callbacks from meta
-            const meta = table.options.meta;
+            const meta = table.options.meta as UserTableMeta | undefined;
 
             return (
                 <DropdownMenu>
+                    {/* --- Culprit Area --- */}
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
+                            {/* ↓↓↓ These extra spaces/newlines might be interpreted as text nodes ↓↓↓ */}{" "}
+                            <span className="sr-only">Open menu</span>{" "}
+                            <MoreHorizontal className="h-4 w-4" /> {/* ↑↑↑ */}
                         </Button>
+                        {/* Or maybe there's accidental whitespace/comment HERE between Trigger and Button */}
                     </DropdownMenuTrigger>
+                    {/* --- End Culprit Area --- */}
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem
@@ -272,21 +564,22 @@ export const columns: ColumnDef<User, UserTableMeta>[] = [
                                 navigator.clipboard.writeText(user.email)
                             }
                         >
-                            Copy Email
+                            {" "}
+                            Copy Email{" "}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                             onClick={() => meta?.onEditRequest(user)}
                         >
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Edit User
+                            {" "}
+                            <Pencil className="mr-2 h-4 w-4" /> Edit User{" "}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             className="text-red-600 focus:text-red-700 focus:bg-red-50"
                             onClick={() => meta?.onDeleteRequest(user)}
                         >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete User
+                            {" "}
+                            <Trash2 className="mr-2 h-4 w-4" /> Delete User{" "}
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
