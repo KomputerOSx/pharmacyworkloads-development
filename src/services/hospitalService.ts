@@ -16,7 +16,7 @@ import {
     where,
 } from "firebase/firestore";
 import { db } from "@/config/firebase";
-import { mapFirestoreDocToHosp } from "@/utils/firestoreUtil";
+import { mapFirestoreDocToHosp } from "@/lib/firestoreUtil";
 import { Hosp } from "@/types/hospTypes";
 
 const hospitalsCollection = collection(db, "hospitals");

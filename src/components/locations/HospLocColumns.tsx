@@ -33,9 +33,9 @@ import { MixerHorizontalIcon } from "@radix-ui/react-icons"; // Ensure @radix-ui
 
 // Project Specific Imports
 import { HospLoc } from "@/types/hosLocTypes";
-import { formatDate } from "@/utils/utils";
-import { cn } from "@/lib/utils"; // Assuming you have cn utility
+// Assuming you have cn utility
 import { Skeleton } from "../ui/skeleton";
+import { cn, formatDate } from "@/lib/utils";
 
 // --- Table Meta Interface ---
 // Defines the custom properties added to the table's meta option

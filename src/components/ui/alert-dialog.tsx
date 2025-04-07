@@ -5,8 +5,10 @@ import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 // Assuming you might want a close button optionally, or for consistency:
 // import { Cross2Icon } from "@radix-ui/react-icons";
 
+// Adjust path if needed
+import { buttonVariants } from "@/components/ui/button";
+
 import { cn } from "@/lib/utils"; // Adjust path if needed
-import { buttonVariants } from "@/components/ui/button"; // Adjust path if needed
 
 // --- Root Component ---
 const AlertDialog = AlertDialogPrimitive.Root;

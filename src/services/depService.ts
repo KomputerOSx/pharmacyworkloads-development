@@ -15,7 +15,7 @@ import {
     where,
 } from "firebase/firestore";
 import { db } from "@/config/firebase";
-import { mapFirestoreDocToDep } from "@/utils/firestoreUtil";
+import { mapFirestoreDocToDep } from "@/lib/firestoreUtil";
 import { Department } from "@/types/depTypes";
 
 const DepartmentsCollection = collection(db, "departments");

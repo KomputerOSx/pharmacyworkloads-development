@@ -14,7 +14,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/config/firebase";
 import { HospLoc } from "@/types/hosLocTypes";
-import { mapFirestoreDocToHospLoc } from "@/utils/firestoreUtil";
+import { mapFirestoreDocToHospLoc } from "@/lib/firestoreUtil";
 
 const hospLocCollection = collection(db, "hospital_locations");
 

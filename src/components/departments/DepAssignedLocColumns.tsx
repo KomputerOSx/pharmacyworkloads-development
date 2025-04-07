@@ -20,7 +20,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 // Project Specific Imports
 import { AssignedLocationData } from "@/types/depTypes";
-import { formatDate } from "@/utils/utils";
+
+import { formatDate } from "@/lib/utils";
 
 // --- Table Meta Interface ---
 interface DepAssignedLocTableMeta {

@@ -3,7 +3,8 @@ import { db } from "@/config/firebase";
 import { Org } from "@/types/orgTypes";
 import { Hosp } from "@/types/hospTypes";
 import { HospLoc } from "@/types/hosLocTypes";
-import { Department, DepHospLocAss } from "@/types/depTypes"; // Adjust path if needed
+import { Department, DepHospLocAss } from "@/types/depTypes";
+import { User } from "@/types/userTypes"; // Adjust path if needed
 
 export const formatFirestoreTimestamp = (timestamp: Timestamp) => {
     if (timestamp && typeof timestamp.toDate === "function") {
@@ -219,7 +220,39 @@ export const mapFirestoreDocToDepHospLocAss = (
         locationId: data.locationId as string,
         createdById: (data.createdById as string) ?? "system",
         updatedById: (data.updatedById as string) ?? "system",
-        createdAt: (data.createdAt as Timestamp)?.toDate() ?? new Date(0),
-        updatedAt: (data.updatedAt as Timestamp)?.toDate() ?? new Date(0),
+        createdAt: (data.createdAt as Timestamp) ?? null,
+        updatedAt: (data.createdAt as Timestamp) ?? null,
+    };
+};
+
+export const mapFirestoreDocToUser = (
+    id: string,
+    data: DocumentData | undefined,
+): User | null => {
+    // Ensure data exists
+    if (!data) {
+        console.warn(
+            `EtMJRg2a - mapFirestoreDocToDep: Received undefined data for ID ${id}.`,
+        );
+        return null;
+    }
+
+    return {
+        id: id,
+        firstName: (data.firstName as string) ?? "",
+        lastName: (data.lastName as string) ?? "",
+        email: (data.email as string) ?? "",
+        phoneNumber: (data.phoneNumber as string) ?? "",
+        orgId: (data.orgId as string) ?? "",
+        departmentId: (data.departmentId as string) ?? "",
+        role: (data.role as string) ?? "",
+        jobTitle: (data.jobTitle as string) ?? "",
+        specialty: (data.specialty as string) ?? "",
+        active: (data.active as boolean) ?? false,
+        lastLogin: (data.createdAt as Timestamp) ?? null,
+        createdAt: (data.createdAt as Timestamp) ?? null,
+        updatedAt: (data.createdAt as Timestamp) ?? null,
+        createdById: (data.createdById as string) ?? "system",
+        updatedById: (data.updatedById as string) ?? "system",
     };
 };

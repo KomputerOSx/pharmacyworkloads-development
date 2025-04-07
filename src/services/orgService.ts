@@ -14,7 +14,7 @@ import {
     where,
 } from "firebase/firestore";
 import { db } from "@/config/firebase";
-import { mapFirestoreDocToOrg } from "@/utils/firestoreUtil";
+import { mapFirestoreDocToOrg } from "@/lib/firestoreUtil";
 import { Org } from "@/types/orgTypes";
 
 const OrgsCol = collection(db, "organisations");

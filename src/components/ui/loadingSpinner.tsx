@@ -1,6 +1,8 @@
 import * as React from "react";
-import { cn } from "@/lib/utils"; // Assuming you have a utils file for class name merging (like clsx or classnames)
-import { Loader2 } from "lucide-react"; // Using lucide-react for a simple spinner icon, you can use any icon library
+// Assuming you have a utils file for class name merging (like clsx or classnames)
+import { Loader2 } from "lucide-react";
+
+import { cn } from "@/lib/utils"; // Using lucide-react for a simple spinner icon, you can use any icon library
 
 interface LoadingSpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
     size?: "sm" | "md" | "lg" | "xlg" | "xxlg";
