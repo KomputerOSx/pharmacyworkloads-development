@@ -3,14 +3,14 @@
 import React from "react";
 import { useParams } from "next/navigation";
 
-import { ChartAreaInteractive } from "@/components/chart-area-interactive";
-import { DataTable } from "@/components/data-table";
-import { SectionCards } from "@/components/section-cards";
+import { ChartAreaInteractive } from "@/components/shadcn/chart-area-interactive";
+import { DataTable } from "@/components/shadcn/data-table";
+import { SectionCards } from "@/components/shadcn/section-cards";
 
 import data from "./data.json";
 import { useOrgs } from "@/hooks/useOrgs";
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
-import { Redirector } from "@/components/Redirector";
+import { Redirector } from "@/components/shadcn/Redirector";
 
 export default function OrgPage() {
     const params = useParams();

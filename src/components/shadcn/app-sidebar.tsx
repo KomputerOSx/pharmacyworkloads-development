@@ -13,9 +13,9 @@ import {
 // Remove NavProjects and NavMain imports if no longer used elsewhere
 // import { NavProjects } from "@/components/nav-projects";
 // import { NavMain } from "@/components/nav-main";
-import { CombinedNav } from "@/components/CombinedNav"; // <-- Import the new component
-import { NavUser } from "@/components/nav-user";
-import { TeamSwitcher } from "@/components/team-switcher";
+import { CombinedNav } from "@/components/shadcn/CombinedNav"; // <-- Import the new component
+import { NavUser } from "@/components/shadcn/nav-user";
+import { TeamSwitcher } from "@/components/shadcn/team-switcher";
 import {
     Sidebar,
     SidebarContent,
@@ -83,8 +83,8 @@ const sidebarLayout = {
         } as NavLinkItem,
         {
             type: "link",
-            title: "Staff",
-            url: "staff",
+            title: "Users",
+            url: "users",
             icon: PersonStanding,
         } as NavLinkItem,
         {

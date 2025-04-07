@@ -2,8 +2,8 @@
 
 // src/app/admin/[orgId]/layout.tsx
 import React, { ReactNode } from "react";
-import { AppSidebar } from "@/components/app-sidebar";
-import { SiteHeader } from "@/components/site-header";
+import { AppSidebar } from "@/components/shadcn/app-sidebar";
+import { SiteHeader } from "@/components/shadcn/site-header";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 
 export default function OrgLayout({ children }: { children: ReactNode }) {
