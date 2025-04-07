@@ -21,7 +21,6 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog"; // Assuming you have this
 import { AssignedLocationData } from "@/types/depTypes"; // Import the processed type
-import { Timestamp } from "firebase/firestore";
 import Link from "next/link";
 import { useHosps } from "@/hooks/useHosps";
 import { HospLoc } from "@/types/hosLocTypes";
@@ -96,25 +95,13 @@ export default function DepartmentAssignmentsPage() {
             // Find the corresponding full location object to get name AND hospId
             const locationDetails = locationsMap.get(ass.locationId);
 
-            let assignedAtDate: Date | null = null;
-            if (ass.createdAt) {
-                if (
-                    typeof ass.createdAt === "object" &&
-                    "toDate" in ass.createdAt
-                ) {
-                    assignedAtDate = (ass.createdAt as Timestamp).toDate();
-                } else if (ass.createdAt instanceof Date) {
-                    assignedAtDate = ass.createdAt;
-                }
-            }
-
             // Ensure the returned object matches the AssignedLocationData type
             const processed: AssignedLocationData = {
                 assignmentId: ass.id,
                 locationId: ass.locationId,
                 locationName: locationDetails?.name ?? null, // Get name from details
                 hospId: locationDetails?.hospId ?? null, // <-- Get hospId from details
-                assignedAt: assignedAtDate,
+                assignedAt: ass.createdAt,
                 id: ass.id,
                 createdAt: ass.createdAt,
                 updatedAt: ass.updatedAt,
@@ -236,7 +223,7 @@ export default function DepartmentAssignmentsPage() {
         : (department?.name ?? "Department Assignments");
 
     return (
-        <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 space-y-8">
+        <div className="mx-auto py-6 px-4 sm:px-6 lg:px-8">
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h1 className="text-2xl font-semibold tracking-tight">

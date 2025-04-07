@@ -23,7 +23,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch"; // Or Checkbox
 import { toast } from "sonner"; // Use your preferred toast library
 
 import { useCreateUser } from "@/hooks/useUsers"; // Adjust path
