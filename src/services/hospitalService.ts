@@ -338,7 +338,7 @@ export async function deleteHospital(
 ): Promise<{ success: true; id: string }> {
     if (!id) {
         throw new Error(
-            "deleteHospital error: Hospital ID is required for deletion.",
+            "deleteHospital error: Hospital ID is required for deletion",
         );
     }
 
