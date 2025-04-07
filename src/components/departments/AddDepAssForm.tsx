@@ -201,7 +201,7 @@ export function AddDepAssForm({ onSuccess, onCancel }: AddDepAssFormProps) {
                                                 </Button>
                                             </FormControl>
                                         </PopoverTrigger>
-                                        <PopoverContent className="w-full p-0">
+                                        <PopoverContent className="w-[--radix-popover-trigger-width] min-w-[300px] p-0 md:w-[400px]">
                                             <Command>
                                                 <CommandInput placeholder="Search locations..." />
                                                 <CommandEmpty>
@@ -215,12 +215,16 @@ export function AddDepAssForm({ onSuccess, onCancel }: AddDepAssFormProps) {
                                                                     location.id
                                                                 }
                                                                 value={
-                                                                    location.id
+                                                                    location.name
                                                                 }
                                                                 onSelect={() => {
                                                                     form.setValue(
                                                                         "locationId",
                                                                         location.id,
+                                                                        {
+                                                                            shouldValidate:
+                                                                                true,
+                                                                        },
                                                                     );
                                                                     setOpenLocationPopover(
                                                                         false,
