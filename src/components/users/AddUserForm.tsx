@@ -23,16 +23,15 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner"; // Use your preferred toast library
 
-import { useCreateUser } from "@/hooks/useUsers"; // Adjust path
-import { Department } from "@/types/depTypes"; // Adjust path
+import { useCreateUser } from "@/hooks/useUsers";
+import { Department } from "@/types/depTypes";
 import {
     addUserSchema,
     AddUserFormData,
-} from "@/lib/validators/userValidators"; // Adjust path
+} from "@/lib/validators/userValidators";
 import { USER_ROLES } from "@/config/roles";
-import { Checkbox } from "@/components/ui/checkbox"; // Adjust path
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface AddUserFormProps {
     orgId: string;

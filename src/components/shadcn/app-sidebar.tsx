@@ -163,7 +163,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 />
             </SidebarContent>
             <SidebarFooter>
-                <NavUser user={sidebarLayout.user} />
+                <NavUser />
             </SidebarFooter>
             <SidebarRail />
         </Sidebar>
