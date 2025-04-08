@@ -1,7 +1,7 @@
 // src/app/admin/orgConsole/page.tsx
 "use client";
 
-import "../../../styles/console/orgConsole.css";
+import "../../../../styles/console/orgConsole.css";
 import { OrgCard } from "@/components/org/OrgCard"; // Assuming this exists
 import { AddOrgForm } from "@/components/org/AddOrgForm"; // Assuming this exists and uses useAddOrganisation internally
 import { useOrgs } from "@/hooks/useOrgs"; // Import the new hook!

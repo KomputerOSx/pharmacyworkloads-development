@@ -1,31 +1,25 @@
-// src/app/(your-path)/[orgId]/departments/[depId]/page.tsx (Example Path)
 "use client";
 
-import { useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-import { Loader2, Terminal } from "lucide-react"; // Import icons
-
-// Your Hooks
-import {
-    useDepHospLocAssignments,
-    useDeleteDepHospLocAssignment,
-} from "@/hooks/useDepAss";
-import { useHospLocs } from "@/hooks/useHospLoc"; // To get location names
-import { useDep } from "@/hooks/useDeps"; // To get department name (optional)
-
-// Your Components
-import { AddDepAssForm } from "@/components/departments/AddDepAssForm"; // Your existing form
-import { DepAssignedLocTable } from "@/components/departments/DepAssignedLocTable"; // The table component
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
-import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog"; // Assuming you have this
-import { AssignedLocationData } from "@/types/depTypes"; // Import the processed type
-import Link from "next/link";
+import { useMemo, useState } from "react";
+import { useDep } from "@/hooks/useDeps";
 import { useHosps } from "@/hooks/useHosps";
+import {
+    useDeleteDepHospLocAssignment,
+    useDepHospLocAssignments,
+} from "@/hooks/useDepAss";
+import { useHospLocs } from "@/hooks/useHospLoc";
 import { HospLoc } from "@/types/hosLocTypes";
+import { AssignedLocationData } from "@/types/depTypes";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Loader2, Terminal } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DepAssignedLocTable } from "@/components/departments/DepAssignedLocTable";
+import Link from "next/link";
+import { AddDepAssForm } from "@/components/departments/AddDepAssForm";
+import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
 
-// --- Page Component ---
 export default function DepartmentAssignmentsPage() {
     const params = useParams();
     const orgId = params.orgId as string;
