@@ -239,6 +239,7 @@ export const mapFirestoreDocToUser = (
 
     return {
         id: id,
+        authUid: (data.authUid as string) ?? "",
         firstName: (data.firstName as string) ?? "",
         lastName: (data.lastName as string) ?? "",
         email: (data.email as string) ?? "",
