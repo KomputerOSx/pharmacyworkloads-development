@@ -1,11 +1,10 @@
 // src/app/providers.tsx
-"use client"; // VERY IMPORTANT: This marks the component as a Client Component
+"use client";
 
 import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "sonner"; // Keep Toaster here if it uses client features
+import { Toaster } from "sonner";
 
-// Function to create/get the client instance (handles server vs browser)
 function makeQueryClient() {
     return new QueryClient({
         defaultOptions: {
