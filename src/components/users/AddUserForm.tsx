@@ -74,7 +74,6 @@ export function AddUserForm({
             {
                 onSuccess: (newUser) => {
                     console.log("User created successfully:", newUser);
-                    toast.success("User created successfully!"); // Toast handled by hook, but can add specific messages here
                     form.reset(); // Reset form fields
                     onSuccessfulSubmitAction(); // Call the callback to close the dialog
                 },

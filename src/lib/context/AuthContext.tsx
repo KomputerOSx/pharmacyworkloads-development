@@ -19,27 +19,28 @@ import {
     signOut,
     User,
     UserCredential,
+    sendPasswordResetEmail,
+    verifyPasswordResetCode,
+    confirmPasswordReset,
 } from "firebase/auth";
-import { auth } from "@/config/firebase"; // Adjust path if needed
+import { auth } from "@/config/firebase";
+import { useRouter } from "next/navigation"; // Adjust path if needed
 
 const EMAIL_FOR_SIGN_IN_KEY = "emailForSignIn"; // Key for localStorage
 
 interface AuthContextType {
     user: User | null;
-    /** True during the initial Firebase auth state check on load. */
     loading: boolean;
-    /** True when an async auth action (login, logout, link send/completion) is in progress. */
     isProcessingAuthAction: boolean;
-    /** Logs the current user out. */
     logout: () => Promise<void>;
-    /** Logs a user in using email and password. */
     loginWithEmail: (
         email: string,
         password: string,
     ) => Promise<UserCredential>;
-    /** Sends a passwordless sign-in link to the provided email. */
     sendLoginLink: (email: string) => Promise<void>;
-    // Add other methods like loginWithGoogle, signUpWithEmail as needed
+    sendPasswordResetLink: (email: string) => Promise<void>;
+    verifyResetCode: (code: string) => Promise<string>;
+    confirmResetPassword: (code: string, newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -49,47 +50,63 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(true);
     const [isProcessingAuthAction, setIsProcessingAuthAction] = useState(false);
 
+    const router = useRouter();
+
     useEffect(() => {
         const completeSignInWithLink = async () => {
+            console.log(
+                "Checking for sign-in link. Current URL:",
+                window.location.href,
+            ); // Log URL
             if (isSignInWithEmailLink(auth, window.location.href)) {
+                console.log("Sign-in link detected."); // Log detection
                 setIsProcessingAuthAction(true);
                 const email = window.localStorage.getItem(
                     EMAIL_FOR_SIGN_IN_KEY,
                 );
+                console.log("Email from localStorage:", email); // Log email retrieval
+
                 if (!email) {
-                    // Prompting for email is complex, handle as error or implement UI prompt separately
                     console.error(
                         "Sign-in link completion failed: Email not found in storage.",
                     );
+                    // Consider adding a user-facing message or redirect here
+                    router.push("/login?error=session_expired");
                     setIsProcessingAuthAction(false);
-                    window.localStorage.removeItem(EMAIL_FOR_SIGN_IN_KEY); // Clean up just in case
-                    // Potentially show an error message to the user
-                    return; // Stop the process
+                    window.localStorage.removeItem(EMAIL_FOR_SIGN_IN_KEY);
+                    return;
                 }
-
                 try {
+                    console.log("Attempting signInWithEmailLink..."); // Log attempt
                     await signInWithEmailLink(
                         auth,
                         email,
                         window.location.href,
                     );
-                    // Success: onAuthStateChanged below will set user.
+                    console.log("signInWithEmailLink SUCCESSFUL!"); // Log success
+
+                    // *** THE REDIRECT ***
+                    console.log("Attempting redirect to /admin/orgsConsole..."); // Log redirect attempt
+                    setTimeout(() => router.push("/admin/orgsConsole"), 1000);
+                    // router.push("/admin/orgsConsole"); // Your target URL
+                    // You might not see logs after this if the redirect is fast
+
                     window.history.replaceState(
                         {},
                         document.title,
                         window.location.pathname,
-                    ); // Clean URL
+                    );
                 } catch (error) {
-                    console.error("Error signing in with email link:", error);
-                    // Potentially show error message
+                    console.error("Error during signInWithEmailLink:", error); // Log specific error
                 } finally {
-                    window.localStorage.removeItem(EMAIL_FOR_SIGN_IN_KEY); // Always clean up storage
-                    // onAuthStateChanged will set isProcessing to false eventually
+                    window.localStorage.removeItem(EMAIL_FOR_SIGN_IN_KEY);
                 }
+            } else {
+                console.log("Not a sign-in link or already processed."); // Log if not detected
             }
         };
 
-        completeSignInWithLink(); // Attempt on initial load
+        void completeSignInWithLink();
 
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
@@ -98,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
 
         return () => unsubscribe(); // Cleanup listener
-    }, []); // Runs once on mount
+    }, [router]);
 
     const logout = useCallback(async () => {
         setIsProcessingAuthAction(true);
@@ -107,7 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // onAuthStateChanged handles state update & processing flag reset
         } catch (error) {
             console.error("Logout failed:", error);
-            setIsProcessingAuthAction(false); // Reset on error
+            setIsProcessingAuthAction(false);
             throw error;
         }
     }, []);
@@ -130,7 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const sendLoginLink = useCallback(async (email: string) => {
         setIsProcessingAuthAction(true);
         const actionCodeSettings = {
-            url: window.location.href, // Redirect back to the same page
+            url: `${window.location.origin}/login`,
             handleCodeInApp: true,
         };
 
@@ -147,6 +164,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
+    // --- Password Reset Functions ---
+
+    const sendPasswordResetLink = useCallback(async (email: string) => {
+        setIsProcessingAuthAction(true);
+        // IMPORTANT: The URL here MUST point to the page where the user
+        // will enter their new password (the page with PasswordResetForm).
+        // Firebase will append the oobCode (token) and other params to this URL.
+        const actionCodeSettings = {
+            url: `${window.location.origin}/reset-password`, // Or your specific deployed URL base + route
+            handleCodeInApp: true,
+        };
+        try {
+            await sendPasswordResetEmail(auth, email, actionCodeSettings);
+            setIsProcessingAuthAction(false); // Sending action is done
+        } catch (error) {
+            console.error("Failed to send password reset link:", error);
+            setIsProcessingAuthAction(false);
+            throw error;
+        }
+    }, []);
+
+    const verifyResetCode = useCallback(
+        async (code: string): Promise<string> => {
+            setIsProcessingAuthAction(true);
+            try {
+                const email = await verifyPasswordResetCode(auth, code);
+                setIsProcessingAuthAction(false);
+                return email;
+            } catch (error) {
+                console.error("Failed to verify password reset code:", error);
+                setIsProcessingAuthAction(false);
+                throw error; // Re-throw for component handling (e.g., invalid/expired code)
+            }
+        },
+        [],
+    );
+
+    const confirmResetPassword = useCallback(
+        async (code: string, newPassword: string) => {
+            setIsProcessingAuthAction(true);
+            try {
+                await confirmPasswordReset(auth, code, newPassword);
+                setIsProcessingAuthAction(false);
+                // Consider logging the user out here if they were somehow still logged in,
+                // although typically they wouldn't be during this flow.
+                await signOut(auth);
+            } catch (error) {
+                console.error("Failed to confirm password reset:", error);
+                setIsProcessingAuthAction(false);
+                throw error; // Re-throw for component handling (e.g., weak password)
+            }
+        },
+        [],
+    );
+
     const value = {
         user,
         loading,
@@ -154,6 +226,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         loginWithEmail,
         sendLoginLink,
+        sendPasswordResetLink,
+        verifyResetCode,
+        confirmResetPassword,
     };
 
     return (
