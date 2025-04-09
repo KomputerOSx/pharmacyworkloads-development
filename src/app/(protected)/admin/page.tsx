@@ -2,5 +2,5 @@
 import { redirect } from "next/navigation";
 
 export default function Admin() {
-    redirect("/admin/orgConsole");
+    redirect("/admin/orgsConsole");
 }

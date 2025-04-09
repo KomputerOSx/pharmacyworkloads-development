@@ -5,13 +5,7 @@
  * Using 'as const' asserts that this array and its contents are read-only
  * and allows TypeScript to infer a narrow literal type for each role.
  */
-export const USER_ROLES = [
-    "Superuser",
-    "Manager",
-    "Coordinator",
-    "User",
-    "Viewer",
-] as const;
+export const USER_ROLES = ["admin", "manager", "coordinator", "user"] as const;
 
 export type UserRole = (typeof USER_ROLES)[number];
 

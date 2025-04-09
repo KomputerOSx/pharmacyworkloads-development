@@ -63,69 +63,6 @@ export default function OrgConsole() {
     //       to prevent actions during background updates.
     const disableActions = isFetching;
 
-    // return (
-    //     <div className={"container"}>
-    //         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
-    //             Select organisation
-    //         </h1>
-    //
-    //         <Dialog open={open} onOpenChange={setOpen}>
-    //             <DialogTrigger asChild>
-    //                 {/* Disable button if fetching */}
-    //                 <Button disabled={disableActions}>
-    //                     Create Organisation
-    //                 </Button>
-    //             </DialogTrigger>
-    //             <DialogContent>
-    //                 <DialogHeader>
-    //                     <DialogTitle>Create Organisation</DialogTitle>
-    //                     <DialogDescription>
-    //                         Enter the details for your new organisation.
-    //                     </DialogDescription>
-    //                 </DialogHeader>
-    //                 {/* Pass setOpen to close the dialog on success */}
-    //                 {/* AddOrgForm should internally use useAddOrganisation */}
-    //                 <AddOrgForm onOpenChange={setOpen} />
-    //             </DialogContent>
-    //         </Dialog>
-    //
-    //         {/* Use the refetch function from useOrganisations */}
-    //         <Button
-    //             className={"container w-[150px]"}
-    //             onClick={() => refetch()} // Call refetch directly
-    //             variant={"outline"}
-    //             disabled={disableActions} // Disable while fetching
-    //         >
-    //             {isFetching ? "Refreshing..." : "Refresh"}
-    //         </Button>
-    //         <Input
-    //             type="text"
-    //             placeholder="Search Organisations"
-    //             value={searchTerm}
-    //             onChange={(e) => setSearchTerm(e.target.value)}
-    //             className={"w-[300px]"}
-    //         />
-    //
-    //         <div
-    //             className={
-    //                 "container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-    //             }
-    //         >
-    //             {/* Make sure to handle the case where orgs might be undefined initially */}
-    //             {filteredOrgs?.map((org) => (
-    //                 <div key={org.id} className={""}>
-    //                     {/* OrgCard might need org id for potential updates/deletes */}
-    //                     {/* It might internally use useUpdateOrganisation/useDeleteOrganisation */}
-    //                     <OrgCard org={org} />
-    //                 </div>
-    //             ))}
-    //             {orgs?.length === 0 && !isLoading && (
-    //                 <p>No organisations found.</p>
-    //             )}
-    //         </div>
-    //     </div>
-    // );
-
     return (
         // 1. Main Page Container: Centered, Max Width, Padding
         <div className="w-full max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

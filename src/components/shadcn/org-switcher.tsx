@@ -19,6 +19,8 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 import Link from "next/link";
+import { useAuth } from "@/lib/context/AuthContext";
+import { useUser } from "@/hooks/useUsers";
 
 export function OrgSwitcher({
     orgs,
@@ -38,6 +40,9 @@ export function OrgSwitcher({
     }, [orgs, currentOrgIdParam]);
 
     const [isLoading] = useState(false);
+
+    const { user: authUser } = useAuth();
+    const { data: userProfile } = useUser(authUser?.uid);
 
     // const handleOrgChange = (orgId: string) => {
     //     if (orgId === currentOrgIdParam) {
@@ -81,44 +86,47 @@ export function OrgSwitcher({
                             <ChevronsUpDown className="ml-auto" />
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                        className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-                        align="start"
-                        side={isMobile ? "bottom" : "right"}
-                        sideOffset={4}
-                    >
-                        {/*<DropdownMenuLabel className="text-muted-foreground text-xs">*/}
-                        {/*    Organisations*/}
-                        {/*</DropdownMenuLabel>*/}
-                        {/*{orgs.sort().map((org, index) => (*/}
-                        {/*    <DropdownMenuItem*/}
-                        {/*        key={org.name}*/}
-                        {/*        onClick={() => handleOrgChange(org.id)}*/}
-                        {/*        className="gap-2 p-2"*/}
-                        {/*    >*/}
-                        {/*        {org.id === activeOrg.id ? (*/}
-                        {/*            <strong>{org.name}</strong>*/}
-                        {/*        ) : (*/}
-                        {/*            org.name*/}
-                        {/*        )}*/}
-                        {/*        <DropdownMenuShortcut>*/}
-                        {/*            ⌘{index + 1}*/}
-                        {/*        </DropdownMenuShortcut>*/}
-                        {/*    </DropdownMenuItem>*/}
-                        {/*))}*/}
-                        {/*<DropdownMenuSeparator />*/}
-                        <Link
-                            href="/admin/orgsConsole"
-                            className="text-muted-foreground font-medium"
+                    {userProfile?.role === "admin" && (
+                        <DropdownMenuContent
+                            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+                            align="start"
+                            side={isMobile ? "bottom" : "right"}
+                            sideOffset={4}
                         >
-                            <DropdownMenuItem className="gap-2 p-2">
-                                <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
-                                    <House className="size-4" />
-                                </div>
-                                Return to Orgs Console
-                            </DropdownMenuItem>
-                        </Link>
-                    </DropdownMenuContent>
+                            {/*<DropdownMenuLabel className="text-muted-foreground text-xs">*/}
+                            {/*    Organisations*/}
+                            {/*</DropdownMenuLabel>*/}
+                            {/*{orgs.sort().map((org, index) => (*/}
+                            {/*    <DropdownMenuItem*/}
+                            {/*        key={org.name}*/}
+                            {/*        onClick={() => handleOrgChange(org.id)}*/}
+                            {/*        className="gap-2 p-2"*/}
+                            {/*    >*/}
+                            {/*        {org.id === activeOrg.id ? (*/}
+                            {/*            <strong>{org.name}</strong>*/}
+                            {/*        ) : (*/}
+                            {/*            org.name*/}
+                            {/*        )}*/}
+                            {/*        <DropdownMenuShortcut>*/}
+                            {/*            ⌘{index + 1}*/}
+                            {/*        </DropdownMenuShortcut>*/}
+                            {/*    </DropdownMenuItem>*/}
+                            {/*))}*/}
+                            {/*<DropdownMenuSeparator />*/}
+
+                            <Link
+                                href="/admin/orgsConsole"
+                                className="text-muted-foreground font-medium"
+                            >
+                                <DropdownMenuItem className="gap-2 p-2">
+                                    <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
+                                        <House className="size-4" />
+                                    </div>
+                                    Return to Orgs Console
+                                </DropdownMenuItem>
+                            </Link>
+                        </DropdownMenuContent>
+                    )}
                 </DropdownMenu>
             </SidebarMenuItem>
         </SidebarMenu>

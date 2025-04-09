@@ -96,9 +96,6 @@ export function useCreateDepHospLocAssignment() {
                 `zX9dRqW1 - Error creating assignment for department ${variables.departmentId} & location ${variables.locationId}:`,
                 error,
             );
-            toast.error(
-                `Error(kF4xSzB7): Failed to create assignment: ${error.message}`,
-            );
         },
     });
 }

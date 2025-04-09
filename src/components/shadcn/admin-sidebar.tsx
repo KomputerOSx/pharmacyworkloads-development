@@ -107,7 +107,9 @@ const sidebarLayout = {
     ] as CombinedNavItem[],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AdminSidebar({
+    ...props
+}: React.ComponentProps<typeof Sidebar>) {
     const { orgId } = useParams();
     const { data: orgs, isLoading, isError } = useOrgs();
     const router = useRouter();

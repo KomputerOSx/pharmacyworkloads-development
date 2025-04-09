@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { usePathname, useParams } from "next/navigation";
-import { CombinedNavItem } from "./app-sidebar"; // Import types from AppSidebar or a shared types file
+import { CombinedNavItem } from "./admin-sidebar"; // Import types from AppSidebar or a shared types file
 import {
     Accordion,
     AccordionContent,

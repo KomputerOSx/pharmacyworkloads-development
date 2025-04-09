@@ -1,9 +1,9 @@
 // src/app/(protected)/layout.tsx
-"use client"; // This layout needs to be a Client Component to use hooks
+"use client";
 
 import React, { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useAuth } from "@/lib/context/AuthContext"; // Adjust import path if needed
+import { useAuth } from "@/lib/context/AuthContext";
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 
 export default function ProtectedLayout({
@@ -13,17 +13,14 @@ export default function ProtectedLayout({
 }) {
     const { user, loading } = useAuth();
     const router = useRouter();
-    const pathname = usePathname(); // Get the current path
+    const pathname = usePathname();
 
     useEffect(() => {
-        // Wait until the loading state is resolved
         if (!loading) {
-            // If loading is finished and there's no user, redirect to login
             if (!user) {
                 console.log(
                     `Protected route (${pathname}): No user found, redirecting to login.`,
                 );
-                // Redirect to login, preserving the intended destination
                 router.replace(
                     `/login?redirect=${encodeURIComponent(pathname)}`,
                 );
@@ -31,12 +28,10 @@ export default function ProtectedLayout({
                 console.log(
                     `Protected route (${pathname}): User authenticated.`,
                 );
-                // User is logged in, allow access (component will render children)
             }
         }
-    }, [user, loading, router, pathname]); // Dependencies for the effect
+    }, [user, loading, router, pathname]);
 
-    // While loading, show a loading indicator (or null)
     if (loading) {
         return (
             <LoadingSpinner
@@ -47,7 +42,6 @@ export default function ProtectedLayout({
         );
     }
 
-    // If loading is done and user exists, render the requested page content
     if (!loading && user) {
         return <>{children}</>;
     }
