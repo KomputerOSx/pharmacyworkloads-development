@@ -75,75 +75,6 @@ export async function getHospital(id: string): Promise<Hosp | null> {
     }
 }
 
-// create the hospital
-// export async function createHospital(
-//     hospitalData: Partial<Hosp>,
-//     orgId: string,
-//     userId = "system",
-// ): Promise<Hosp> {
-//     // Validate organization is provided
-//     if (!orgId) {
-//         throw new Error(
-//             "1Gv4Jn6x - Organization is required to create a hospital",
-//         );
-//     }
-//
-//     const hospitalId: string | null = null;
-//
-//     try {
-//         // 2. Prepare data with timestamps and audit fields
-//         const dataToAdd = {
-//             ...hospitalData, // Directly spread the input data
-//             orgId: orgId,
-//             createdAt: serverTimestamp(),
-//             updatedAt: serverTimestamp(),
-//             createdById: userId,
-//             updatedById: userId,
-//         };
-//
-//         const docRef: DocumentReference = await addDoc(
-//             hospitalsCollection,
-//             dataToAdd,
-//         );
-//
-//         const newHospitalDoc = await getDoc(docRef); // Use the docRef we already have
-//         if (!newHospitalDoc.exists()) {
-//             // This should be extremely rare if addDoc succeeded, but handle defensively
-//             throw new Error(
-//                 `Wd9fGj4k - Failed to retrieve newly created hospital (ID: ${hospitalId}) immediately after creation.`,
-//             );
-//         }
-//
-//         const createdHospital = mapFirestoreDocToHosp(
-//             newHospitalDoc.id,
-//             newHospitalDoc.data(),
-//         );
-//
-//         if (!createdHospital) {
-//             // This implies the mapper function failed even though the doc exists
-//             throw new Error(
-//                 `Pq2sRz8m - Failed to map newly created hospital (ID: ${hospitalId}) data.`,
-//             );
-//         }
-//
-//         return createdHospital;
-//     } catch (error) {
-//         // 8. Handle any other errors (e.g., from initial addDoc, getDoc, or re-thrown errors)
-//         console.error(
-//             `eYLH58kQ - Error during hospital creation process (potential ID: ${hospitalId}):`,
-//             error,
-//         );
-//
-//         if (error instanceof Error && error.message.startsWith("Ab7LLjje")) {
-//             throw error;
-//         } else {
-//             throw new Error(
-//                 `Failed to create hospital. Reason: ${error instanceof Error ? error.message : String(error)}`,
-//             );
-//         }
-//     }
-// }
-
 export async function createHospital(
     hospitalData: Partial<Hosp>,
     orgId: string,
@@ -278,7 +209,6 @@ export async function updateHospital(
         console.warn(
             `kT6xrxZJ - updateHospital warning: No specific fields provided for update on hospital ${id}. Only timestamps/audit fields will be updated.`,
         );
-        // Decide if this is an error or acceptable behavior
     }
 
     try {

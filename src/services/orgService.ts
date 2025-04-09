@@ -139,6 +139,16 @@ export const deleteOrg = async (orgId: string): Promise<void> => {
 
     const organisationRef = doc(db, "organisations", orgId);
 
+    console.log("CMPhVhX2 - Attempting to delete Organisation with ID:", orgId);
+
+    const orgHasHospitals = await checkIfOrgHasHospitals(orgId);
+
+    if (orgHasHospitals) {
+        throw new Error(
+            "Organisation has associated hospitals. Cannot delete. \nAll associated hospitals must be deleted first, or changed to another organisation.",
+        );
+    }
+
     try {
         await deleteDoc(organisationRef);
         console.log(
@@ -153,29 +163,15 @@ export const deleteOrg = async (orgId: string): Promise<void> => {
     }
 };
 
-export const countHospitals = async (
-    organisationId: string,
-): Promise<number> => {
-    if (!organisationId) {
-        console.error(
-            "vfW8WEG7 - Error counting hospitals: Organisation ID is required.",
-        );
-        throw new Error("xh8RYSVu - Organisation ID is required.");
-    }
+async function checkIfOrgHasHospitals(orgId: string): Promise<boolean> {
     try {
-        const hospOrgAssCol = collection(
-            db,
-            "hospital_organisation_assignments",
+        const hospitalsRef = collection(db, "hospitals");
+        const querySnapshot = await getDocs(
+            query(hospitalsRef, where("orgId", "==", orgId)),
         );
-        const orgRef = doc(db, "organisations", organisationId); // Create ref once
-        const q = query(hospOrgAssCol, where("organisation", "==", orgRef));
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.size;
+        return !querySnapshot.empty;
     } catch (error) {
-        console.error(
-            `5zEwZu4E - Error counting hospitals for org ${organisationId}:`,
-            error,
-        );
-        throw error;
+        console.error(`Error checking if org ${orgId} has hospitals:`, error);
+        return false;
     }
-};
+}

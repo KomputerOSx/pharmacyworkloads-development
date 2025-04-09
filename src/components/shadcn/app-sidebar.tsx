@@ -15,7 +15,7 @@ import {
 // import { NavMain } from "@/components/nav-main";
 import { CombinedNav } from "@/components/shadcn/CombinedNav"; // <-- Import the new component
 import { NavUser } from "@/components/shadcn/nav-user";
-import { TeamSwitcher } from "@/components/shadcn/team-switcher";
+import { OrgSwitcher } from "@/components/shadcn/org-switcher";
 import {
     Sidebar,
     SidebarContent,
@@ -88,27 +88,22 @@ const sidebarLayout = {
             icon: PersonStanding,
         } as NavLinkItem,
         {
-            type: "menu",
-            title: "Locations",
-            icon: Frame,
-            items: [
-                { title: "Wards", url: "wards" },
-                { title: "Clinics", url: "clinics" },
-                { title: "Pharmacy", url: "pharmacy" },
-                { title: "Other", url: "other-locations" },
-            ],
-        } as NavMenuItem,
-        {
-            type: "menu",
+            type: "link",
             title: "Settings",
+            url: "settings",
             icon: Settings2,
-            items: [
-                { title: "General", url: "settings/general" },
-                { title: "Team", url: "settings/team" },
-                { title: "Billing", url: "settings/billing" },
-                { title: "Limits", url: "settings/limits" },
-            ],
-        } as NavMenuItem,
+        } as NavLinkItem,
+        // {
+        //     type: "menu",
+        //     title: "Settings",
+        //     icon: Settings2,
+        //     items: [
+        //         { title: "General", url: "settings/general" },
+        //         { title: "Team", url: "settings/team" },
+        //         { title: "Billing", url: "settings/billing" },
+        //         { title: "Limits", url: "settings/limits" },
+        //     ],
+        // } as NavMenuItem,
     ] as CombinedNavItem[],
 };
 
@@ -149,7 +144,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </div>
         );
     } else {
-        headerContent = <TeamSwitcher orgs={orgs} />;
+        headerContent = <OrgSwitcher orgs={orgs} />;
     }
 
     return (

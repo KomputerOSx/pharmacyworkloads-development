@@ -19,7 +19,7 @@ export function OrgCard({ org }: { org: Org }) {
         window.location.href = `/admin/${id}`;
     };
     return (
-        <Card className="container w-[350px]">
+        <Card className="container">
             <CardHeader>
                 <CardTitle className={"text-xl"}>{org.name}</CardTitle>
             </CardHeader>

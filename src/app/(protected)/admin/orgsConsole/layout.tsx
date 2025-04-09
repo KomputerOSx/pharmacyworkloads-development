@@ -7,8 +7,8 @@ export default function OrgConsoleLayout({
     children: ReactNode;
 }) {
     return (
-        <div className="flex min-h-screen flex-col">
-            <main className="flex-1">{children}</main>
+        <div className="">
+            <main className="">{children}</main>
         </div>
     );
 }

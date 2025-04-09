@@ -91,15 +91,11 @@ export const syncUserChangesToAuth = onDocumentUpdated(
             needsUpdate = true;
         }
 
-        // --- Phone Number check removed ---
-
         // --- 3. Perform the Auth Update (if changes were detected) ---
         if (!needsUpdate) {
             logger.info(
                 `User ${authUidToUpdate}: No relevant changes detected for Auth sync.`,
             );
-            // Clear any previous error status if no update needed now
-            // Keep authUpdateWarning clearing in case an invalid email was previously logged
             await afterSnapshot.ref.set(
                 {
                     authUpdateError: null,

@@ -23,7 +23,7 @@ import { useState } from "react";
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 import Link from "next/link";
 
-export function TeamSwitcher({
+export function OrgSwitcher({
     orgs,
 }: {
     orgs: {
@@ -91,26 +91,26 @@ export function TeamSwitcher({
                         side={isMobile ? "bottom" : "right"}
                         sideOffset={4}
                     >
-                        <DropdownMenuLabel className="text-muted-foreground text-xs">
-                            Organisations
-                        </DropdownMenuLabel>
-                        {orgs.map((org, index) => (
-                            <DropdownMenuItem
-                                key={org.name}
-                                onClick={() => handleOrgChange(org.id)}
-                                className="gap-2 p-2"
-                            >
-                                {org.id === activeOrg.id ? (
-                                    <strong>{org.name}</strong>
-                                ) : (
-                                    org.name
-                                )}
-                                <DropdownMenuShortcut>
-                                    ⌘{index + 1}
-                                </DropdownMenuShortcut>
-                            </DropdownMenuItem>
-                        ))}
-                        <DropdownMenuSeparator />
+                        {/*<DropdownMenuLabel className="text-muted-foreground text-xs">*/}
+                        {/*    Organisations*/}
+                        {/*</DropdownMenuLabel>*/}
+                        {/*{orgs.sort().map((org, index) => (*/}
+                        {/*    <DropdownMenuItem*/}
+                        {/*        key={org.name}*/}
+                        {/*        onClick={() => handleOrgChange(org.id)}*/}
+                        {/*        className="gap-2 p-2"*/}
+                        {/*    >*/}
+                        {/*        {org.id === activeOrg.id ? (*/}
+                        {/*            <strong>{org.name}</strong>*/}
+                        {/*        ) : (*/}
+                        {/*            org.name*/}
+                        {/*        )}*/}
+                        {/*        <DropdownMenuShortcut>*/}
+                        {/*            ⌘{index + 1}*/}
+                        {/*        </DropdownMenuShortcut>*/}
+                        {/*    </DropdownMenuItem>*/}
+                        {/*))}*/}
+                        {/*<DropdownMenuSeparator />*/}
                         <Link
                             href="/admin/orgsConsole"
                             className="text-muted-foreground font-medium"

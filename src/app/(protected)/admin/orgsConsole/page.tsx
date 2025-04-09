@@ -16,19 +16,27 @@ import {
     DialogHeader,
 } from "@/components/ui/dialog";
 import React, { useState } from "react";
+import { RefreshCw, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 export default function OrgConsole() {
     // Use the React Query hook to get data and state
     const {
-        data: orgs, // Data is in the 'data' property, renamed here to 'orgs'
-        isLoading, // True on initial load when no cached data exists
-        isFetching, // True whenever a fetch is in progress (initial or background)
-        isError, // True if the query resulted in an error
-        error, // The error object if isError is true
-        refetch, // Function to manually trigger a refetch
+        data: orgs,
+        isLoading,
+        isFetching,
+        isError,
+        error,
+        refetch,
     } = useOrgs();
 
     const [open, setOpen] = useState(false); // State for the dialog
+    const [searchTerm, setSearchTerm] = useState(""); // State for the search term
+
+    const filteredOrgs = orgs?.filter((org) =>
+        org.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
+    // Function to close the dialog
 
     // Use isLoading for the initial loading state
     if (isLoading) {
@@ -55,53 +63,173 @@ export default function OrgConsole() {
     //       to prevent actions during background updates.
     const disableActions = isFetching;
 
+    // return (
+    //     <div className={"container"}>
+    //         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+    //             Select organisation
+    //         </h1>
+    //
+    //         <Dialog open={open} onOpenChange={setOpen}>
+    //             <DialogTrigger asChild>
+    //                 {/* Disable button if fetching */}
+    //                 <Button disabled={disableActions}>
+    //                     Create Organisation
+    //                 </Button>
+    //             </DialogTrigger>
+    //             <DialogContent>
+    //                 <DialogHeader>
+    //                     <DialogTitle>Create Organisation</DialogTitle>
+    //                     <DialogDescription>
+    //                         Enter the details for your new organisation.
+    //                     </DialogDescription>
+    //                 </DialogHeader>
+    //                 {/* Pass setOpen to close the dialog on success */}
+    //                 {/* AddOrgForm should internally use useAddOrganisation */}
+    //                 <AddOrgForm onOpenChange={setOpen} />
+    //             </DialogContent>
+    //         </Dialog>
+    //
+    //         {/* Use the refetch function from useOrganisations */}
+    //         <Button
+    //             className={"container w-[150px]"}
+    //             onClick={() => refetch()} // Call refetch directly
+    //             variant={"outline"}
+    //             disabled={disableActions} // Disable while fetching
+    //         >
+    //             {isFetching ? "Refreshing..." : "Refresh"}
+    //         </Button>
+    //         <Input
+    //             type="text"
+    //             placeholder="Search Organisations"
+    //             value={searchTerm}
+    //             onChange={(e) => setSearchTerm(e.target.value)}
+    //             className={"w-[300px]"}
+    //         />
+    //
+    //         <div
+    //             className={
+    //                 "container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+    //             }
+    //         >
+    //             {/* Make sure to handle the case where orgs might be undefined initially */}
+    //             {filteredOrgs?.map((org) => (
+    //                 <div key={org.id} className={""}>
+    //                     {/* OrgCard might need org id for potential updates/deletes */}
+    //                     {/* It might internally use useUpdateOrganisation/useDeleteOrganisation */}
+    //                     <OrgCard org={org} />
+    //                 </div>
+    //             ))}
+    //             {orgs?.length === 0 && !isLoading && (
+    //                 <p>No organisations found.</p>
+    //             )}
+    //         </div>
+    //     </div>
+    // );
+
     return (
-        <div className={"container"}>
-            <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
-                Select organisation
+        // 1. Main Page Container: Centered, Max Width, Padding
+        <div className="w-full max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl mb-6 text-center sm:text-left">
+                {" "}
+                Select Organisation
             </h1>
 
-            <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                    {/* Disable button if fetching */}
-                    <Button disabled={disableActions}>
-                        Create Organisation
+            {/* 2. Controls Section: Flexbox for alignment and wrapping */}
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+                {" "}
+                {/* Space between items, wrap, add bottom margin */}
+                {/* Left aligned controls */}
+                <div className="flex items-center gap-4">
+                    <Dialog open={open} onOpenChange={setOpen}>
+                        <DialogTrigger asChild>
+                            <Button disabled={disableActions}>
+                                Create Organisation
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Create Organisation</DialogTitle>
+                                <DialogDescription>
+                                    Enter the details for your new organisation.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <AddOrgForm onOpenChange={setOpen} />
+                        </DialogContent>
+                    </Dialog>
+
+                    <Button
+                        onClick={() => refetch()}
+                        variant={"outline"}
+                        disabled={disableActions}
+                        size="icon" // Make refresh button smaller (optional)
+                        aria-label="Refresh organisations"
+                    >
+                        {/* Replace text with an icon for smaller button */}
+                        {isFetching ? (
+                            <LoadingSpinner size="sm" /> // Show small spinner when fetching
+                        ) : (
+                            <RefreshCw className="h-4 w-4" />
+                        )}
                     </Button>
-                </DialogTrigger>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Create Organisation</DialogTitle>
-                        <DialogDescription>
-                            Enter the details for your new organisation.
-                        </DialogDescription>
-                    </DialogHeader>
-                    {/* Pass setOpen to close the dialog on success */}
-                    {/* AddOrgForm should internally use useAddOrganisation */}
-                    <AddOrgForm onOpenChange={setOpen} />
-                </DialogContent>
-            </Dialog>
+                </div>
+                {/* Right aligned search */}
+                <div className="relative w-full sm:w-auto">
+                    {" "}
+                    {/* Full width on small screens, auto on larger */}
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        type="text"
+                        placeholder="Search Organisations..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-8 w-full sm:w-[300px]" // Padding for icon, specific width on larger screens
+                    />
+                </div>
+            </div>
 
-            {/* Use the refetch function from useOrganisations */}
-            <Button
-                className={"container w-[150px]"}
-                onClick={() => refetch()} // Call refetch directly
-                variant={"outline"}
-                disabled={disableActions} // Disable while fetching
+            {/* 3. Grid Container - Inherits padding/centering from parent */}
+            {/*    Use grid classes directly */}
+            <div
+                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mr-8" // Slightly larger gap
             >
-                {isFetching ? "Refreshing..." : "Refresh"}
-            </Button>
-
-            <div className={"card-list"}>
-                {/* Make sure to handle the case where orgs might be undefined initially */}
-                {orgs?.map((org) => (
-                    <div key={org.id} className={"card"}>
-                        {/* OrgCard might need org id for potential updates/deletes */}
-                        {/* It might internally use useUpdateOrganisation/useDeleteOrganisation */}
-                        <OrgCard org={org} />
+                {/* Check if filteredOrgs exists and has items */}
+                {filteredOrgs && filteredOrgs.length > 0 ? (
+                    filteredOrgs.map((org) => (
+                        <OrgCard key={org.id} org={org} />
+                    ))
+                ) : (
+                    // Show message if no orgs match search OR if no orgs exist at all
+                    <div className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-4 text-center py-12">
+                        {" "}
+                        {/* Span all columns, center text, add padding */}
+                        <p className="text-muted-foreground">
+                            {orgs && orgs.length > 0
+                                ? "No organisations found matching your search."
+                                : "No organisations created yet."}
+                        </p>
+                        {orgs?.length === 0 && !isLoading && (
+                            <Dialog open={open} onOpenChange={setOpen}>
+                                <DialogTrigger asChild>
+                                    <Button className="mt-4">
+                                        Create First Organisation
+                                    </Button>
+                                </DialogTrigger>
+                                {/* Re-use DialogContent from above */}
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>
+                                            Create Organisation
+                                        </DialogTitle>
+                                        <DialogDescription>
+                                            Enter the details for your new
+                                            organisation.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <AddOrgForm onOpenChange={setOpen} />
+                                </DialogContent>
+                            </Dialog>
+                        )}
                     </div>
-                ))}
-                {orgs?.length === 0 && !isLoading && (
-                    <p>No organisations found.</p>
                 )}
             </div>
         </div>
