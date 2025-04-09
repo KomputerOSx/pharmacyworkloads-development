@@ -7,9 +7,6 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuShortcut,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -18,7 +15,7 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useState } from "react";
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 import Link from "next/link";
@@ -35,23 +32,22 @@ export function OrgSwitcher({
     const { isMobile } = useSidebar();
 
     const { orgId: currentOrgIdParam } = useParams(); // Renamed to avoid conflict
-    const router = useRouter();
 
     const activeOrg = React.useMemo(() => {
         return orgs.find((org) => org.id === currentOrgIdParam);
     }, [orgs, currentOrgIdParam]);
 
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading] = useState(false);
 
-    const handleOrgChange = (orgId: string) => {
-        if (orgId === currentOrgIdParam) {
-            return;
-        }
-
-        setIsLoading(true);
-
-        router.push(`/admin/${orgId}`);
-    };
+    // const handleOrgChange = (orgId: string) => {
+    //     if (orgId === currentOrgIdParam) {
+    //         return;
+    //     }
+    //
+    //     setIsLoading(true);
+    //
+    //     router.push(`/admin/${orgId}`);
+    // };
 
     if (isLoading) return <LoadingSpinner text={"Loading..."} />;
 

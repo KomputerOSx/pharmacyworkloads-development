@@ -58,7 +58,6 @@ export default function OrgSettingsPage() {
         isLoading: isLoadingOrg,
         isError: isErrorOrg,
         error: errorOrg,
-        refetch: refetchOrgData,
     } = useOrg(orgId);
 
     const updateMutation = useUpdateOrg(); // For name, type, contacts
