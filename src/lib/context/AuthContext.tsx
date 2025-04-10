@@ -25,6 +25,8 @@ import {
 } from "firebase/auth";
 import { auth } from "@/config/firebase";
 import { useRouter } from "next/navigation"; // Adjust path if needed
+import { updateLastLogin } from "@/services/userService";
+import { toast } from "sonner";
 
 const EMAIL_FOR_SIGN_IN_KEY = "emailForSignIn"; // Key for localStorage
 
@@ -78,18 +80,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 }
                 try {
                     console.log("Attempting signInWithEmailLink..."); // Log attempt
-                    await signInWithEmailLink(
+                    const userCredential = await signInWithEmailLink(
                         auth,
                         email,
                         window.location.href,
                     );
                     console.log("signInWithEmailLink SUCCESSFUL!"); // Log success
 
+                    if (userCredential.user) {
+                        try {
+                            console.log(
+                                `Attempting to update lastLogin for ${userCredential.user.uid} via magic link.`,
+                            );
+                            await updateLastLogin(userCredential.user.uid);
+                            console.log(
+                                "LastLogin updated successfully via magic link.",
+                            );
+                        } catch (updateError) {
+                            console.error(
+                                "Failed to update lastLogin after magic link sign-in:",
+                                updateError,
+                            );
+                            toast.warning(
+                                "Login successful, but failed to record login time.",
+                            );
+                        }
+                    }
+
                     // *** THE REDIRECT ***
-                    console.log("Attempting redirect to /admin/orgsConsole..."); // Log redirect attempt
-                    setTimeout(() => router.push("/admin/orgsConsole"), 1000);
-                    // router.push("/admin/orgsConsole"); // Your target URL
-                    // You might not see logs after this if the redirect is fast
+                    console.log("Attempting redirect to /user..."); // Log redirect attempt
+                    setTimeout(() => router.push("/user"), 1000);
 
                     window.history.replaceState(
                         {},
@@ -133,8 +153,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         async (email: string, password: string) => {
             setIsProcessingAuthAction(true);
             try {
-                // onAuthStateChanged handles state update & processing flag reset
-                return await signInWithEmailAndPassword(auth, email, password);
+                const userCredential = await signInWithEmailAndPassword(
+                    auth,
+                    email,
+                    password,
+                );
+
+                if (userCredential.user) {
+                    try {
+                        console.log(
+                            `Attempting to update lastLogin for ${userCredential.user.uid} via password.`,
+                        );
+                        await updateLastLogin(userCredential.user.uid);
+                        console.log(
+                            "LastLogin updated successfully via password.",
+                        );
+                    } catch (updateError) {
+                        console.error(
+                            "Failed to update lastLogin after password sign-in:",
+                            updateError,
+                        );
+                        toast.warning(
+                            "Login successful, but failed to record login time.",
+                        );
+                    }
+                }
+                return userCredential;
             } catch (error) {
                 console.error("Email login failed:", error);
                 setIsProcessingAuthAction(false); // Reset on error

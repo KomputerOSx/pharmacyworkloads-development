@@ -415,6 +415,22 @@ export async function updateUser(
     }
 }
 
+export async function updateLastLogin(id: string): Promise<void> {
+    try {
+        const userRef = doc(UsersCollection, id);
+        await updateDoc(userRef, { lastLogin: serverTimestamp() });
+        console.log("Last login updated for user with ID:", id);
+    } catch (error) {
+        console.error(
+            `Error updating last login for user with ID ${id}:`,
+            error,
+        );
+        throw new Error(
+            `Failed to update last login for user (ID: ${id}). Reason: ${error instanceof Error ? error.message : String(error)}`,
+        );
+    }
+}
+
 export async function deleteUser(id: string): Promise<void> {
     if (!id) {
         throw new Error("deleteUser error: User ID is required for deletion.");

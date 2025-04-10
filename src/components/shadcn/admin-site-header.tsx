@@ -26,7 +26,7 @@ function formatRouteSegments(segments: string[]): string {
         .join(" / "); // Join multiple segments with a separator like ' / '
 }
 
-export function SiteHeader() {
+export function AdminSiteHeader() {
     const pathname = usePathname(); // Get the current path
     const [title, setTitle] = useState<string>(""); // State to hold the title
 
@@ -59,7 +59,7 @@ export function SiteHeader() {
                         className="hidden sm:flex"
                     >
                         <Link
-                            href="#"
+                            href="/user"
                             rel="noopener noreferrer"
                             target="_blank"
                             className="dark:text-foreground"
@@ -75,7 +75,7 @@ export function SiteHeader() {
                         className="hidden sm:flex"
                     >
                         <Link
-                            href="#"
+                            href="/manager"
                             rel="noopener noreferrer"
                             target="_blank"
                             className="dark:text-foreground"
