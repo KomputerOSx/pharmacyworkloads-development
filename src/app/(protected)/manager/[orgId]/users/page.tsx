@@ -3,8 +3,6 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-
-// UI Components
 import {
     Dialog,
     DialogContent,
@@ -16,30 +14,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Terminal, Users as UsersIcon } from "lucide-react"; // Added UsersIcon
-
-// Custom Hooks and Components
-import { useUsers, useDeleteUser } from "@/hooks/useUsers"; // Ensure path is correct
-import { useDeps } from "@/hooks/useDeps"; // Ensure path is correct for fetching departments
-import { AddUserForm } from "@/components/users/AddUserForm"; // Create this component
-import { EditUserForm } from "@/components/users/EditUserForm"; // Create this component
-import { UserDataTable } from "@/components/users/UserDataTable"; // Create this component
-import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog"; // Assuming this exists
-import { User } from "@/types/userTypes"; // Ensure path is correct
-import { Department } from "@/types/depTypes"; // Ensure path is correct
+import { Loader2, Terminal, Users as UsersIcon } from "lucide-react";
+import { useUsers, useDeleteUser } from "@/hooks/useUsers";
+import { useDeps } from "@/hooks/useDeps";
+import { AddUserForm } from "@/components/users/AddUserForm";
+import { EditUserForm } from "@/components/users/EditUserForm";
+import { UserDataTable } from "@/components/users/UserDataTable";
+import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
+import { User } from "@/types/userTypes";
+import { Department } from "@/types/depTypes";
 
 export default function UsersPage() {
     const params = useParams();
-    const orgId = params.orgId as string; // Assert type as orgId should be present
+    const orgId = params.orgId as string;
 
-    // State for Dialogs and selected items
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [userForEdit, setUserForEdit] = useState<User | null>(null);
     const [userForDelete, setUserForDelete] = useState<User | null>(null);
 
-    // --- Data Fetching ---
     const {
         data: users,
         isLoading: isLoadingUsers,
@@ -54,13 +48,10 @@ export default function UsersPage() {
         isLoading: isLoadingDeps,
         isError: isErrorDeps,
         error: errorDeps,
-    } = useDeps(orgId); // Fetch departments for dropdowns and display names
+    } = useDeps(orgId);
 
-    // --- Mutations ---
     const deleteUserMutation = useDeleteUser();
 
-    // --- Memoized Data ---
-    // Create a map for quickly looking up department names by ID
     const departmentNameMap = useMemo(() => {
         const map = new Map<string, string>();
         if (departments) {
@@ -71,7 +62,6 @@ export default function UsersPage() {
         return map;
     }, [departments]);
 
-    // --- Callback Handlers ---
     const handleOpenEditDialog = useCallback((user: User) => {
         console.log("Opening edit dialog for user:", user.email);
         setUserForEdit(user);
