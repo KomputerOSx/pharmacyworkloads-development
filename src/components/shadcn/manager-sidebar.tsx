@@ -65,12 +65,6 @@ const sidebarLayout = {
         } as NavLinkItem,
         {
             type: "link",
-            title: "Hospitals",
-            url: "hospitals",
-            icon: Hospital,
-        } as NavLinkItem,
-        {
-            type: "link",
             title: "Departments",
             url: "departments",
             icon: Frame,
@@ -86,12 +80,6 @@ const sidebarLayout = {
             title: "Users",
             url: "users",
             icon: PersonStanding,
-        } as NavLinkItem,
-        {
-            type: "link",
-            title: "Settings",
-            url: "settings",
-            icon: Settings2,
         } as NavLinkItem,
         // {
         //     type: "menu",
@@ -119,9 +107,9 @@ export function ManagerSidebar({
             // Check url is defined
             // Handle root navigation explicitly if needed
             if (url === "/") {
-                router.push(`/admin/${orgId}`);
+                router.push(`/manager/${orgId}`);
             } else {
-                router.push(`/admin/${orgId}/${url.replace(/^\//, "")}`); // Ensure no leading slash from url
+                router.push(`/manager/${orgId}/${url.replace(/^\//, "")}`); // Ensure no leading slash from url
             }
         } else {
             console.warn(
