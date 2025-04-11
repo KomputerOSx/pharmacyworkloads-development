@@ -20,10 +20,12 @@ export type User = {
     updatedById: string;
 };
 
-export type userDirectorateAss = {
+export type UserTeamAss = {
     id: string;
     userId: string;
-    directorate: string;
+    orgId: string;
+    depId: string;
+    teamId: string;
     startDate: Timestamp | null;
     endDate: Timestamp | null;
     createdAt: Timestamp | null;

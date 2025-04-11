@@ -19,7 +19,7 @@ import {
 import { DepTeam } from "@/types/subDepTypes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Terminal, PlusCircle } from "lucide-react";
+import { Loader2, Terminal, PlusCircle, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
 import { AddDepTeamForm } from "@/components/departments/departmentTeams/AddDepTeamForm";
@@ -348,8 +348,15 @@ export default function DepartmentTeamsManagementPage() {
                             />
                         </DialogContent>
                     </Dialog>
-                    <Link href={`/admin/${orgId}/departments/`}>
+                    <Link
+                        href={`/admin/${orgId}/departments/${depId}/locationAssignments`}
+                    >
                         <Button size="sm" variant="outline">
+                            <MapPin className="mr-2 h-4 w-4" /> Assignments{" "}
+                        </Button>
+                    </Link>
+                    <Link href={`/admin/${orgId}/departments/`}>
+                        <Button size="sm" variant="default">
                             {" "}
                             Back to Departments{" "}
                         </Button>

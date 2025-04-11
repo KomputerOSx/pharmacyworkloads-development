@@ -8,7 +8,7 @@ import { useHospLocs } from "@/hooks/useHospLoc";
 import { AssignedLocationData } from "@/types/depTypes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Terminal } from "lucide-react";
+import { Badge, Goal, Loader2, MapPin, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
@@ -252,6 +252,14 @@ export default function DepartmentAssignmentsPage() {
                         )}
                         Refresh Data
                     </Button>
+                    <Link
+                        href={`/admin/${orgId}/departments/${depId}/departmentTeams`}
+                    >
+                        <Button size="sm" variant="outline">
+                            <Goal className="mr-2 h-4 w-4" />
+                            Teams{" "}
+                        </Button>
+                    </Link>
                     <Link href={`/admin/${orgId}/departments/`}>
                         <Button size="sm" variant={"default"}>
                             Back to Departments
