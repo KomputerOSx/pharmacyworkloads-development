@@ -21,6 +21,16 @@ export type DepHospLocAss = {
     updatedById: string;
 };
 
+export type DepTeamAss = {
+    id: string;
+    departmentId: string;
+    teamId: string;
+    createdAt: Timestamp | null;
+    updatedAt: Timestamp | null;
+    createdById: string;
+    updatedById: string;
+};
+
 export interface AssignedLocationData
     extends Omit<
         DepHospLocAss,

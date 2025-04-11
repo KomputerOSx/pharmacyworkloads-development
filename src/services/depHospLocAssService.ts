@@ -1,3 +1,5 @@
+// Define the collection reference
+import { DepHospLocAss } from "@/types/depTypes";
 import {
     addDoc,
     collection,
@@ -12,10 +14,9 @@ import {
     updateDoc,
     where,
 } from "firebase/firestore";
-import { db } from "@/config/firebase"; // Assuming db config is here
-import { DepHospLocAss } from "@/types/depTypes"; // Assuming types/mapper are in this file or imported elsewhere
 import { mapFirestoreDocToDepHospLocAss } from "@/lib/firestoreUtil";
-// Define the collection reference
+import { db } from "@/config/firebase";
+
 const depAssCollection = collection(db, "department_location_assignments");
 
 export async function getDepHospLocAssignments(

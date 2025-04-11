@@ -39,8 +39,9 @@ import {
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"; // Optional: For horizontal scroll on small screens
 
 // Project Imports
-import { HospLoc } from "@/types/hosLocTypes"; // Adjust path
-import { columns, DataTableViewOptions } from "./HospLocColumns"; // Import updated columns/options
+// Adjust path
+import { columns, DataTableViewOptions } from "./HospLocColumns";
+import { HospLoc } from "@/types/subDepTypes"; // Import updated columns/options
 
 // --- Component Props Interface ---
 

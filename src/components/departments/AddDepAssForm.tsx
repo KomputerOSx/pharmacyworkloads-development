@@ -36,15 +36,15 @@ import {
 import { toast } from "sonner";
 
 // Import your hooks
-import {
-    useCreateDepHospLocAssignment,
-    useDepHospLocAssignments,
-} from "@/hooks/useDepAss";
 import { useHospLocs } from "@/hooks/useHospLoc";
 import { useParams } from "next/navigation";
 import { useHosps } from "@/hooks/useHosps";
 
 import { cn } from "@/lib/utils";
+import {
+    useCreateDepHospLocAssignment,
+    useDepHospLocAssignments,
+} from "@/hooks/useDepHospLocAss";
 
 // Define the form schema
 const formSchema = z.object({

@@ -35,8 +35,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 // *** IMPORTANT: Create and import the update hook ***
 import { useUpdateHospLoc } from "@/hooks/useHospLoc"; // Assuming you have this hook
 import { useHosps } from "@/hooks/useHosps";
-import { getHospLocTypes } from "@/types/hosLocTypes";
-import { HospLoc } from "@/types/hosLocTypes";
+
+import { getHospLocTypes, HospLoc } from "@/types/subDepTypes";
 
 // --- Zod Schema Definition (Can often be the same as Add form) ---
 // If validation rules differ for edit, create a separate schema

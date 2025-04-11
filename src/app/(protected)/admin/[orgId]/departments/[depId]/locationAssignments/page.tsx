@@ -1,15 +1,10 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { useDep } from "@/hooks/useDeps";
 import { useHosps } from "@/hooks/useHosps";
-import {
-    useDeleteDepHospLocAssignment,
-    useDepHospLocAssignments,
-} from "@/hooks/useDepAss";
 import { useHospLocs } from "@/hooks/useHospLoc";
-import { HospLoc } from "@/types/hosLocTypes";
 import { AssignedLocationData } from "@/types/depTypes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -19,12 +14,17 @@ import { DepAssignedLocTable } from "@/components/departments/DepAssignedLocTabl
 import Link from "next/link";
 import { AddDepAssForm } from "@/components/departments/AddDepAssForm";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
+import { HospLoc } from "@/types/subDepTypes";
+import {
+    useDeleteDepHospLocAssignment,
+    useDepHospLocAssignments,
+} from "@/hooks/useDepHospLocAss";
 
 export default function DepartmentAssignmentsPage() {
     const params = useParams();
     const orgId = params.orgId as string;
     const depId = params.depId as string;
-
+    const router = useRouter();
     // State for delete confirmation
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [assignmentToDelete, setAssignmentToDelete] = useState<{
@@ -107,6 +107,14 @@ export default function DepartmentAssignmentsPage() {
     // --- Mutations ---
     const { mutate: deleteAssignment, isPending: isDeleting } =
         useDeleteDepHospLocAssignment();
+
+    useEffect(() => {
+        if (!isLoadingDept) {
+            if (depId !== department?.id) {
+                router.replace("/404");
+            }
+        }
+    }, [depId, department, isLoadingDept, router]);
 
     // --- Event Handlers ---
     const handleRefresh = () => {
@@ -221,7 +229,7 @@ export default function DepartmentAssignmentsPage() {
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h1 className="text-2xl font-semibold tracking-tight">
-                    Assignments for: {currentDepartmentName}
+                    Locations Assignments for: {currentDepartmentName}
                 </h1>
                 <div className={"flex gap-2"}>
                     <Button

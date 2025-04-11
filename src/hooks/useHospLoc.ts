@@ -7,8 +7,8 @@ import {
 } from "@/services/hospLocService";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { HospLoc } from "@/types/hosLocTypes";
 import { toast } from "sonner";
+import { HospLoc } from "@/types/subDepTypes";
 
 export const hospLocKeys = {
     all: ["hospLocs"],

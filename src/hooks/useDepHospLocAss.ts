@@ -1,15 +1,13 @@
-import {
-    getDepHospLocAssignments,
-    getDepHospLocAssignment,
-    createDepHospLocAssignment,
-    updateDepHospLocAssignment,
-    deleteDepHospLocAssignment,
-} from "@/services/depAssService"; // Adjust path if needed
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { DepHospLocAss } from "@/types/depTypes"; // Adjust path if needed
+import { DepHospLocAss } from "@/types/depTypes";
+import {
+    createDepHospLocAssignment,
+    deleteDepHospLocAssignment,
+    getDepHospLocAssignment,
+    getDepHospLocAssignments,
+    updateDepHospLocAssignment,
+} from "@/services/depHospLocAssService";
 import { toast } from "sonner";
-
-// --- Query Keys ---
 
 export const depAssKeys = {
     all: ["depAss"],
@@ -23,8 +21,6 @@ export const depAssKeys = {
         departmentId,
     ],
 };
-
-// --- Query Hooks (useQuery) ---
 
 /**
  * Hook to fetch department-location assignments for a specific department.
@@ -49,8 +45,6 @@ export function useDepHospLocAssignment(id?: string) {
         enabled: !!id,
     });
 }
-
-// --- Mutation Hooks (useMutation) ---
 
 /**
  * Hook to create a new department-location assignment.

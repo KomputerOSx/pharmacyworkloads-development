@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Pencil, Trash2, Plus } from "lucide-react"; // Import Plus icon
+import { Pencil, Trash2, Plus, Goal } from "lucide-react"; // Import Plus icon
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +23,8 @@ interface DepCardProps {
 }
 
 export function DepCard({ department, orgId, onEdit, onDelete }: DepCardProps) {
-    const assignmentsUrl = `/admin/${orgId}/departments/${department.id}`;
+    const assignmentsUrl = `/admin/${orgId}/departments/${department.id}/locationAssignments`;
+    const teamsUrl = `/admin/${orgId}/departments/${department.id}/departmentTeams`;
 
     const handleEditClick = () => {
         onEdit(department);
@@ -37,7 +38,7 @@ export function DepCard({ department, orgId, onEdit, onDelete }: DepCardProps) {
         // Ensure card takes full height in a grid and uses flex-col
         <Card className="">
             {/* CardHeader now uses flex to position title and button */}
-            <CardHeader className="flex flex-row justify-between items-start">
+            <CardHeader className="flex justify-between items-center pt-4">
                 {/* Title remains */}
                 <CardTitle className="text-xl mr-2">
                     {" "}
@@ -53,7 +54,18 @@ export function DepCard({ department, orgId, onEdit, onDelete }: DepCardProps) {
                         className="flex-shrink-0" // Prevent shrinking if title is long
                     >
                         <Plus className="h-4 w-4 mr-1" />
-                        Assignments
+                        Locations
+                    </Button>
+                </Link>
+                <Link href={teamsUrl} passHref legacyBehavior>
+                    <Button
+                        variant="outline"
+                        size="sm" // Keep size small as requested
+                        aria-label={`Assignments for ${department.name}`}
+                        className="flex-shrink-0" // Prevent shrinking if title is long
+                    >
+                        <Goal className="h-4 w-4 mr-1" />
+                        Teams
                     </Button>
                 </Link>
             </CardHeader>

@@ -1,6 +1,6 @@
+//Locations can be: wards, clinics, carehomes, bed base rehabs, monufacturing, dispensary's, etc
 import { Timestamp } from "firebase/firestore";
 
-//Locations can be: wards, clinics, carehomes, bed base rehabs, monufacturing, dispensary's, etc
 export type HospLoc = {
     id: string;
     name: string;
@@ -17,7 +17,6 @@ export type HospLoc = {
     createdById: string;
     updatedById: string;
 };
-
 export const getHospLocTypes = () => {
     return [
         { id: "ward", name: "Ward" },
@@ -27,4 +26,17 @@ export const getHospLocTypes = () => {
         { id: "manufacturing", name: "Manufacturing" },
         { id: "other", name: "Other" },
     ];
+};
+
+export type DepTeam = {
+    id: string;
+    name: string;
+    depId: string;
+    orgId: string;
+    description: string | null;
+    active: boolean;
+    createdAt: Timestamp | null;
+    updatedAt: Timestamp | null;
+    createdById: string;
+    updatedById: string;
 };

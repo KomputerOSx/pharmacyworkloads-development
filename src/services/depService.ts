@@ -1,7 +1,6 @@
 import {
     addDoc,
     collection,
-    deleteDoc,
     doc,
     DocumentData,
     documentId,
@@ -13,10 +12,12 @@ import {
     serverTimestamp,
     updateDoc,
     where,
+    writeBatch,
 } from "firebase/firestore";
 import { db } from "@/config/firebase";
 import { mapFirestoreDocToDep } from "@/lib/firestoreUtil";
 import { Department } from "@/types/depTypes";
+import { deleteAssignmentsByDepartment } from "@/services/depTeamAssService";
 
 const DepartmentsCollection = collection(db, "departments");
 
@@ -474,34 +475,135 @@ export async function updateDep(
     }
 }
 
+// export async function deleteDep(id: string): Promise<void> {
+//     if (!id) {
+//         throw new Error(
+//             "deleteDep error: Department ID is required for deletion.",
+//         );
+//     }
+//
+//     console.log("fpBqeu8X - Attempting to delete Department with ID:", id);
+//
+//     const hasAssignments = await checkDepHasAssignments(id);
+//     if (hasAssignments) {
+//         throw new Error(
+//             `Cannot delete a department with assigned locations. All Location Assignments must be deleted first.`,
+//         );
+//     }
+//
+//     try {
+//         const departmentRef = doc(db, "departments", id);
+//         console.log("Cq2CkYZb - Deleting Department document:", id);
+//         await deleteDoc(departmentRef);
+//         console.log("wegdXKD3 - Successfully deleted Department document:", id);
+//     } catch (error) {
+//         console.error(
+//             `mC7eUQT6 - Error deleting Department with ID ${id}:`,
+//             error,
+//         );
+//         throw new Error(
+//             `Failed to delete Department (ID: ${id}). Reason: ${error instanceof Error ? error.message : String(error)}`,
+//         );
+//     }
+// }
+
 export async function deleteDep(id: string): Promise<void> {
     if (!id) {
         throw new Error(
-            "deleteDep error: Department ID is required for deletion.",
+            "hY2gT6dS - deleteDep error: Department ID is required for deletion.",
         );
     }
 
     console.log("fpBqeu8X - Attempting to delete Department with ID:", id);
 
-    const hasAssignments = await checkDepHasAssignments(id);
-    if (hasAssignments) {
+    // 1. Safety Check: Ensure no locations are assigned to this department
+    const hasLocationAssignments = await checkDepHasAssignments(id);
+    if (hasLocationAssignments) {
+        console.error(
+            `mJ4bF8wP - Cannot delete department ${id}: It has assigned locations.`,
+        );
         throw new Error(
             `Cannot delete a department with assigned locations. All Location Assignments must be deleted first.`,
         );
     }
 
+    // --- Optional Step: Delete Department-Team Assignments ---
     try {
-        const departmentRef = doc(db, "departments", id);
-        console.log("Cq2CkYZb - Deleting Department document:", id);
-        await deleteDoc(departmentRef);
-        console.log("wegdXKD3 - Successfully deleted Department document:", id);
+        console.log(
+            `rG2sN8vC - Deleting team assignments for department ${id}...`,
+        );
+        await deleteAssignmentsByDepartment(id); // Requires importing this function
+        console.log(
+            `eP3dN7hJ - Successfully deleted team assignments for department ${id}.`,
+        );
+    } catch (assError) {
+        if (assError instanceof Error) {
+            console.error(
+                `tY5bV8wE - Failed to delete team assignments for department ${id}:`,
+                assError,
+            );
+            throw new Error(
+                `Failed to clean up team assignments before deleting department ${id}. Reason: ${assError.message}`,
+            );
+        } else {
+            console.error(
+                `tY5bV8wE - Failed to delete team assignments for department ${id}:`,
+                assError,
+            );
+            throw new Error(
+                `Failed to clean up team assignments before deleting department ${id}. Reason: Unknown error`,
+            );
+        }
+    }
+
+    // 2. Prepare Batch Deletion for Department and its Teams
+    const batch = writeBatch(db);
+    const departmentRef = doc(db, "departments", id);
+    const teamsCollectionRef = collection(db, "department_teams");
+
+    try {
+        // Find teams associated with this department
+        const teamsQuery = query(teamsCollectionRef, where("depId", "==", id));
+        const teamsSnapshot = await getDocs(teamsQuery);
+
+        let teamCount = 0;
+        if (!teamsSnapshot.empty) {
+            teamsSnapshot.forEach((teamDoc) => {
+                console.log(
+                    `yU7cF2mS - Queuing deletion for associated team: ${teamDoc.id}`,
+                );
+                batch.delete(teamDoc.ref); // Add team deletion to the batch
+                teamCount++;
+            });
+            console.log(
+                `zX1gH9oL - Found ${teamCount} associated team(s) to delete.`,
+            );
+        } else {
+            console.log(
+                `wB4nT6kF - No associated teams found for department ${id}.`,
+            );
+        }
+
+        // Add the main department deletion to the batch
+        console.log("Cq2CkYZb - Queuing deletion for Department document:", id);
+        batch.delete(departmentRef);
+
+        // 3. Commit the Batch Operation
+        console.log(
+            `qZ8vB3nW - Committing batch deletion for department ${id} and ${teamCount} team(s)...`,
+        );
+        await batch.commit();
+        console.log(
+            `jM6fD1yX - Successfully deleted Department document ${id} and ${teamCount} associated team(s).`,
+        );
     } catch (error) {
         console.error(
-            `mC7eUQT6 - Error deleting Department with ID ${id}:`,
+            `mC7eUQT6 - Error during batch deletion process for Department ID ${id}:`,
             error,
         );
+        // The error could be from querying teams or committing the batch
         throw new Error(
-            `Failed to delete Department (ID: ${id}). Reason: ${error instanceof Error ? error.message : String(error)}`,
+            `Failed to delete Department (ID: ${id}) and/or its associated teams. Reason: ${error instanceof Error ? error.message : String(error)}`,
         );
     }
 }

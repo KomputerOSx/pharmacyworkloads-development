@@ -34,8 +34,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 // Your project imports
 import { useCreateHospLoc } from "@/hooks/useHospLoc";
 import { useHosps } from "@/hooks/useHosps";
-import { getHospLocTypes } from "@/types/hosLocTypes";
-import { HospLoc } from "@/types/hosLocTypes"; // Assuming description is in HospLoc
+
+import { getHospLocTypes, HospLoc } from "@/types/subDepTypes"; // Assuming description is in HospLoc
 
 // --- Zod Schema Definition ---
 const formSchema = z.object({

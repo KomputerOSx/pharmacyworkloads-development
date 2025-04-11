@@ -13,8 +13,8 @@ import {
     where,
 } from "firebase/firestore";
 import { db } from "@/config/firebase";
-import { HospLoc } from "@/types/hosLocTypes";
 import { mapFirestoreDocToHospLoc } from "@/lib/firestoreUtil";
+import { HospLoc } from "@/types/subDepTypes";
 
 const hospLocCollection = collection(db, "hospital_locations");
 

@@ -2,9 +2,9 @@ import { doc, DocumentData, getDoc, Timestamp } from "firebase/firestore"; // Ma
 import { db } from "@/config/firebase";
 import { Org } from "@/types/orgTypes";
 import { Hosp } from "@/types/hospTypes";
-import { HospLoc } from "@/types/hosLocTypes";
-import { Department, DepHospLocAss } from "@/types/depTypes";
-import { User } from "@/types/userTypes"; // Adjust path if needed
+import { Department, DepHospLocAss, DepTeamAss } from "@/types/depTypes";
+import { User } from "@/types/userTypes";
+import { DepTeam, HospLoc } from "@/types/subDepTypes"; // Adjust path if needed
 
 export const formatFirestoreTimestamp = (timestamp: Timestamp) => {
     if (timestamp && typeof timestamp.toDate === "function") {
@@ -256,4 +256,72 @@ export const mapFirestoreDocToUser = (
         createdById: (data.createdById as string) ?? "system",
         updatedById: (data.updatedById as string) ?? "system",
     };
+};
+
+export const mapFirestoreDocToDepTeam = (
+    id: string,
+    data: DocumentData | undefined,
+): DepTeam | null => {
+    if (!data) {
+        console.warn(
+            `gP5rT9wE - mapFirestoreDocToDepTeam: Received undefined data for ID ${id}.`,
+        );
+        return null;
+    }
+
+    const team: DepTeam = {
+        id: id,
+        name: (data.name as string) ?? "",
+        depId: (data.depId as string) ?? "",
+        orgId: (data.orgId as string) ?? "",
+        description: (data.description as string) ?? null,
+        active: (data.active as boolean) ?? false,
+        createdById: (data.createdById as string) ?? "system",
+        updatedById: (data.updatedById as string) ?? "system",
+        createdAt: (data.createdAt as Timestamp) ?? null,
+        updatedAt: (data.createdAt as Timestamp) ?? null,
+    };
+
+    if (!team.name || !team.id || !team.depId || !team.orgId) {
+        console.error(
+            `qL2mS8dN - mapFirestoreDocToDepTeam: Incomplete team data mapped for ID: ${id}. Missing name, depId, or orgId. Data received:`,
+            data,
+        );
+        return null;
+    }
+
+    return team;
+};
+
+export const mapFirestoreDocToDepTeamAss = (
+    id: string,
+    data: DocumentData | undefined,
+): DepTeamAss | null => {
+    if (!data) {
+        console.warn(
+            `xY7cZ1vB - mapFirestoreDocToDepTeamAss: Received undefined data for ID ${id}.`,
+        );
+        return null;
+    }
+
+    const assignment: DepTeamAss = {
+        id: id,
+        departmentId: (data.departmentId as string) ?? "",
+        teamId: (data.teamId as string) ?? "",
+        createdById: (data.createdById as string) ?? "system",
+        updatedById: (data.updatedById as string) ?? "system",
+        createdAt: (data.createdAt as Timestamp) ?? null,
+        updatedAt: (data.createdAt as Timestamp) ?? null,
+    };
+
+    // Validate essential foreign keys
+    if (!assignment.departmentId || !assignment.teamId) {
+        console.error(
+            `wE3rT9uJ - mapFirestoreDocToDepTeamAss: Incomplete assignment data mapped for ID: ${id}. Missing departmentId or teamId. Data received:`,
+            data,
+        );
+        return null;
+    }
+
+    return assignment;
 };

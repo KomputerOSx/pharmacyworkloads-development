@@ -22,11 +22,12 @@ import { Loader2, Terminal } from "lucide-react"; // Added Loader2 for loading s
 import { useDeleteHospLoc, useHospLocs } from "@/hooks/useHospLoc"; // Ensure path is correct
 import { AddHospLocForm } from "@/components/locations/AddHospLocForm"; // Ensure path is correct
 import { HospLocDataTable } from "@/components/locations/HospLocDataTable";
-import { HospLoc } from "@/types/hosLocTypes"; // *** IMPORT THE DATA TABLE COMPONENT ***
+// *** IMPORT THE DATA TABLE COMPONENT ***
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
 import { EditHospLocForm } from "@/components/locations/EditHospLocForm";
 import { Hosp } from "@/types/hospTypes";
 import { useHosps } from "@/hooks/useHosps";
+import { HospLoc } from "@/types/subDepTypes";
 
 export default function LocationsPage() {
     const params = useParams();
