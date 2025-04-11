@@ -1,7 +1,7 @@
 // src/lib/validators/userValidators.ts
 
 import { z } from "zod";
-import { USER_ROLES } from "@/config/roles"; // Adjust the import path as needed
+import { ADMIN_USER_ROLES } from "@/config/roles"; // Adjust the import path as needed
 
 /**
  * Base schema containing common user fields and validation rules.
@@ -38,7 +38,7 @@ const baseUserSchema = z.object({
         .string({ required_error: "Please select a department." })
         .min(1, { message: "Please select a department." }), // Ensure a non-empty string ID is selected
 
-    role: z.enum(USER_ROLES, {
+    role: z.enum(ADMIN_USER_ROLES, {
         required_error: "Please select a role.", // Error if value is not provided
         invalid_type_error: "Invalid role selected.", // Error if value is not one of USER_ROLES
     }),
@@ -52,8 +52,6 @@ const baseUserSchema = z.object({
 
 // --- Schema for Adding a User ---
 export const addUserSchema = baseUserSchema.extend({
-    // Add specific overrides or additions for 'add' if needed
-    // For example, setting a default for 'active' during creation
     active: z.boolean().default(true), // Default new users to active
 });
 

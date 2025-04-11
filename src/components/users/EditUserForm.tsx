@@ -25,16 +25,16 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-
-import { useUpdateUser } from "@/hooks/useUsers"; // Adjust path
+import { ADMIN_USER_ROLES, MANAGER_USER_ROLES } from "@/config/roles";
+import { useUpdateUser, useUser } from "@/hooks/useUsers"; // Adjust path
 import { Department } from "@/types/depTypes"; // Adjust path
 import { User } from "@/types/userTypes"; // Adjust path
 import {
     editUserSchema,
     EditUserFormData,
 } from "@/lib/validators/userValidators"; // Adjust path
-import { USER_ROLES } from "@/config/roles";
-import { Checkbox } from "@/components/ui/checkbox"; // Adjust path
+import { Checkbox } from "@/components/ui/checkbox";
+import { useAuth } from "@/lib/context/AuthContext"; // Adjust path
 
 interface EditUserFormProps {
     orgId: string;
@@ -49,6 +49,9 @@ export function EditUserForm({
     departments,
     onSuccessfulSubmitAction,
 }: EditUserFormProps) {
+    const { user: authUser } = useAuth();
+    const { data: userProfile } = useUser(authUser?.uid);
+
     const updateUserMutation = useUpdateUser();
 
     const form = useForm<EditUserFormData>({
@@ -248,11 +251,24 @@ export function EditUserForm({
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {USER_ROLES.map((role) => (
-                                        <SelectItem key={role} value={role}>
-                                            {role}
-                                        </SelectItem>
-                                    ))}
+                                    {/*if user is admin, show ADMIN_USER_ROLES, IF user is manager, show MANAGER_USER_ROLES*/}
+                                    {userProfile?.role === "admin"
+                                        ? ADMIN_USER_ROLES.map((role) => (
+                                              <SelectItem
+                                                  key={role}
+                                                  value={role}
+                                              >
+                                                  {role}
+                                              </SelectItem>
+                                          ))
+                                        : MANAGER_USER_ROLES.map((role) => (
+                                              <SelectItem
+                                                  key={role}
+                                                  value={role}
+                                              >
+                                                  {role}
+                                              </SelectItem>
+                                          ))}
                                 </SelectContent>
                             </Select>
                             <FormMessage />

@@ -24,14 +24,15 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-import { useCreateUser } from "@/hooks/useUsers";
+import { useCreateUser, useUser } from "@/hooks/useUsers";
 import { Department } from "@/types/depTypes";
 import {
     addUserSchema,
     AddUserFormData,
 } from "@/lib/validators/userValidators";
-import { USER_ROLES } from "@/config/roles";
+import { ADMIN_USER_ROLES, MANAGER_USER_ROLES } from "@/config/roles";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useAuth } from "@/lib/context/AuthContext";
 
 interface AddUserFormProps {
     orgId: string;
@@ -44,6 +45,9 @@ export function AddUserForm({
     departments,
     onSuccessfulSubmitAction,
 }: AddUserFormProps) {
+    const { user: authUser } = useAuth();
+    const { data: userProfile } = useUser(authUser?.uid);
+
     const createUserMutation = useCreateUser();
 
     const form = useForm<AddUserFormData>({
@@ -214,11 +218,24 @@ export function AddUserForm({
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {USER_ROLES.map((role) => (
-                                        <SelectItem key={role} value={role}>
-                                            {role} {/* Display role name */}
-                                        </SelectItem>
-                                    ))}
+                                    {/*if user is admin, show ADMIN_USER_ROLES, IF user is manager, show MANAGER_USER_ROLES*/}
+                                    {userProfile?.role === "admin"
+                                        ? ADMIN_USER_ROLES.map((role) => (
+                                              <SelectItem
+                                                  key={role}
+                                                  value={role}
+                                              >
+                                                  {role}
+                                              </SelectItem>
+                                          ))
+                                        : MANAGER_USER_ROLES.map((role) => (
+                                              <SelectItem
+                                                  key={role}
+                                                  value={role}
+                                              >
+                                                  {role}
+                                              </SelectItem>
+                                          ))}
                                 </SelectContent>
                             </Select>
                             <FormMessage />
