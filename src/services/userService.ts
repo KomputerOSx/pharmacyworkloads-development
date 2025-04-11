@@ -17,6 +17,7 @@ import {
 import { db } from "@/config/firebase"; // Assuming your firebase config is here
 import { User } from "@/types/userTypes"; // Assuming your User type is here
 import { mapFirestoreDocToUser } from "@/lib/firestoreUtil";
+import { deleteUserTeamAssignmentsByUser } from "@/services/userTeamAssService";
 
 const UsersCollection = collection(db, "users");
 
@@ -430,33 +431,95 @@ export async function updateLastLogin(id: string): Promise<void> {
         );
     }
 }
+//
+// export async function deleteUser(id: string): Promise<void> {
+//     if (!id) {
+//         throw new Error("deleteUser error: User ID is required for deletion.");
+//     }
+//
+//     console.log("Attempting to delete User with ID:", id);
+//
+//     try {
+//         const userRef = doc(UsersCollection, id);
+//
+//         // Optional: Check if user exists before deleting
+//         const docSnap = await getDoc(userRef);
+//         if (!docSnap.exists()) {
+//             console.warn(`User with ID ${id} not found. Skipping deletion.`);
+//             // Depending on desired behaviour, could throw an error or just return.
+//             // throw new Error(`Cannot delete. User with ID ${id} not found.`);
+//             return; // Exit gracefully if not found
+//         }
+//
+//         console.log("Deleting User document:", id);
+//         await deleteDoc(userRef);
+//         console.log("Successfully deleted User document:", id);
+//     } catch (error) {
+//         console.error(`Error deleting User with ID ${id}:`, error);
+//         throw new Error(
+//             `Failed to delete User (ID: ${id}). Reason: ${error instanceof Error ? error.message : String(error)}`,
+//         );
+//     }
+// }
 
 export async function deleteUser(id: string): Promise<void> {
     if (!id) {
-        throw new Error("deleteUser error: User ID is required for deletion.");
+        throw new Error(
+            "eEtdP2WX - deleteUser error: User ID is required for deletion.",
+        );
     }
 
-    console.log("Attempting to delete User with ID:", id);
+    console.log(
+        "X12z4Unj - Attempting to delete User and associated assignments with ID:",
+        id,
+    );
 
+    // 1. Delete associated User-Team assignments FIRST
     try {
-        const userRef = doc(UsersCollection, id);
+        console.log(
+            `gP5rT9wE - Deleting user-team assignments for user ID: ${id}`,
+        );
+        await deleteUserTeamAssignmentsByUser(id); // Call the cleanup function
+        console.log(
+            `qL2mS8dN - Successfully deleted user-team assignments for user ID: ${id}.`,
+        );
+    } catch (assignmentError) {
+        console.error(
+            `xY7cZ1vB - Critical Error: Failed to delete associated team assignments for user ID ${id}. Aborting user deletion.`,
+            assignmentError,
+        );
+        // Throw a specific error indicating cleanup failure
+        throw new Error(
+            `Failed to clean up team assignments for user (ID: ${id}) before deletion. Reason: ${assignmentError instanceof Error ? assignmentError.message : String(assignmentError)}`,
+        );
+    }
 
-        // Optional: Check if user exists before deleting
+    // 2. Proceed to delete the User document itself
+    try {
+        const userRef = doc(UsersCollection, id); // Use your actual collection reference
+
+        // Optional: Check if user exists before deleting (good practice)
         const docSnap = await getDoc(userRef);
         if (!docSnap.exists()) {
-            console.warn(`User with ID ${id} not found. Skipping deletion.`);
-            // Depending on desired behaviour, could throw an error or just return.
-            // throw new Error(`Cannot delete. User with ID ${id} not found.`);
-            return; // Exit gracefully if not found
+            console.warn(
+                `wE3rT9uJ - User with ID ${id} not found after assignment cleanup (or never existed). Skipping user document deletion.`,
+            );
+            // If assignments were deleted, this might be okay.
+            // If assignments failed, the error above would have stopped execution.
+            return; // Exit gracefully
         }
 
-        console.log("Deleting User document:", id);
+        console.log(`fG8hY2vK - Deleting User document: ${id}`);
         await deleteDoc(userRef);
-        console.log("Successfully deleted User document:", id);
-    } catch (error) {
-        console.error(`Error deleting User with ID ${id}:`, error);
+        console.log(`jM1nB4cP - Successfully deleted User document: ${id}`);
+    } catch (userDeleteError) {
+        console.error(
+            `kL5pW9sD - Error deleting User document with ID ${id} (assignments might have been deleted):`,
+            userDeleteError,
+        );
+        // Even if user delete fails, assignments might be gone. This error indicates inconsistency potential.
         throw new Error(
-            `Failed to delete User (ID: ${id}). Reason: ${error instanceof Error ? error.message : String(error)}`,
+            `Failed to delete User document (ID: ${id}) after assignment cleanup. Reason: ${userDeleteError instanceof Error ? userDeleteError.message : String(userDeleteError)}`,
         );
     }
 }

@@ -81,91 +81,6 @@ export async function getDep(id: string): Promise<Department | null> {
     }
 }
 
-// export async function createDep(
-//     // Input data, explicitly excluding fields we will set automatically
-//     departmentData: Omit<
-//         Partial<Department>,
-//         "id" | "orgId" | "createdAt" | "updatedAt" | "createdBy" | "updatedBy"
-//     >,
-//     orgId: string,
-//     userId = "system",
-// ): Promise<Department> {
-//     // 1. Validate essential inputs
-//     if (!orgId) {
-//         throw new Error(
-//             "2kQYNajj - Organization ID  are required to create a Department.",
-//         );
-//     }
-//
-//     if (!departmentData.name) {
-//         throw new Error("eQgDj7gv - Department name cannot be empty.");
-//     }
-//
-//     try {
-//         // 2. Prepare data for creation
-//         const dataToAdd: DocumentData = {
-//             ...departmentData, // Spread the provided data (like address, etc.)
-//             name: departmentData.name,
-//             orgId: orgId,
-//             createdAt: serverTimestamp(),
-//             updatedAt: serverTimestamp(),
-//             createdBy: userId,
-//             updatedBy: userId,
-//         };
-//
-//         // 3. Add the document to the collection - Firestore generates the ID
-//         const newDocRef: DocumentReference = await addDoc(
-//             DepartmentsCollection,
-//             dataToAdd,
-//         );
-//
-//         // 4. Fetch the newly created document using the reference returned by addDoc
-//         const newDepartmentDoc = await getDoc(newDocRef);
-//
-//         if (!newDepartmentDoc.exists()) {
-//             // This is highly unexpected if addDoc succeeded
-//             throw new Error(
-//                 `CREATE_DEP_ERR_FETCH_FAIL - Failed to retrieve newly created Department (ID: ${newDocRef.id}) immediately after creation.`,
-//             );
-//         }
-//
-//         // 5. Map the Firestore document data (including the auto-generated ID)
-//         const createdDepartment = mapFirestoreDocToDep(
-//             newDepartmentDoc.id, // Use the ID from the snapshot
-//             newDepartmentDoc.data(),
-//         );
-//
-//         if (!createdDepartment) {
-//             throw new Error(
-//                 `CREATE_DEP_ERR_FETCH_FAIL - Failed to map newly created department data (ID: ${newDepartmentDoc.id}). Check mapper logic and Firestore data.`,
-//             );
-//         }
-//
-//         console.log(
-//             `Department created successfully with ID: ${createdDepartment.id}`,
-//         );
-//         return createdDepartment; // Return the complete mapped object
-//     } catch (error) {
-//         // Updated error log message - no custom ID to reference here
-//         console.error(
-//             `Gnb5y7ej - Error during Department creation process (OrgID: ${orgId}):`,
-//             error,
-//         );
-//
-//         // Re-throw specific internal errors or a generic one
-//         if (
-//             error instanceof Error &&
-//             error.message.startsWith("CREATE_DEP_ERR")
-//         ) {
-//             throw error;
-//         } else {
-//             throw new Error(
-//                 `Failed to create department. Reason: ${error instanceof Error ? error.message : String(error)}`,
-//             );
-//         }
-//     }
-// }
-
 export async function createDep(
     // Input data, explicitly excluding fields we will set automatically
     departmentData: Omit<
@@ -475,38 +390,6 @@ export async function updateDep(
         }
     }
 }
-
-// export async function deleteDep(id: string): Promise<void> {
-//     if (!id) {
-//         throw new Error(
-//             "deleteDep error: Department ID is required for deletion.",
-//         );
-//     }
-//
-//     console.log("fpBqeu8X - Attempting to delete Department with ID:", id);
-//
-//     const hasAssignments = await checkDepHasAssignments(id);
-//     if (hasAssignments) {
-//         throw new Error(
-//             `Cannot delete a department with assigned locations. All Location Assignments must be deleted first.`,
-//         );
-//     }
-//
-//     try {
-//         const departmentRef = doc(db, "departments", id);
-//         console.log("Cq2CkYZb - Deleting Department document:", id);
-//         await deleteDoc(departmentRef);
-//         console.log("wegdXKD3 - Successfully deleted Department document:", id);
-//     } catch (error) {
-//         console.error(
-//             `mC7eUQT6 - Error deleting Department with ID ${id}:`,
-//             error,
-//         );
-//         throw new Error(
-//             `Failed to delete Department (ID: ${id}). Reason: ${error instanceof Error ? error.message : String(error)}`,
-//         );
-//     }
-// }
 
 export async function deleteDep(id: string): Promise<void> {
     if (!id)

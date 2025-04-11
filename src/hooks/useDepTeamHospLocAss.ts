@@ -1,16 +1,14 @@
 import {
-    getAssignmentsByTeam,
-    getAssignmentsByLocation,
-    getAssignmentsByDepartment, // Added this query
-    // getAssignmentById, // Less common to fetch single assignment by ID? Include if needed.
-    createAssignment,
+    getDepTeamHospLocAssignmentsByTeam,
+    getDepTeamHospLocAssignmentsByLocation,
+    getDepTeamHospLocAssignmentsByDepartment,
+    createDepTeamHospLocAssignment,
     deleteDepTeamHospLocAssignment,
-    // Bulk delete hooks can be added if UI needs them
-} from "@/services/depTeamHospLocAssService"; // Adjust path
+} from "@/services/depTeamHospLocAssService";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { DepTeamHospLocAss } from "@/types/depTypes"; // Adjust path
+import { DepTeamHospLocAss } from "@/types/depTypes";
 
 // --- Query Keys Factory ---
 export const depTeamHospLocAssKeys = {
@@ -36,7 +34,7 @@ export const depTeamHospLocAssKeys = {
 export function useAssignmentsByTeam(teamId?: string) {
     return useQuery<DepTeamHospLocAss[], Error>({
         queryKey: depTeamHospLocAssKeys.listByTeam(teamId!),
-        queryFn: () => getAssignmentsByTeam(teamId!),
+        queryFn: () => getDepTeamHospLocAssignmentsByTeam(teamId!),
         enabled: !!teamId,
         staleTime: 3 * 60 * 1000,
     });
@@ -46,7 +44,7 @@ export function useAssignmentsByTeam(teamId?: string) {
 export function useAssignmentsByLocation(locationId?: string) {
     return useQuery<DepTeamHospLocAss[], Error>({
         queryKey: depTeamHospLocAssKeys.listByLocation(locationId!),
-        queryFn: () => getAssignmentsByLocation(locationId!),
+        queryFn: () => getDepTeamHospLocAssignmentsByLocation(locationId!),
         enabled: !!locationId,
         staleTime: 3 * 60 * 1000,
     });
@@ -56,7 +54,7 @@ export function useAssignmentsByLocation(locationId?: string) {
 export function useAssignmentsByDepartment(depId?: string) {
     return useQuery<DepTeamHospLocAss[], Error>({
         queryKey: depTeamHospLocAssKeys.listByDepartment(depId!),
-        queryFn: () => getAssignmentsByDepartment(depId!),
+        queryFn: () => getDepTeamHospLocAssignmentsByDepartment(depId!),
         enabled: !!depId,
         staleTime: 3 * 60 * 1000,
     });
@@ -73,7 +71,7 @@ export function useCreateTeamLocAssignment() {
             depId: string;
             userId?: string;
         }) =>
-            createAssignment(
+            createDepTeamHospLocAssignment(
                 variables.teamId,
                 variables.locationId,
                 variables.orgId,

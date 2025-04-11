@@ -22,7 +22,7 @@ const assCollection = collection(db, "department_team_location_assignments");
  * @param teamId - The ID of the team.
  * @returns Promise<DepTeamHospLocAss[]>
  */
-export async function getAssignmentsByTeam(
+export async function getDepTeamHospLocAssignmentsByTeam(
     teamId: string,
 ): Promise<DepTeamHospLocAss[]> {
     if (!teamId) {
@@ -51,7 +51,7 @@ export async function getAssignmentsByTeam(
  * @param locationId - The ID of the location.
  * @returns Promise<DepTeamHospLocAss[]>
  */
-export async function getAssignmentsByLocation(
+export async function getDepTeamHospLocAssignmentsByLocation(
     locationId: string,
 ): Promise<DepTeamHospLocAss[]> {
     if (!locationId) {
@@ -83,7 +83,7 @@ export async function getAssignmentsByLocation(
  * @param depId - The ID of the department.
  * @returns Promise<DepTeamHospLocAss[]>
  */
-export async function getAssignmentsByDepartment(
+export async function getDepTeamHospLocAssignmentsByDepartment(
     depId: string,
 ): Promise<DepTeamHospLocAss[]> {
     if (!depId) {
@@ -175,7 +175,7 @@ export async function checkAssignmentExists(
  * @param userId - The ID of the user creating the assignment.
  * @returns Promise<DepTeamHospLocAss> - The newly created assignment object.
  */
-export async function createAssignment(
+export async function createDepTeamHospLocAssignment(
     teamId: string,
     locationId: string,
     orgId: string,
@@ -285,7 +285,9 @@ export async function deleteDepTeamHospLocAssignment(
  * @param teamId - The ID of the team.
  * @returns Promise<void>
  */
-export async function deleteAssignmentsByTeam(teamId: string): Promise<void> {
+export async function deleteTeamHospLocAssignmentsByTeam(
+    teamId: string,
+): Promise<void> {
     if (!teamId)
         throw new Error(
             "bTJ7rHCD - deleteAssignmentsByTeam: Team ID required.",

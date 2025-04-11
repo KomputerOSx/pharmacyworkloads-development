@@ -39,6 +39,7 @@ interface DepTeamsTableProps {
     onDeleteRequest: (teamId: string, teamName: string) => void;
     onEditRequest: (team: DepTeam) => void;
     onManageLocationsRequest: (team: DepTeam) => void;
+    onManageUsersRequest: (team: DepTeam) => void;
     isLoading: boolean;
 }
 
@@ -47,6 +48,7 @@ interface DepTeamsTableMeta extends TableMeta<DepTeam> {
     openDeleteDialog: (teamId: string, teamName: string) => void;
     openEditSheet: (team: DepTeam) => void;
     openManageLocationsDialog: (team: DepTeam) => void;
+    openManageUsersDialog: (team: DepTeam) => void;
 }
 
 export function DepTeamsTable({
@@ -54,6 +56,7 @@ export function DepTeamsTable({
     onDeleteRequest,
     onEditRequest,
     onManageLocationsRequest,
+    onManageUsersRequest,
     isLoading,
 }: DepTeamsTableProps) {
     const data = useMemo(() => teams ?? [], [teams]);
@@ -86,6 +89,7 @@ export function DepTeamsTable({
             openDeleteDialog: onDeleteRequest,
             openEditSheet: onEditRequest,
             openManageLocationsDialog: onManageLocationsRequest,
+            openManageUsersDialog: onManageUsersRequest,
         } as DepTeamsTableMeta, // Cast meta type
     });
 

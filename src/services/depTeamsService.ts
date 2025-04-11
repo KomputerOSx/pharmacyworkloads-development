@@ -15,7 +15,8 @@ import {
 import { db } from "@/config/firebase";
 import { mapFirestoreDocToDepTeam } from "@/lib/firestoreUtil";
 import { DepTeam } from "@/types/subDepTypes";
-import { deleteAssignmentsByTeam } from "@/services/depTeamHospLocAssService";
+import { deleteTeamHospLocAssignmentsByTeam } from "@/services/depTeamHospLocAssService";
+import { deleteUserTeamAssignmentsByTeam } from "@/services/userTeamAssService";
 
 const depTeamsCollection = collection(db, "department_teams");
 
@@ -260,56 +261,139 @@ export async function updateDepTeam(
         );
     }
 }
+//
+// export async function deleteDepTeam(id: string): Promise<void> {
+//     if (!id)
+//         throw new Error("pL8kR3vM - deleteDepTeam error: Team ID required.");
+//     console.log(`aF2dS7hN - Attempting delete Department Team: ${id}`);
+//
+//     // 1. Clean up NEW Team-Location assignments linked to this team
+//     try {
+//         console.log(
+//             `yG5bN1wQ - Deleting team-location assignments for team ${id}...`,
+//         );
+//         await deleteAssignmentsByTeam(id); // Use the new service function
+//         console.log(
+//             `sK3jP9zV - Deleted team-location assignments for team ${id}.`,
+//         );
+//     } catch (assError) {
+//         console.error(
+//             `bH7wE2sR - Failed to delete team-location assignments for team ${id}:`,
+//             assError,
+//         );
+//         let reason = "Unknown assignment cleanup error.";
+//         if (assError instanceof Error) reason = assError.message;
+//         throw new Error(
+//             `Cleanup failed before deleting team ${id}. Reason: ${reason}`,
+//         );
+//     }
+//
+//     // 2. Delete the Team document itself
+//     try {
+//         const teamRef: DocumentReference = doc(db, "department_teams", id); // Ensure correct collection name
+//         const checkSnap = await getDoc(teamRef);
+//         if (!checkSnap.exists()) {
+//             console.warn(`nC1xT8dR - Team ${id} not found. Deletion skipped.`);
+//             return;
+//         }
+//
+//         console.log(`hY9gT5dS - Deleting Department Team document: ${id}`);
+//         await deleteDoc(teamRef);
+//         console.log(
+//             `mJ4bF8wP - Successfully deleted Department Team document: ${id}`,
+//         );
+//     } catch (error) {
+//         console.error(
+//             `rG2sN8vC - Error deleting Department Team ${id}:`,
+//             error,
+//         );
+//         let reason = "Unknown team deletion error.";
+//         if (error instanceof Error) reason = error.message;
+//         throw new Error(
+//             `Failed to delete Department Team ${id}. Reason: ${reason}`,
+//         );
+//     }
+// }
 
 export async function deleteDepTeam(id: string): Promise<void> {
-    if (!id)
+    if (!id) {
         throw new Error("pL8kR3vM - deleteDepTeam error: Team ID required.");
-    console.log(`aF2dS7hN - Attempting delete Department Team: ${id}`);
+    }
+    console.log(
+        `aF2dS7hN - Cascade delete initiated for Department Team ID: ${id}`,
+    );
 
-    // 1. Clean up NEW Team-Location assignments linked to this team
+    // 1. Clean up Team-Location assignments
     try {
         console.log(
-            `yG5bN1wQ - Deleting team-location assignments for team ${id}...`,
+            `yG5bN1wQ - Deleting team-LOCATION assignments for team ${id}...`,
         );
-        await deleteAssignmentsByTeam(id); // Use the new service function
+        // Use the explicitly imported and potentially renamed function
+        await deleteTeamHospLocAssignmentsByTeam(id);
         console.log(
-            `sK3jP9zV - Deleted team-location assignments for team ${id}.`,
+            `sK3jP9zV - Deleted team-LOCATION assignments for team ${id}.`,
         );
-    } catch (assError) {
+    } catch (locAssError) {
         console.error(
-            `bH7wE2sR - Failed to delete team-location assignments for team ${id}:`,
-            assError,
+            `bH7wE2sR - CRITICAL Error: Failed to delete team-LOCATION assignments for team ${id}. Aborting team deletion.`,
+            locAssError,
         );
-        let reason = "Unknown assignment cleanup error.";
-        if (assError instanceof Error) reason = assError.message;
+        let reason = "Unknown location assignment cleanup error.";
+        if (locAssError instanceof Error) reason = locAssError.message;
+        // Stop the process if this critical cleanup fails
         throw new Error(
-            `Cleanup failed before deleting team ${id}. Reason: ${reason}`,
+            `Location assignment cleanup failed before deleting team ${id}. Reason: ${reason}`,
         );
     }
 
-    // 2. Delete the Team document itself
+    // 2. Clean up User-Team assignments
+    try {
+        console.log(
+            `nC1xT8dR - Deleting USER-team assignments for team ${id}...`,
+        );
+        // Use the explicitly imported and potentially renamed function
+        await deleteUserTeamAssignmentsByTeam(id);
+        console.log(`hY9gT5dS - Deleted USER-team assignments for team ${id}.`);
+    } catch (userAssError) {
+        console.error(
+            `mJ4bF8wP - CRITICAL Error: Failed to delete USER-team assignments for team ${id}. Aborting team deletion.`,
+            userAssError,
+        );
+        let reason = "Unknown user assignment cleanup error.";
+        if (userAssError instanceof Error) reason = userAssError.message;
+        // Stop the process if this critical cleanup fails
+        throw new Error(
+            `User assignment cleanup failed before deleting team ${id}. Reason: ${reason}`,
+        );
+    }
+
+    // 3. Delete the Team document itself
     try {
         const teamRef: DocumentReference = doc(db, "department_teams", id); // Ensure correct collection name
         const checkSnap = await getDoc(teamRef);
         if (!checkSnap.exists()) {
-            console.warn(`nC1xT8dR - Team ${id} not found. Deletion skipped.`);
+            console.warn(
+                `rG2sN8vC - Team ${id} not found after assignment cleanup. Deletion skipped.`,
+            );
+            // This might be acceptable if cleanup succeeded
             return;
         }
 
-        console.log(`hY9gT5dS - Deleting Department Team document: ${id}`);
+        console.log(`eP3dN7hJ - Deleting Department Team document: ${id}`);
         await deleteDoc(teamRef);
         console.log(
-            `mJ4bF8wP - Successfully deleted Department Team document: ${id}`,
+            `tY5bV8wE - Successfully deleted Department Team document: ${id} after cleaning up assignments.`,
         );
-    } catch (error) {
+    } catch (teamDeleteError) {
         console.error(
-            `rG2sN8vC - Error deleting Department Team ${id}:`,
-            error,
+            `yU7cF2mS - Error deleting Department Team document ${id} (assignments may be deleted):`,
+            teamDeleteError,
         );
-        let reason = "Unknown team deletion error.";
-        if (error instanceof Error) reason = error.message;
+        let reason = "Unknown team document deletion error.";
+        if (teamDeleteError instanceof Error) reason = teamDeleteError.message;
+        // This indicates potential inconsistency if assignment cleanup succeeded but team delete failed
         throw new Error(
-            `Failed to delete Department Team ${id}. Reason: ${reason}`,
+            `Failed to delete Department Team document ${id} after assignment cleanup. Reason: ${reason}`,
         );
     }
 }

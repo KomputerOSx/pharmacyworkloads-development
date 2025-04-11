@@ -3,7 +3,7 @@ import { db } from "@/config/firebase";
 import { Org } from "@/types/orgTypes";
 import { Hosp } from "@/types/hospTypes";
 import { Department, DepHospLocAss, DepTeamHospLocAss } from "@/types/depTypes";
-import { User } from "@/types/userTypes";
+import { User, UserTeamAss } from "@/types/userTypes";
 import { DepTeam, HospLoc } from "@/types/subDepTypes"; // Adjust path if needed
 
 export const formatFirestoreTimestamp = (timestamp: Timestamp) => {
@@ -312,8 +312,8 @@ export const mapFirestoreDocToDepTeamHospLocAss = (
         depId: (data.depId as string) ?? "", // Denormalized department ID
         createdById: (data.createdById as string) ?? "system",
         updatedById: (data.updatedById as string) ?? "system",
-        createdAt: data.createdAt instanceof Timestamp ? data.createdAt : null,
-        updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt : null,
+        createdAt: (data.createdAt as Timestamp) ?? null,
+        updatedAt: (data.createdAt as Timestamp) ?? null,
     };
 
     if (
@@ -324,6 +324,48 @@ export const mapFirestoreDocToDepTeamHospLocAss = (
     ) {
         console.error(
             `fD7zV1xR - mapFirestoreDocToDepTeamHospLocAss: Incomplete assignment data mapped for ID: ${id}. Missing teamId, locationId, orgId, or depId. Data:`,
+            data,
+        );
+        return null;
+    }
+
+    return assignment;
+};
+
+export const mapFirestoreDocToUserTeamAss = (
+    id: string,
+    data: DocumentData | undefined,
+): UserTeamAss | null => {
+    if (!data) {
+        console.warn(
+            `bH7wE2sR - mapFirestoreDocToUserTeamAss: Received undefined data for ID ${id}.`,
+        );
+        return null;
+    }
+
+    const assignment: UserTeamAss = {
+        id: id,
+        userId: (data.userId as string) ?? "",
+        orgId: (data.orgId as string) ?? "",
+        depId: (data.depId as string) ?? "",
+        teamId: (data.teamId as string) ?? "",
+        startDate: (data.startDate as Timestamp) ?? null,
+        endDate: (data.endDate as Timestamp) ?? null,
+        createdById: (data.createdById as string) ?? "system",
+        updatedById: (data.updatedById as string) ?? "system",
+        createdAt: (data.createdAt as Timestamp) ?? null,
+        updatedAt: (data.createdAt as Timestamp) ?? null,
+    };
+
+    // Validate essential foreign keys
+    if (
+        !assignment.userId ||
+        !assignment.orgId ||
+        !assignment.depId ||
+        !assignment.teamId
+    ) {
+        console.error(
+            `nC1xT8dR - mapFirestoreDocToUserTeamAss: Incomplete assignment data mapped for ID: ${id}. Missing required fields. Data:`,
             data,
         );
         return null;

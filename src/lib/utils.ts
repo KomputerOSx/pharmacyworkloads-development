@@ -63,6 +63,50 @@ export const formatDate = (
     }
 };
 
+export const formatDateNoTime = (
+    dateInput: Timestamp | string | Date | null | undefined,
+): string => {
+    if (dateInput === null || typeof dateInput === "undefined") {
+        return "";
+    }
+
+    try {
+        let date: Date;
+
+        if (dateInput instanceof Timestamp) {
+            date = dateInput.toDate();
+        } else if (typeof dateInput === "string") {
+            date = new Date(dateInput);
+        } else {
+            date = dateInput;
+        }
+
+        if (isNaN(date.getTime())) {
+            console.warn(
+                "formatDate - Could not parse input into a valid Date:",
+                dateInput,
+            );
+            return "Invalid Date";
+        }
+
+        const options: Intl.DateTimeFormatOptions = {
+            year: "numeric", // e.g., 2023
+            month: "short", // e.g., Jan, Feb
+            day: "numeric", // e.g., 1, 15
+        };
+
+        return date.toLocaleDateString(undefined, options);
+    } catch (error) {
+        console.error(
+            "Error occurred during date formatting:",
+            error,
+            "Input:",
+            dateInput,
+        );
+        return "Error";
+    }
+};
+
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }

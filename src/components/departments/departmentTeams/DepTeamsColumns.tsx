@@ -5,7 +5,14 @@ import { DepTeam } from "@/types/subDepTypes"; // Use the DepTeam type directly
 import { formatDate } from "@/lib/utils";
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, MoreHorizontal, Trash, Edit, MapPin } from "lucide-react";
+import {
+    ArrowUpDown,
+    MoreHorizontal,
+    Trash,
+    Edit,
+    MapPin,
+    Users,
+} from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -21,6 +28,7 @@ interface DepTeamsTableMeta {
     openDeleteDialog: (teamId: string, teamName: string) => void;
     openEditSheet: (team: DepTeam) => void;
     openManageLocationsDialog: (team: DepTeam) => void;
+    openManageUsersDialog: (team: DepTeam) => void;
 }
 
 // --- Action Row Component Props ---
@@ -74,6 +82,12 @@ const DataTableRowActions: React.FC<DataTableRowActionsProps> = ({
                     className="cursor-pointer"
                 >
                     <Edit className="mr-2 h-4 w-4" /> Edit Team
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                    onClick={() => meta.openManageUsersDialog(team)}
+                    className="cursor-pointer"
+                >
+                    <Users className="mr-2 h-4 w-4" /> Manage Users
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     onClick={() => meta.openManageLocationsDialog(team)}
@@ -180,13 +194,13 @@ export const columns: ColumnDef<DepTeam>[] = [
         id: "actions",
         header: () => <div className="text-right pr-4">Actions</div>,
         cell: ({ row, table }: CellContext<DepTeam, unknown>) => {
-            // Cast meta safely - type includes new function now
             const meta = table.options.meta as DepTeamsTableMeta | undefined;
-            // Check for all required meta functions
+            // Check for ALL required meta functions now
             if (
                 !meta?.openDeleteDialog ||
                 !meta?.openEditSheet ||
-                !meta?.openManageLocationsDialog
+                !meta?.openManageLocationsDialog ||
+                !meta.openManageUsersDialog
             ) {
                 console.error(
                     "Meta methods not provided to DepTeamsColumns actions cell!",

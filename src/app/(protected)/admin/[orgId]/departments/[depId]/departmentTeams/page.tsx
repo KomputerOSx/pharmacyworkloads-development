@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
 import { AddDepTeamForm } from "@/components/departments/departmentTeams/AddDepTeamForm";
 import { DepTeamsTable } from "@/components/departments/departmentTeams/DepTeamsTable";
+import { ManageTeamUsersDialogContent } from "@/components/departments/departmentTeams/ManageTeamUsersDialogContent";
 import {
     Dialog,
     DialogContent,
@@ -50,6 +51,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { useUsers } from "@/hooks/useUsers";
 
 const editFormSchema = z.object({
     name: z.string().min(1, "Team name is required"),
@@ -77,6 +79,10 @@ export default function DepartmentTeamsManagementPage() {
     const [mutatingLocationId, setMutatingLocationId] = useState<string | null>(
         null,
     );
+    const [isManageUsersDialogOpen, setIsManageUsersDialogOpen] =
+        useState(false);
+    const [managingUsersForTeam, setManagingUsersForTeam] =
+        useState<DepTeam | null>(null);
 
     const { data: department, isLoading: isLoadingDept } = useDep(depId);
     const {
@@ -99,10 +105,25 @@ export default function DepartmentTeamsManagementPage() {
         useCreateTeamLocAssignment();
     const { mutate: deleteTeamLocAssign, isPending: isDeletingAssign } =
         useDeleteTeamLocAssignment();
+    const { data: allOrgUsers, isLoading: isLoadingOrgUsers } = useUsers(orgId);
+
+    const allDepUsers = useMemo(() => {
+        if (!allOrgUsers) return [];
+        return allOrgUsers.filter((user) => user.departmentId === depId);
+    }, [allOrgUsers, depId]);
 
     const editForm = useForm<EditFormValues>({
         resolver: zodResolver(editFormSchema),
     });
+    useEffect(() => {
+        if (editingTeam) {
+            editForm.reset({
+                name: editingTeam.name,
+                description: editingTeam.description ?? "",
+                active: editingTeam.active,
+            });
+        }
+    }, [editingTeam, editForm]);
 
     useEffect(() => {
         if (editingTeam) {
@@ -133,7 +154,7 @@ export default function DepartmentTeamsManagementPage() {
     }, [allOrgLocations, departmentLocationIds]);
 
     const handleRefresh = () => {
-        void refetchTeams(); /* refetch locations/assignments if needed */
+        void refetchTeams();
     };
     const handleOpenEditDialog = (team: DepTeam) => {
         setEditingTeam(team);
@@ -160,6 +181,15 @@ export default function DepartmentTeamsManagementPage() {
         setIsManageLocDialogOpen(false);
         setManagingLocationsForTeam(null);
         setMutatingLocationId(null);
+    };
+
+    const handleOpenManageUsersDialog = (team: DepTeam) => {
+        setManagingUsersForTeam(team);
+        setIsManageUsersDialogOpen(true);
+    };
+    const handleCloseManageUsersDialog = () => {
+        setIsManageUsersDialogOpen(false);
+        setManagingUsersForTeam(null);
     };
 
     const handleEditSubmit = (values: EditFormValues) => {
@@ -289,6 +319,7 @@ export default function DepartmentTeamsManagementPage() {
                 onDeleteRequest={handleOpenDeleteDialog}
                 onEditRequest={handleOpenEditDialog}
                 onManageLocationsRequest={handleOpenManageLocationsDialog}
+                onManageUsersRequest={handleOpenManageUsersDialog}
                 isLoading={isLoading}
             />
         );
@@ -553,6 +584,50 @@ export default function DepartmentTeamsManagementPage() {
                             type="button"
                             variant="outline"
                             onClick={handleCloseManageLocationsDialog}
+                        >
+                            Close
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Manage Users Dialog */}
+            <Dialog
+                open={isManageUsersDialogOpen}
+                onOpenChange={setIsManageUsersDialogOpen}
+            >
+                <DialogContent
+                    className="sm:max-w-lg"
+                    onInteractOutside={handleCloseManageUsersDialog}
+                    onEscapeKeyDown={handleCloseManageUsersDialog}
+                >
+                    <DialogHeader>
+                        <DialogTitle>
+                            Manage Users for Team: {managingUsersForTeam?.name}
+                        </DialogTitle>
+                        <DialogDescription>
+                            Select the users from &#39;
+                            {department?.name || "the organization"}&#39; who
+                            should be assigned to this team.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <ScrollArea>
+                        {/* Render the dedicated content component if a team is selected */}
+                        {managingUsersForTeam && (
+                            <ManageTeamUsersDialogContent
+                                team={managingUsersForTeam}
+                                orgId={orgId}
+                                depId={depId} // Pass team's department ID
+                                allDepUsers={allDepUsers} // Pass fetched users
+                                isLoadingDepUsers={isLoadingOrgUsers}
+                            />
+                        )}
+                    </ScrollArea>
+                    <DialogFooter className="mt-4 sm:justify-end">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={handleCloseManageUsersDialog}
                         >
                             Close
                         </Button>
