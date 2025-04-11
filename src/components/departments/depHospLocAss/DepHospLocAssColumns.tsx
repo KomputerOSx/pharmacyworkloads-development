@@ -1,13 +1,12 @@
-// src/components/departments/DepAssignedLocColumns.tsx
 "use client";
 
+import { CellContext, Column, ColumnDef, Row } from "@tanstack/react-table";
+import { AssignedLocationData } from "@/types/depTypes";
+import { Skeleton } from "@/components/ui/skeleton";
+import { formatDate } from "@/lib/utils";
 import React from "react";
-import { ColumnDef, Column, Row, CellContext } from "@tanstack/react-table";
-// Make sure these icons are imported
-import { ArrowUpDown, MoreHorizontal, Trash } from "lucide-react";
-
-// Shadcn UI Imports - Double-check these
 import { Button } from "@/components/ui/button";
+import { ArrowUpDown, MoreHorizontal, Trash } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -16,14 +15,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Skeleton } from "@/components/ui/skeleton";
 
-// Project Specific Imports
-import { AssignedLocationData } from "@/types/depTypes";
-
-import { formatDate } from "@/lib/utils";
-
-// --- Table Meta Interface ---
 interface DepAssignedLocTableMeta {
     // Pass the assignmentId to the delete handler
     openDeleteDialog: (
@@ -63,7 +55,6 @@ const SortableHeader = ({
         )}
     </Button>
 );
-
 // --- Action Buttons Component for Each Row ---
 const DataTableRowActions: React.FC<DataTableRowActionsProps> = ({
     row,
@@ -106,7 +97,6 @@ const DataTableRowActions: React.FC<DataTableRowActionsProps> = ({
         </DropdownMenu>
     );
 };
-
 // --- Column Definitions Array ---
 export const columns: ColumnDef<AssignedLocationData>[] = [
     // 1. Location Name Column

@@ -1,186 +1,183 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useDep } from "@/hooks/useDeps";
-import { useHosps } from "@/hooks/useHosps";
-import { useHospLocs } from "@/hooks/useHospLoc";
-import { AssignedLocationData } from "@/types/depTypes";
+import {
+    useDepTeams,
+    useDeleteDepTeam,
+    useUpdateDepTeam,
+} from "@/hooks/useDepTeams";
+import { DepTeam } from "@/types/subDepTypes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Terminal } from "lucide-react";
+import { Loader2, Terminal, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DepAssignedLocTable } from "@/components/departments/DepAssignedLocTable";
-import Link from "next/link";
-import { AddDepAssForm } from "@/components/departments/AddDepAssForm";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
-import { HospLoc } from "@/types/subDepTypes";
+import { AddDepTeamForm } from "@/components/departments/departmentTeams/AddDepTeamForm";
+import { DepTeamsTable } from "@/components/departments/departmentTeams/DepTeamsTable";
+// Import Dialog components
 import {
-    useDeleteDepHospLocAssignment,
-    useDepHospLocAssignments,
-} from "@/hooks/useDepHospLocAss";
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger, // Needed to trigger the dialog open
+    DialogFooter, // Optional, if needed outside the form
+    // DialogClose, // Use state to control closing instead
+} from "@/components/ui/dialog";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
 
-export default function DepartmentAssignmentsPage() {
+// --- Edit Form Schema ---
+const editFormSchema = z.object({
+    name: z.string().min(1, "Team name is required"),
+    description: z.string().optional(),
+    active: z.boolean(),
+});
+type EditFormValues = z.infer<typeof editFormSchema>;
+
+export default function DepartmentTeamsManagementPage() {
     const params = useParams();
     const orgId = params.orgId as string;
     const depId = params.depId as string;
     const router = useRouter();
-    // State for delete confirmation
+
+    // --- State for Dialogs ---
+    const [isAddDialogOpen, setIsAddDialogOpen] = useState(false); // Changed state name
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // Changed state name
+    const [editingTeam, setEditingTeam] = useState<DepTeam | null>(null);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-    const [assignmentToDelete, setAssignmentToDelete] = useState<{
+    const [teamToDelete, setTeamToDelete] = useState<{
         id: string;
-        name: string | null;
+        name: string;
     } | null>(null);
 
     // --- Data Fetching ---
     const {
-        data: department, // Fetch single department info if needed for title
+        data: department,
         isLoading: isLoadingDept,
         isError: isErrorDept,
         error: errorDept,
-    } = useDep(depId); // Assuming useDeps can fetch a single one
-
-    // ADDED: Fetch Hospitals
+    } = useDep(depId);
     const {
-        data: hospitals,
-        isLoading: isLoadingHospitals,
-        isError: isErrorHospitals,
-        error: errorHospitals,
-        refetch: refetchHospitals,
-    } = useHosps(orgId);
-
-    const {
-        data: assignedRaw, // Raw assignment data { departmentId, locationId, ... }
-        isLoading: isLoadingAssignments,
-        isError: isErrorAssignments,
-        error: errorAssignments,
-        refetch: refetchAssignments,
-    } = useDepHospLocAssignments(depId);
-
-    const {
-        data: locations, // All locations { id, name, ... }
-        isLoading: isLoadingLocations,
-        isError: isErrorLocations,
-        error: errorLocations,
-        refetch: refetchLocations,
-    } = useHospLocs(orgId);
-
-    // --- Data Processing ---
-
-    // CORRECTED: Map for location ID -> full location object
-    const locationsMap = useMemo(() => {
-        if (!locations) return new Map<string, HospLoc>();
-        return new Map(locations.map((loc) => [loc.id, loc]));
-    }, [locations]);
-
-    // ADDED: Map for hospital ID -> hospital name
-    const hospitalNameMap = useMemo(() => {
-        if (!hospitals) return new Map<string, string>();
-        return new Map(
-            hospitals.map((hosp) => [hosp.id, hosp.name ?? "Unnamed Hospital"]),
-        );
-    }, [hospitals]);
-
-    // CORRECTED: Process assigned locations to include names AND hospId
-    const processedAssignments = useMemo((): AssignedLocationData[] => {
-        if (!assignedRaw) return [];
-
-        return assignedRaw.map((ass) => {
-            // Find the corresponding full location object to get name AND hospId
-            const locationDetails = locationsMap.get(ass.locationId);
-
-            // Ensure the returned object matches the AssignedLocationData type
-            const processed: AssignedLocationData = {
-                assignmentId: ass.id,
-                locationId: ass.locationId,
-                locationName: locationDetails?.name ?? null, // Get name from details
-                hospId: locationDetails?.hospId ?? null, // <-- Get hospId from details
-                assignedAt: ass.createdAt,
-                id: ass.id,
-                createdAt: ass.createdAt,
-                updatedAt: ass.updatedAt,
-            };
-            return processed;
-        }); //.filter(item => item !== null); // Filter nulls if map could potentially return null
-    }, [assignedRaw, locationsMap]); // Depend on raw assignments and the locations map
+        data: teams,
+        isLoading: isLoadingTeams,
+        isError: isErrorTeams,
+        error: errorTeams,
+        refetch: refetchTeams,
+    } = useDepTeams(orgId, depId);
 
     // --- Mutations ---
-    const { mutate: deleteAssignment, isPending: isDeleting } =
-        useDeleteDepHospLocAssignment();
+    const { mutate: deleteTeam, isPending: isDeleting } = useDeleteDepTeam();
+    const { mutate: updateTeam, isPending: isUpdating } = useUpdateDepTeam();
 
+    // --- Edit Form Initialization ---
+    const editForm = useForm<EditFormValues>({
+        resolver: zodResolver(editFormSchema),
+    });
+
+    // --- Effects ---
     useEffect(() => {
-        if (!isLoadingDept) {
-            if (depId !== department?.id) {
-                router.replace("/404");
-            }
+        if (editingTeam) {
+            editForm.reset({
+                name: editingTeam.name,
+                description: editingTeam.description ?? "",
+                active: editingTeam.active,
+            });
         }
-    }, [depId, department, isLoadingDept, router]);
+    }, [editingTeam, editForm]);
 
     // --- Event Handlers ---
     const handleRefresh = () => {
-        void refetchAssignments();
-        void refetchLocations();
-        void refetchHospitals();
-        // refetch department if needed
+        void refetchTeams();
     };
 
-    const handleOpenDeleteDialog = (
-        assignmentId: string,
-        locationName: string | null,
-    ) => {
-        setAssignmentToDelete({
-            id: assignmentId,
-            name: locationName ?? "this assignment",
-        });
+    // Edit Handlers
+    const handleOpenEditDialog = (team: DepTeam) => {
+        // Renamed handler
+        setEditingTeam(team);
+        setIsEditDialogOpen(true); // Open edit dialog
+    };
+    const handleCloseEditDialog = () => {
+        // Renamed handler
+        setIsEditDialogOpen(false); // Close edit dialog
+        setEditingTeam(null);
+        editForm.reset();
+    };
+    const handleEditSubmit = (values: EditFormValues) => {
+        if (!editingTeam) return;
+        updateTeam(
+            { id: editingTeam.id, teamData: values, orgId, depId },
+            {
+                onSuccess: (updated) => {
+                    toast.success(`Team "${updated.name}" updated.`);
+                    handleCloseEditDialog();
+                },
+                onError: (error) => {
+                    toast.error(`Update failed: ${error.message}`);
+                },
+            },
+        );
+    };
+
+    // Delete Handlers
+    const handleOpenDeleteDialog = (teamId: string, teamName: string) => {
+        setTeamToDelete({ id: teamId, name: teamName });
         setIsDeleteDialogOpen(true);
     };
-
     const handleCloseDeleteDialog = () => {
         setIsDeleteDialogOpen(false);
-        setAssignmentToDelete(null);
+        setTeamToDelete(null);
     };
-
     const handleConfirmDelete = () => {
-        if (!assignmentToDelete) return;
-
-        deleteAssignment(
-            { id: assignmentToDelete.id, departmentId: depId }, // Pass assignment ID and department ID
+        if (!teamToDelete) return;
+        deleteTeam(
+            { id: teamToDelete.id, orgId, depId },
             {
                 onSuccess: () => {
+                    toast.success(`Team "${teamToDelete.name}" deleted.`);
                     handleCloseDeleteDialog();
                 },
                 onError: (error) => {
-                    console.error(error);
+                    toast.error(`Delete failed: ${error.message}`);
                 },
             },
         );
     };
 
     // --- Render Logic ---
-    const renderAssignmentTable = () => {
-        const isLoading =
-            isLoadingAssignments ||
-            isLoadingLocations ||
-            isLoadingHospitals ||
-            isLoadingDept;
-        const isError =
-            isErrorAssignments ||
-            isErrorLocations ||
-            isErrorHospitals ||
-            isErrorDept;
-        const error =
-            errorAssignments || errorLocations || errorHospitals || errorDept;
+    const renderContent = () => {
+        // ... (loading and error rendering logic remains the same) ...
+        const isLoading = isLoadingTeams || isLoadingDept;
+        const isError = isErrorTeams || isErrorDept;
+        const error = errorTeams || errorDept;
 
-        if (isLoading) {
-            // Simple Skeleton for the table area
+        if (isLoading && !teams) {
+            // Show skeleton only on initial load
             return (
                 <div className="mt-6 space-y-4 rounded-md border p-4">
-                    <Skeleton className="h-8 w-1/3" /> {/* Title/Header */}
-                    <Skeleton className="h-10 w-full" /> {/* Table Header */}
-                    <Skeleton className="h-8 w-full" /> {/* Row 1 */}
-                    <Skeleton className="h-8 w-full" /> {/* Row 2 */}
-                    <Skeleton className="h-8 w-full" /> {/* Row 3 */}
-                    <Skeleton className="h-8 w-2/3 mt-4" /> {/* Pagination */}
+                    <Skeleton className="h-10 w-full mb-4" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-2/3 mt-4" />
                 </div>
             );
         }
@@ -207,84 +204,193 @@ export default function DepartmentAssignmentsPage() {
             );
         }
 
-        // Render the actual data table
         return (
-            <DepAssignedLocTable
-                assignments={processedAssignments}
+            <DepTeamsTable
+                teams={teams ?? []}
                 onDeleteRequest={handleOpenDeleteDialog}
-                isLoadingLocations={isLoadingLocations} // For location name cell skeleton
-                hospitalNameMap={hospitalNameMap} // <-- Pass correct map
-                isLoadingHospitals={isLoadingHospitals} // <-- Pass correct loading state
+                onEditRequest={handleOpenEditDialog} // Pass the correct handler
+                isLoading={isLoading}
             />
         );
     };
 
-    // Get department name for title, handle loading
     const currentDepartmentName = isLoadingDept
         ? "Department..."
-        : (department?.name ?? "Department Assignments");
+        : (department?.name ?? "Manage Teams");
 
     return (
-        <div className="mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            {/* Header Section */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h1 className="text-2xl font-semibold tracking-tight">
-                    Assignments for: {currentDepartmentName}
-                </h1>
-                <div className={"flex gap-2"}>
+        <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 max-w-5xl">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div>
+                    <h1 className="text-2xl font-semibold tracking-tight">
+                        Manage Teams for: {currentDepartmentName}
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                        Create, view, edit, and delete teams for this
+                        department.
+                    </p>
+                </div>
+                <div className="flex gap-2 flex-shrink-0">
                     <Button
-                        variant={"outline"}
+                        variant="outline"
                         size="sm"
                         onClick={handleRefresh}
-                        // CORRECTED: Disable button based on all relevant loading states
-                        disabled={
-                            isLoadingAssignments ||
-                            isLoadingLocations ||
-                            isLoadingHospitals ||
-                            isLoadingDept
-                        }
+                        disabled={isLoadingTeams || isLoadingDept}
+                        aria-label="Refresh teams list"
                     >
-                        {(isLoadingAssignments ||
-                            isLoadingLocations ||
-                            isLoadingHospitals ||
-                            isLoadingDept) && (
+                        {(isLoadingTeams || isLoadingDept) && (
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        )}
-                        Refresh Data
+                        )}{" "}
+                        Refresh
                     </Button>
-                    <Link href={`/admin/${orgId}/departments/`}>
-                        <Button size="sm" variant={"default"}>
-                            Back to Departments
+
+                    {/* === Use DialogTrigger for Add Team === */}
+                    <Dialog
+                        open={isAddDialogOpen}
+                        onOpenChange={setIsAddDialogOpen}
+                    >
+                        <DialogTrigger asChild>
+                            <Button size="sm">
+                                <PlusCircle className="mr-2 h-4 w-4" /> Create
+                                Team
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[480px]">
+                            {" "}
+                            {/* Adjust width if needed */}
+                            <DialogHeader>
+                                <DialogTitle>Create New Team</DialogTitle>
+                                <DialogDescription>
+                                    Enter the details for the new team. It will
+                                    be automatically associated with the '
+                                    {currentDepartmentName}' department.
+                                </DialogDescription>
+                            </DialogHeader>
+                            {/* AddDepTeamForm handles the creation logic and buttons */}
+                            <AddDepTeamForm
+                                onSuccess={() => setIsAddDialogOpen(false)} // Close dialog on success
+                                onCancel={() => setIsAddDialogOpen(false)} // Close dialog on cancel
+                            />
+                            {/* No separate DialogFooter needed if buttons are in the form */}
+                        </DialogContent>
+                    </Dialog>
+                    {/* ======================================== */}
+
+                    <Link href={`/admin/${orgId}/departments/${depId}`}>
+                        <Button size="sm" variant="outline">
+                            {" "}
+                            Back to Department{" "}
                         </Button>
                     </Link>
                 </div>
             </div>
 
-            {/* Add Assignment Form */}
-            <AddDepAssForm
-                onSuccess={refetchAssignments} // Refetch assignments list on successful add
-                // onCancel can be added if needed
-            />
+            {/* Table */}
+            {renderContent()}
 
-            {/* Assigned Locations Table Section */}
-            <div className="mt-8">
-                <h2 className="text-xl font-semibold tracking-tight mb-4">
-                    Currently Assigned Locations
-                </h2>
-                {renderAssignmentTable()}
-            </div>
+            {/* Edit Team Dialog (Not triggered by a button here, but controlled by state) */}
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                <DialogContent
+                    className="sm:max-w-[480px]"
+                    onInteractOutside={handleCloseEditDialog}
+                    onEscapeKeyDown={handleCloseEditDialog}
+                >
+                    <DialogHeader>
+                        <DialogTitle>
+                            Edit Team: {editingTeam?.name}
+                        </DialogTitle>
+                        <DialogDescription>
+                            Update the details for this team. Click save when
+                            you're done.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <Form {...editForm}>
+                        <form
+                            onSubmit={editForm.handleSubmit(handleEditSubmit)}
+                            className="space-y-6 py-4"
+                        >
+                            <FormField
+                                control={editForm.control}
+                                name="name"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        {" "}
+                                        <FormLabel>Team Name</FormLabel>{" "}
+                                        <FormControl>
+                                            <Input {...field} />
+                                        </FormControl>{" "}
+                                        <FormMessage />{" "}
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={editForm.control}
+                                name="description"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        {" "}
+                                        <FormLabel>Description</FormLabel>{" "}
+                                        <FormControl>
+                                            <Textarea
+                                                {...field}
+                                                value={field.value ?? ""}
+                                            />
+                                        </FormControl>{" "}
+                                        <FormMessage />{" "}
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={editForm.control}
+                                name="active"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                                        <div className="space-y-0.5">
+                                            <FormLabel>Active Status</FormLabel>
+                                            <FormMessage />
+                                        </div>
+                                        <FormControl>
+                                            <Switch
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                            />
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
+                            {/* Form submit/cancel buttons act as dialog controls */}
+                            <div className="flex justify-end gap-2 pt-4">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={handleCloseEditDialog}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button type="submit" disabled={isUpdating}>
+                                    {isUpdating && (
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    )}
+                                    Save Changes
+                                </Button>
+                            </div>
+                        </form>
+                    </Form>
+                </DialogContent>
+            </Dialog>
 
-            {/* Delete Confirmation Dialog */}
-            {assignmentToDelete && (
+            {/* Delete Confirmation Dialog (remains the same) */}
+            {teamToDelete && (
                 <DeleteConfirmationDialog
                     open={isDeleteDialogOpen}
                     onOpenChange={(open) => {
                         if (!open) handleCloseDeleteDialog();
                     }}
-                    itemName={`assignment for "${assignmentToDelete.name}"`}
-                    itemType="location assignment"
+                    itemName={`team "${teamToDelete.name}"`}
+                    itemType="department team"
                     onConfirm={handleConfirmDelete}
-                    isPending={isDeleting} // Pass loading state to dialog
+                    isPending={isDeleting}
                 />
             )}
         </div>

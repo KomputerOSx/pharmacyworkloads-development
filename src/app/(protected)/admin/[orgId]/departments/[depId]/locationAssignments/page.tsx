@@ -10,15 +10,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DepAssignedLocTable } from "@/components/departments/DepAssignedLocTable";
 import Link from "next/link";
-import { AddDepAssForm } from "@/components/departments/AddDepAssForm";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
 import { HospLoc } from "@/types/subDepTypes";
 import {
     useDeleteDepHospLocAssignment,
     useDepHospLocAssignments,
 } from "@/hooks/useDepHospLocAss";
+import { AddDepAssForm } from "@/components/departments/depHospLocAss/AddDepHospLocAssForm";
+import { DepAssignedLocTable } from "@/components/departments/depHospLocAss/DepHospLocAssTable";
 
 export default function DepartmentAssignmentsPage() {
     const params = useParams();

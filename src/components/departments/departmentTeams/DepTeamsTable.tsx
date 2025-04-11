@@ -1,18 +1,19 @@
-// src/components/departments/DepAssignedLocTable.tsx
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
-    useReactTable,
+    flexRender,
     getCoreRowModel,
     getPaginationRowModel,
     getSortedRowModel,
+    getFilteredRowModel, // For filtering
     SortingState,
-    flexRender,
+    ColumnFiltersState, // For filtering
     TableMeta,
+    useReactTable,
 } from "@tanstack/react-table";
-
-// Shadcn UI Components
+import { columns } from "./DepTeamsColumns"; // Import the new team columns
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
     Table,
     TableBody,
@@ -21,7 +22,6 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import {
     Select,
     SelectContent,
@@ -29,76 +29,82 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input"; // For filtering
+import { DepTeam } from "@/types/subDepTypes"; // Use the DepTeam type
 
-// Project Imports
-import { AssignedLocationData } from "@/types/depTypes"; // Use the processed data type
-import { columns } from "./DepAssignedLocColumns"; // Import columns for this table
-// Optional: Import DataTableViewOptions if you use it
-// import { DataTableViewOptions } from "./DepAssignedLocColumns";
-
-// --- Component Props Interface ---
-interface DepAssignedLocTableProps {
-    assignments: AssignedLocationData[];
-    onDeleteRequest: (
-        assignmentId: string,
-        locationName: string | null,
-    ) => void;
-    isLoadingLocations: boolean; // Pass loading state for location names
-    hospitalNameMap: Map<string, string>;
-    isLoadingHospitals: boolean;
+// --- Component Props ---
+interface DepTeamsTableProps {
+    teams: DepTeam[]; // Expect an array of DepTeam objects
+    onDeleteRequest: (teamId: string, teamName: string) => void;
+    onEditRequest: (team: DepTeam) => void;
+    isLoading: boolean; // Pass overall loading state for skeleton/empty state
 }
 
 // --- Table Meta Interface --- (Should match the one in Columns)
-interface DepAssignedLocTableMeta extends TableMeta<AssignedLocationData> {
-    openDeleteDialog: (
-        assignmentId: string,
-        locationName: string | null,
-    ) => void;
-    isLoadingLocations: boolean;
-    hospitalNameMap: Map<string, string>;
-    isLoadingHospitals: boolean;
+interface DepTeamsTableMeta extends TableMeta<DepTeam> {
+    openDeleteDialog: (teamId: string, teamName: string) => void;
+    openEditSheet: (team: DepTeam) => void;
 }
 
-export function DepAssignedLocTable({
-    assignments,
+export function DepTeamsTable({
+    teams,
     onDeleteRequest,
-    isLoadingLocations,
-    hospitalNameMap,
-    isLoadingHospitals,
-}: DepAssignedLocTableProps) {
-    const data = useMemo(() => assignments ?? [], [assignments]);
+    onEditRequest,
+    isLoading,
+}: DepTeamsTableProps) {
+    const data = useMemo(() => teams ?? [], [teams]);
 
     const [sorting, setSorting] = useState<SortingState>(() => [
-        { id: "assignedAt", desc: true }, // Default sort by assigned date
+        { id: "createdAt", desc: true }, // Default sort by creation date
     ]);
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]); // State for filters
 
-    // --- Initialize TanStack Table ---
     const table = useReactTable({
         data,
         columns,
         state: {
             sorting,
+            columnFilters,
         },
         onSortingChange: setSorting,
+        onColumnFiltersChange: setColumnFilters, // Handle filter changes
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
+        getFilteredRowModel: getFilteredRowModel(), // Enable filtering model
         initialState: {
             pagination: {
                 pageSize: 10,
             },
         },
+        // Pass meta data for columns/cells
         meta: {
             openDeleteDialog: onDeleteRequest,
-            isLoadingLocations: isLoadingLocations,
-            hospitalNameMap: hospitalNameMap,
-            isLoadingHospitals: isLoadingHospitals,
-        } as DepAssignedLocTableMeta,
+            openEditSheet: onEditRequest,
+        } as DepTeamsTableMeta, // Cast meta type
     });
 
     return (
         <div className="w-full space-y-4">
+            {/* --- Toolbar (Filtering etc.) --- */}
+            <div className="flex items-center py-4">
+                <Input
+                    placeholder="Filter by name..."
+                    value={
+                        (table.getColumn("name")?.getFilterValue() as string) ??
+                        ""
+                    }
+                    onChange={(event) =>
+                        table
+                            .getColumn("name")
+                            ?.setFilterValue(event.target.value)
+                    }
+                    className="max-w-sm"
+                />
+                {/* Add more filters here if needed (e.g., status dropdown) */}
+            </div>
+
             {/* --- The Data Table --- */}
             <div className="rounded-md border">
                 <ScrollArea className="w-full whitespace-nowrap">
@@ -132,7 +138,7 @@ export function DepAssignedLocTable({
                             {table.getRowModel().rows?.length ? (
                                 table.getRowModel().rows.map((row) => (
                                     <TableRow
-                                        key={row.original.assignmentId} // Use assignmentId for key
+                                        key={row.original.id} // Use team ID as key
                                         data-state={
                                             row.getIsSelected() && "selected"
                                         }
@@ -159,10 +165,12 @@ export function DepAssignedLocTable({
                             ) : (
                                 <TableRow>
                                     <TableCell
-                                        colSpan={columns.length} // Use columns length
+                                        colSpan={columns.length}
                                         className="h-24 text-center"
                                     >
-                                        No locations assigned yet.
+                                        {isLoading
+                                            ? "Loading teams..."
+                                            : "No teams found for this department."}
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -174,10 +182,9 @@ export function DepAssignedLocTable({
 
             {/* --- Pagination Controls --- */}
             <div className="flex flex-col gap-4 sm:flex-row items-center justify-between py-4">
-                {/* Placeholder for Row Selection Count if needed */}
+                {/* Row Count */}
                 <div className="text-sm text-muted-foreground order-last sm:order-first">
-                    {/* Add selection count logic if row selection is enabled */}
-                    Total Assignments: {table.getFilteredRowModel().rows.length}
+                    Total Teams: {table.getFilteredRowModel().rows.length}
                 </div>
 
                 {/* Pagination Controls Group */}
@@ -187,9 +194,9 @@ export function DepAssignedLocTable({
                         <p className="text-sm font-medium">Rows:</p>
                         <Select
                             value={`${table.getState().pagination.pageSize}`}
-                            onValueChange={(value) => {
-                                table.setPageSize(Number(value));
-                            }}
+                            onValueChange={(value) =>
+                                table.setPageSize(Number(value))
+                            }
                         >
                             <SelectTrigger className="h-8 w-[70px]">
                                 <SelectValue

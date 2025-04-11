@@ -1,4 +1,3 @@
-// src/components/locations/AddHospLocForm.tsx
 "use client";
 
 import * as React from "react";

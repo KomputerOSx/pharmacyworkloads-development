@@ -31,6 +31,11 @@ export type DepTeamAss = {
     updatedById: string;
 };
 
+export interface AssignedTeamData extends Omit<DepTeamAss, "departmentId"> {
+    assignmentId: string;
+    teamName: string | null;
+    assignedAt: Timestamp | null;
+}
 export interface AssignedLocationData
     extends Omit<
         DepHospLocAss,

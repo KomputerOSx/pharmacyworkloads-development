@@ -36,6 +36,7 @@ import { MixerHorizontalIcon } from "@radix-ui/react-icons"; // Ensure @radix-ui
 import { Skeleton } from "../ui/skeleton";
 import { cn, formatDate } from "@/lib/utils";
 import { HospLoc } from "@/types/subDepTypes";
+import { Badge } from "@/components/ui/badge";
 
 // --- Table Meta Interface ---
 // Defines the custom properties added to the table's meta option
@@ -237,38 +238,36 @@ export const columns: ColumnDef<HospLoc>[] = [
     {
         accessorKey: "active",
         header: ({ column }) => (
-            <SortableHeader column={column} title="Active" />
+            <Button
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                    column.toggleSorting(column.getIsSorted() === "asc")
+                }
+            >
+                {" "}
+                Status <ArrowUpDown className="ml-2 h-4 w-4" />{" "}
+            </Button>
         ),
         cell: ({ row }) => {
             const isActive = row.getValue("active");
-            // Using Badge component styles inline for simplicity
             return (
-                <div
-                    className={cn(
-                        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-                        isActive
-                            ? "border-transparent bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                            : "border-transparent bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-                    )}
+                <Badge
+                    variant={isActive ? "success" : "destructive"}
+                    className="text-xs"
                 >
-                    {isActive ? "Yes" : "No"}
-                </div>
+                    {" "}
+                    {isActive ? "Active" : "Inactive"}{" "}
+                </Badge>
             );
         },
-        // Simple boolean filter
-        filterFn: (row, id, filterValue) => {
-            const rowValue = row.getValue(id) as boolean;
-            // Allow filtering by 'true'/'false' or 'yes'/'no' string
+        filterFn: (row, columnId, filterValue) => {
+            const isActive = row.getValue(columnId);
             const filterString = String(filterValue).toLowerCase();
-            if (filterString === "true" || filterString === "yes")
-                return rowValue;
-            if (filterString === "false" || filterString === "no")
-                return !rowValue;
-            return true; // No filter applied if value is something else
+            if (filterString === "active") return isActive === true;
+            if (filterString === "inactive") return isActive === false;
+            return true;
         },
-        enableSorting: true,
-        enableHiding: true,
-        size: 80,
     },
 
     // 9. Created At Column

@@ -1,11 +1,15 @@
+// Define the form schema
+import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
+import { useHosps } from "@/hooks/useHosps";
+import { useHospLocs } from "@/hooks/useHospLoc";
+import {
+    useCreateDepHospLocAssignment,
+    useDepHospLocAssignments,
+} from "@/hooks/useDepHospLocAss";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
-
-// shadcn components
-import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
     Card,
     CardContent,
@@ -22,37 +26,27 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import {
     Command,
     CommandEmpty,
     CommandGroup,
     CommandInput,
     CommandItem,
 } from "@/components/ui/command";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
-import { toast } from "sonner";
+import * as z from "zod";
 
-// Import your hooks
-import { useHospLocs } from "@/hooks/useHospLoc";
-import { useParams } from "next/navigation";
-import { useHosps } from "@/hooks/useHosps";
-
-import { cn } from "@/lib/utils";
-import {
-    useCreateDepHospLocAssignment,
-    useDepHospLocAssignments,
-} from "@/hooks/useDepHospLocAss";
-
-// Define the form schema
 const formSchema = z.object({
     locationId: z.string({
         required_error: "Please select a location",
     }),
 });
-
 type FormValues = z.infer<typeof formSchema>;
 
 interface AddDepAssFormProps {
