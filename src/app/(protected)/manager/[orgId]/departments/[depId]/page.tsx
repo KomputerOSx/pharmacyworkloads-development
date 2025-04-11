@@ -1,15 +1,10 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useDep } from "@/hooks/useDeps";
 import { useHosps } from "@/hooks/useHosps";
-import {
-    useDeleteDepHospLocAssignment,
-    useDepHospLocAssignments,
-} from "@/hooks/useDepAss";
 import { useHospLocs } from "@/hooks/useHospLoc";
-import { HospLoc } from "@/types/hosLocTypes";
 import { AssignedLocationData } from "@/types/depTypes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -19,11 +14,18 @@ import { DepAssignedLocTable } from "@/components/departments/DepAssignedLocTabl
 import Link from "next/link";
 import { AddDepAssForm } from "@/components/departments/AddDepAssForm";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
+import { router } from "next/client";
+import { HospLoc } from "@/types/subDepTypes";
+import {
+    useDeleteDepHospLocAssignment,
+    useDepHospLocAssignments,
+} from "@/hooks/useDepHospLocAss";
 
 export default function DepartmentAssignmentsPage() {
     const params = useParams();
     const orgId = params.orgId as string;
     const depId = params.depId as string;
+    const router = useRouter();
 
     // State for delete confirmation
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -108,7 +110,6 @@ export default function DepartmentAssignmentsPage() {
     const { mutate: deleteAssignment, isPending: isDeleting } =
         useDeleteDepHospLocAssignment();
 
-    // --- Event Handlers ---
     const handleRefresh = () => {
         void refetchAssignments();
         void refetchLocations();

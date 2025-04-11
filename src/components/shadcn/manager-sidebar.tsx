@@ -3,10 +3,10 @@
 import * as React from "react";
 import {
     Building,
+    Calendar1Icon,
     Frame,
-    Hospital,
+    ListIcon,
     PersonStanding,
-    Settings2,
     SquareTerminal,
 } from "lucide-react";
 
@@ -80,6 +80,18 @@ const sidebarLayout = {
             title: "Users",
             url: "users",
             icon: PersonStanding,
+        } as NavLinkItem,
+        {
+            type: "link",
+            title: "Weekly Rota",
+            url: "users",
+            icon: Calendar1Icon,
+        } as NavLinkItem,
+        {
+            type: "link",
+            title: "Daily Workload",
+            url: "users",
+            icon: ListIcon,
         } as NavLinkItem,
         // {
         //     type: "menu",
