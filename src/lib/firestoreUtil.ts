@@ -2,7 +2,7 @@ import { doc, DocumentData, getDoc, Timestamp } from "firebase/firestore"; // Ma
 import { db } from "@/config/firebase";
 import { Org } from "@/types/orgTypes";
 import { Hosp } from "@/types/hospTypes";
-import { Department, DepHospLocAss, DepTeamAss } from "@/types/depTypes";
+import { Department, DepHospLocAss, DepTeamHospLocAss } from "@/types/depTypes";
 import { User } from "@/types/userTypes";
 import { DepTeam, HospLoc } from "@/types/subDepTypes"; // Adjust path if needed
 
@@ -293,31 +293,37 @@ export const mapFirestoreDocToDepTeam = (
     return team;
 };
 
-export const mapFirestoreDocToDepTeamAss = (
+export const mapFirestoreDocToDepTeamHospLocAss = (
     id: string,
     data: DocumentData | undefined,
-): DepTeamAss | null => {
+): DepTeamHospLocAss | null => {
     if (!data) {
         console.warn(
-            `xY7cZ1vB - mapFirestoreDocToDepTeamAss: Received undefined data for ID ${id}.`,
+            `kL9pW2sC - mapFirestoreDocToDepTeamHospLocAss: Received undefined data for ID ${id}.`,
         );
         return null;
     }
 
-    const assignment: DepTeamAss = {
+    const assignment: DepTeamHospLocAss = {
         id: id,
-        departmentId: (data.departmentId as string) ?? "",
         teamId: (data.teamId as string) ?? "",
+        locationId: (data.locationId as string) ?? "",
+        orgId: (data.orgId as string) ?? "",
+        depId: (data.depId as string) ?? "", // Denormalized department ID
         createdById: (data.createdById as string) ?? "system",
         updatedById: (data.updatedById as string) ?? "system",
-        createdAt: (data.createdAt as Timestamp) ?? null,
-        updatedAt: (data.createdAt as Timestamp) ?? null,
+        createdAt: data.createdAt instanceof Timestamp ? data.createdAt : null,
+        updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt : null,
     };
 
-    // Validate essential foreign keys
-    if (!assignment.departmentId || !assignment.teamId) {
+    if (
+        !assignment.teamId ||
+        !assignment.locationId ||
+        !assignment.orgId ||
+        !assignment.depId
+    ) {
         console.error(
-            `wE3rT9uJ - mapFirestoreDocToDepTeamAss: Incomplete assignment data mapped for ID: ${id}. Missing departmentId or teamId. Data received:`,
+            `fD7zV1xR - mapFirestoreDocToDepTeamHospLocAss: Incomplete assignment data mapped for ID: ${id}. Missing teamId, locationId, orgId, or depId. Data:`,
             data,
         );
         return null;

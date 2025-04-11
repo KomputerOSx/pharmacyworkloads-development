@@ -1,18 +1,17 @@
 // src/components/locations/HospLocColumns.tsx
 "use client";
 
-import React from "react"; // Import React
+import React from "react";
 import {
     ColumnDef,
     Column,
     Table,
     Row,
-    CellContext, // Import CellContext for accessing table meta in cell renderers
+    CellContext,
 } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { Timestamp } from "firebase/firestore";
 
-// Shadcn UI Imports
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -29,17 +28,13 @@ import {
     DropdownMenuContent as ViewDropdownMenuContent,
     DropdownMenuTrigger as ViewDropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MixerHorizontalIcon } from "@radix-ui/react-icons"; // Ensure @radix-ui/react-icons is installed
+import { MixerHorizontalIcon } from "@radix-ui/react-icons";
 
-// Project Specific Imports
-// Assuming you have cn utility
 import { Skeleton } from "../ui/skeleton";
-import { cn, formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import { HospLoc } from "@/types/subDepTypes";
 import { Badge } from "@/components/ui/badge";
 
-// --- Table Meta Interface ---
-// Defines the custom properties added to the table's meta option
 interface HospLocTableMeta {
     openEditDialog: (location: HospLoc) => void;
     openDeleteDialog: (location: HospLoc) => void;
@@ -47,8 +42,6 @@ interface HospLocTableMeta {
     isLoadingHospitalMap: boolean;
 }
 
-// --- Action Row Component Props ---
-// Defines the props expected by the DataTableRowActions component
 interface DataTableRowActionsProps {
     row: Row<HospLoc>;
     openEditDialog: (location: HospLoc) => void; // Function to trigger edit dialog

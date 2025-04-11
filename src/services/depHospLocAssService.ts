@@ -3,7 +3,6 @@ import { DepHospLocAss } from "@/types/depTypes";
 import {
     addDoc,
     collection,
-    deleteDoc,
     doc,
     DocumentData,
     DocumentReference,
@@ -13,12 +12,19 @@ import {
     serverTimestamp,
     updateDoc,
     where,
+    writeBatch,
 } from "firebase/firestore";
 import { mapFirestoreDocToDepHospLocAss } from "@/lib/firestoreUtil";
 import { db } from "@/config/firebase";
 
-const depAssCollection = collection(db, "department_location_assignments");
-
+const depHospLocAssCollection = collection(
+    db,
+    "department_location_assignments",
+);
+const depTeamLocAssCollection = collection(
+    db,
+    "department_team_location_assignments",
+);
 export async function getDepHospLocAssignments(
     departmentId: string,
 ): Promise<DepHospLocAss[]> {
@@ -32,7 +38,7 @@ export async function getDepHospLocAssignments(
     try {
         // *** VERIFY THIS QUERY ***
         const assignmentsQuery = query(
-            depAssCollection,
+            depHospLocAssCollection,
             where("departmentId", "==", departmentId), // Is the field name "departmentId"? Is the comparison correct?
         );
 
@@ -71,7 +77,7 @@ export async function getDepHospLocAssignment(
     }
 
     try {
-        const docRef: DocumentReference = doc(depAssCollection, id); // Use the specific collection
+        const docRef: DocumentReference = doc(depHospLocAssCollection, id); // Use the specific collection
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
@@ -118,7 +124,7 @@ export async function createDepHospLocAssignment(
 
         // 3. Add the document to the collection - Firestore generates the ID
         const newDocRef: DocumentReference = await addDoc(
-            depAssCollection,
+            depHospLocAssCollection,
             dataToAdd,
         );
 
@@ -193,7 +199,10 @@ export async function updateDepHospLocAssignment(
     }
 
     try {
-        const assignmentRef: DocumentReference = doc(depAssCollection, id); // Use specific collection
+        const assignmentRef: DocumentReference = doc(
+            depHospLocAssCollection,
+            id,
+        ); // Use specific collection
 
         const dataToUpdate = {
             ...data, // Spread any other updatable fields if they exist
@@ -246,33 +255,125 @@ export async function updateDepHospLocAssignment(
     }
 }
 
+// export async function deleteDepHospLocAssignment(id: string): Promise<void> {
+//     if (!id) {
+//         throw new Error(
+//             "deleteDepHospLocAssignment error: Assignment ID is required for deletion.",
+//         );
+//     }
+//
+//     console.log(
+//         `zP4jKbV7 - Attempting to delete department assignment with ID: ${id}`,
+//     );
+//
+//     try {
+//         const assignmentRef = doc(depHospLocAssCollection, id);
+//         console.log(
+//             `eR8sYdN2 - Deleting department assignment document: ${id}`,
+//         );
+//         await deleteDoc(assignmentRef);
+//         console.log(
+//             `qF1wXcT6 - Successfully deleted department assignment document: ${id}`,
+//         );
+//     } catch (error) {
+//         console.error(
+//             `hN5mZsA9 - Error deleting department assignment with ID ${id}:`,
+//             error,
+//         );
+//         throw new Error(
+//             `Failed to delete department assignment (ID: ${id}). Reason: ${error instanceof Error ? error.message : String(error)}`,
+//         );
+//     }
+// }
+
+/**
+ * Deletes a department-location assignment AND all associated
+ * team-location assignments for that same department and location.
+ * @param id - The ID of the department_location_assignment document to delete.
+ * @returns Promise<void>
+ */
 export async function deleteDepHospLocAssignment(id: string): Promise<void> {
     if (!id) {
         throw new Error(
-            "deleteDepHospLocAssignment error: Assignment ID is required for deletion.",
+            "vC9xR4zG - deleteDepHospLocAssignment error: Assignment ID required.",
         );
     }
 
-    console.log(
-        `zP4jKbV7 - Attempting to delete department assignment with ID: ${id}`,
-    );
+    console.log(`zP4jKbV7 - Cascade delete initiated for DepLocAss ID: ${id}`);
+
+    const mainAssignmentRef = doc(depHospLocAssCollection, id);
+    const batch = writeBatch(db); // Initialize the batch
 
     try {
-        const assignmentRef = doc(depAssCollection, id); // Use specific collection
+        // 1. Fetch the main assignment to get details
+        const mainAssignmentSnap = await getDoc(mainAssignmentRef);
+        if (!mainAssignmentSnap.exists()) {
+            console.warn(
+                `uN1pL6hT - DepLocAss document with ID ${id} not found. Cannot cascade delete.`,
+            );
+            return;
+        }
+
+        const assignmentData = mainAssignmentSnap.data();
+        const departmentId = assignmentData.departmentId as string | undefined;
+        const locationId = assignmentData.locationId as string | undefined;
+
+        // Validate required data for cascading
+        if (!departmentId || !locationId) {
+            throw new Error(
+                `wB4nT8kF - Missing departmentId or locationId in DepLocAss document ${id}. Cannot cascade delete.`,
+            );
+        }
+
         console.log(
-            `eR8sYdN2 - Deleting department assignment document: ${id}`,
+            `pL8kR3vM - Found DepLocAss: DepID=${departmentId}, LocID=${locationId}. Preparing cascade.`,
         );
-        await deleteDoc(assignmentRef);
+
+        // 2. Find associated Team-Location assignments
+        const teamAssignmentsQuery = query(
+            depTeamLocAssCollection,
+            where("depId", "==", departmentId),
+            where("locationId", "==", locationId),
+        );
+
+        const teamAssignmentsSnapshot = await getDocs(teamAssignmentsQuery);
+
+        let teamAssignCount = 0;
+        if (!teamAssignmentsSnapshot.empty) {
+            teamAssignmentsSnapshot.forEach((doc) => {
+                console.log(
+                    `aF2dS7hN - Queuing deletion for DepTeamLocAss ID: ${doc.id}`,
+                );
+                batch.delete(doc.ref); // Add team assignment deletion to batch
+                teamAssignCount++;
+            });
+            console.log(
+                `yG5bN1wQ - Found ${teamAssignCount} associated team assignment(s) to delete.`,
+            );
+        } else {
+            console.log(`sK3jP9zV - No associated team assignments found.`);
+        }
+
+        // 3. Add the main assignment deletion to the batch
         console.log(
-            `qF1wXcT6 - Successfully deleted department assignment document: ${id}`,
+            `bH7wE2sR - Queuing deletion for main DepLocAss document: ${id}`,
+        );
+        batch.delete(mainAssignmentRef);
+
+        // 4. Commit the batch operation
+        console.log(`nC1xT8dR - Committing batch delete...`);
+        await batch.commit();
+        console.log(
+            `hY9gT5dS - Successfully deleted DepLocAss ${id} and ${teamAssignCount} associated team assignments.`,
         );
     } catch (error) {
         console.error(
-            `hN5mZsA9 - Error deleting department assignment with ID ${id}:`,
+            `mJ4bF8wP - Error during cascade delete process for DepLocAss ID ${id}:`,
             error,
         );
+        // Determine if error came from fetching/querying or committing
         throw new Error(
-            `Failed to delete department assignment (ID: ${id}). Reason: ${error instanceof Error ? error.message : String(error)}`,
+            `Failed cascade delete for DepLocAss (ID: ${id}). Reason: ${error instanceof Error ? error.message : String(error)}`,
         );
     }
 }

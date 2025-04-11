@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useDep } from "@/hooks/useDeps";
 import { useHosps } from "@/hooks/useHosps";
@@ -12,7 +12,6 @@ import { Loader2, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
-import { router } from "next/client";
 import { HospLoc } from "@/types/subDepTypes";
 import {
     useDeleteDepHospLocAssignment,
@@ -25,9 +24,7 @@ export default function DepartmentAssignmentsPage() {
     const params = useParams();
     const orgId = params.orgId as string;
     const depId = params.depId as string;
-    const router = useRouter();
 
-    // State for delete confirmation
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [assignmentToDelete, setAssignmentToDelete] = useState<{
         id: string;
@@ -36,13 +33,12 @@ export default function DepartmentAssignmentsPage() {
 
     // --- Data Fetching ---
     const {
-        data: department, // Fetch single department info if needed for title
+        data: department,
         isLoading: isLoadingDept,
         isError: isErrorDept,
         error: errorDept,
-    } = useDep(depId); // Assuming useDeps can fetch a single one
+    } = useDep(depId);
 
-    // ADDED: Fetch Hospitals
     const {
         data: hospitals,
         isLoading: isLoadingHospitals,

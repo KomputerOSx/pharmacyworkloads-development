@@ -21,21 +21,18 @@ export type DepHospLocAss = {
     updatedById: string;
 };
 
-export type DepTeamAss = {
+export type DepTeamHospLocAss = {
     id: string;
-    departmentId: string;
+    orgId: string;
+    depId: string;
     teamId: string;
+    locationId: string;
     createdAt: Timestamp | null;
     updatedAt: Timestamp | null;
     createdById: string;
     updatedById: string;
 };
 
-export interface AssignedTeamData extends Omit<DepTeamAss, "departmentId"> {
-    assignmentId: string;
-    teamName: string | null;
-    assignedAt: Timestamp | null;
-}
 export interface AssignedLocationData
     extends Omit<
         DepHospLocAss,

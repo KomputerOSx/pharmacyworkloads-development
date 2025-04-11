@@ -2,18 +2,10 @@
 
 import { CellContext, Column, ColumnDef, Row } from "@tanstack/react-table";
 import { DepTeam } from "@/types/subDepTypes"; // Use the DepTeam type directly
-import { Skeleton } from "@/components/ui/skeleton";
-import { cn, formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import React from "react";
 import { Button } from "@/components/ui/button";
-import {
-    ArrowUpDown,
-    MoreHorizontal,
-    Trash,
-    Edit,
-    CheckCircle,
-    XCircle,
-} from "lucide-react";
+import { ArrowUpDown, MoreHorizontal, Trash, Edit, MapPin } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -26,9 +18,9 @@ import { Badge } from "@/components/ui/badge"; // For active status
 
 // --- Table Meta Interface ---
 interface DepTeamsTableMeta {
-    openDeleteDialog: (teamId: string, teamName: string) => void; // Pass teamId and name
-    openEditSheet: (team: DepTeam) => void; // Pass full team object for editing
-    // No isLoading needed directly in meta if handled at page level
+    openDeleteDialog: (teamId: string, teamName: string) => void;
+    openEditSheet: (team: DepTeam) => void;
+    openManageLocationsDialog: (team: DepTeam) => void;
 }
 
 // --- Action Row Component Props ---
@@ -60,7 +52,7 @@ const DataTableRowActions: React.FC<DataTableRowActionsProps> = ({
     row,
     meta,
 }) => {
-    const team = row.original; // Get the full DepTeam object
+    const team = row.original;
 
     return (
         <DropdownMenu>
@@ -73,24 +65,29 @@ const DataTableRowActions: React.FC<DataTableRowActionsProps> = ({
                     <span className="sr-only">Open menu</span>
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[160px]">
+            <DropdownMenuContent align="end" className="w-[180px]">
+                {" "}
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                    onClick={() => meta.openEditSheet(team)} // Trigger edit action
+                    onClick={() => meta.openEditSheet(team)}
                     className="cursor-pointer"
                 >
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit Team
+                    <Edit className="mr-2 h-4 w-4" /> Edit Team
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                    onClick={() => meta.openDeleteDialog(team.id, team.name)} // Trigger delete action
+                    onClick={() => meta.openManageLocationsDialog(team)}
+                    className="cursor-pointer"
+                >
+                    <MapPin className="mr-2 h-4 w-4" /> Manage Locations
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                    onClick={() => meta.openDeleteDialog(team.id, team.name)}
                     className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/50"
                 >
-                    <Trash className="mr-2 h-4 w-4" />
-                    Delete Team
+                    <Trash className="mr-2 h-4 w-4" /> Delete Team
                 </DropdownMenuItem>
-                {/* Add other actions if needed */}
             </DropdownMenuContent>
         </DropdownMenu>
     );
@@ -183,17 +180,23 @@ export const columns: ColumnDef<DepTeam>[] = [
         id: "actions",
         header: () => <div className="text-right pr-4">Actions</div>,
         cell: ({ row, table }: CellContext<DepTeam, unknown>) => {
-            // Cast meta safely
+            // Cast meta safely - type includes new function now
             const meta = table.options.meta as DepTeamsTableMeta | undefined;
-            if (!meta?.openDeleteDialog || !meta?.openEditSheet) {
+            // Check for all required meta functions
+            if (
+                !meta?.openDeleteDialog ||
+                !meta?.openEditSheet ||
+                !meta?.openManageLocationsDialog
+            ) {
                 console.error(
                     "Meta methods not provided to DepTeamsColumns actions cell!",
                 );
-                return <div className="text-right text-red-500">!</div>; // Indicate error
+                return <div className="text-right text-red-500">!</div>;
             }
             return (
                 <div className="text-right">
-                    <DataTableRowActions row={row} meta={meta} />
+                    {" "}
+                    <DataTableRowActions row={row} meta={meta} />{" "}
                 </div>
             );
         },

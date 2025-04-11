@@ -12,7 +12,7 @@ import {
     TableMeta,
     useReactTable,
 } from "@tanstack/react-table";
-import { columns } from "./DepTeamsColumns"; // Import the new team columns
+import { columns } from "./DepTeamsColumns";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
     Table,
@@ -30,27 +30,30 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; // For filtering
-import { DepTeam } from "@/types/subDepTypes"; // Use the DepTeam type
+import { Input } from "@/components/ui/input";
+import { DepTeam } from "@/types/subDepTypes";
 
 // --- Component Props ---
 interface DepTeamsTableProps {
-    teams: DepTeam[]; // Expect an array of DepTeam objects
+    teams: DepTeam[];
     onDeleteRequest: (teamId: string, teamName: string) => void;
     onEditRequest: (team: DepTeam) => void;
-    isLoading: boolean; // Pass overall loading state for skeleton/empty state
+    onManageLocationsRequest: (team: DepTeam) => void;
+    isLoading: boolean;
 }
 
 // --- Table Meta Interface --- (Should match the one in Columns)
 interface DepTeamsTableMeta extends TableMeta<DepTeam> {
     openDeleteDialog: (teamId: string, teamName: string) => void;
     openEditSheet: (team: DepTeam) => void;
+    openManageLocationsDialog: (team: DepTeam) => void;
 }
 
 export function DepTeamsTable({
     teams,
     onDeleteRequest,
     onEditRequest,
+    onManageLocationsRequest,
     isLoading,
 }: DepTeamsTableProps) {
     const data = useMemo(() => teams ?? [], [teams]);
@@ -82,6 +85,7 @@ export function DepTeamsTable({
         meta: {
             openDeleteDialog: onDeleteRequest,
             openEditSheet: onEditRequest,
+            openManageLocationsDialog: onManageLocationsRequest,
         } as DepTeamsTableMeta, // Cast meta type
     });
 
