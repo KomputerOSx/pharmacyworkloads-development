@@ -26,7 +26,7 @@ function formatRouteSegments(segments: string[]): string {
         .join(" / "); // Join multiple segments with a separator like ' / '
 }
 
-export function AdminSiteHeader() {
+export function SiteHeader() {
     const pathname = usePathname(); // Get the current path
     const [title, setTitle] = useState<string>(""); // State to hold the title
 

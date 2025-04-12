@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 
 // --- Your Existing Imports ---
 import { ManagerSidebar } from "@/components/shadcn/manager-sidebar";
-import { AdminSiteHeader } from "@/components/shadcn/admin-site-header";
+import { SiteHeader } from "@/components/shadcn/site-header";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { useOrgs } from "@/hooks/useOrgs";
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
@@ -136,7 +136,7 @@ export default function ManagerOrgLayout({
                     >
                         <ManagerSidebar variant="inset" />
                         <SidebarInset>
-                            <AdminSiteHeader />
+                            <SiteHeader />
                             <main className="">{children}</main>
                         </SidebarInset>
                     </SidebarProvider>

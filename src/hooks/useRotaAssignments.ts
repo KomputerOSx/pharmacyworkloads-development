@@ -26,10 +26,14 @@ export const assignmentKeys = {
 export function useAssignmentsByWeek(weekId?: string | null) {
     return useQuery<StoredAssignment[], Error>({
         queryKey: assignmentKeys.listByWeek(weekId!),
-        queryFn: () => getAssignmentsByWeek(weekId!),
+        queryFn: () => {
+            if (!weekId) throw new Error("Week ID is required");
+            return getAssignmentsByWeek(weekId);
+        },
         enabled: !!weekId,
         staleTime: 5 * 60 * 1000,
-        // keepPreviousData: true, // Consider if needed for your UX
+        retry: 3,
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     });
 }
 
@@ -39,6 +43,8 @@ export function useAssignmentDetail(assignmentId?: string | null) {
         queryFn: () => getAssignment(assignmentId!),
         enabled: !!assignmentId,
         staleTime: 15 * 60 * 1000,
+        retry: 3,
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     });
 }
 
@@ -109,6 +115,34 @@ export function useUpdateAssignment() {
                 variables.userId,
             ),
 
+        onMutate: async (variables) => {
+            // Cancel any outgoing refetches
+            await queryClient.cancelQueries({
+                queryKey: assignmentKeys.listByWeek(variables.weekId),
+            });
+
+            // Snapshot the previous value
+            const previousAssignments = queryClient.getQueryData(
+                assignmentKeys.listByWeek(variables.weekId),
+            );
+
+            // Optimistically update the cache
+            queryClient.setQueryData<StoredAssignment[]>(
+                assignmentKeys.listByWeek(variables.weekId),
+                (old) => {
+                    if (!old) return [];
+                    return old.map((assignment) =>
+                        assignment.id === variables.assignmentId
+                            ? { ...assignment, ...variables.dataToUpdate }
+                            : assignment,
+                    );
+                },
+            );
+
+            // Return context with the previous value
+            return { previousAssignments };
+        },
+
         onSuccess: async (updatedAssignment, variables) => {
             console.log(
                 "Assignment update successful:",
@@ -133,14 +167,13 @@ export function useUpdateAssignment() {
             toast.success("Assignment updated successfully!");
         },
 
-        onError: (error, variables) => {
-            console.error(
-                `1TxhJHwu - Error updating assignment ${variables.assignmentId}:`,
-                error,
-            );
-            toast.error(
-                `Error: Failed to update assignment - ${error.message}`,
-            );
+        onError: (err, variables, context) => {
+            if (context?.previousAssignments) {
+                queryClient.setQueryData(
+                    assignmentKeys.listByWeek(variables.weekId),
+                    context.previousAssignments,
+                );
+            }
         },
     });
 }
