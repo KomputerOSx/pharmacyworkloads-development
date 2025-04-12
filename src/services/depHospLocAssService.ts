@@ -368,7 +368,7 @@ export async function deleteDepHospLocAssignment(id: string): Promise<void> {
         );
     } catch (error) {
         console.error(
-            `mJ4bF8wP - Error during cascade delete process for DepLocAss ID ${id}:`,
+            `bmvF7Udk - Error during cascade delete process for DepLocAss ID ${id}:`,
             error,
         );
         // Determine if error came from fetching/querying or committing

@@ -46,7 +46,7 @@ export function DepCard({ department, orgId, onEdit, onDelete }: DepCardProps) {
                     {department.name}
                 </CardTitle>
                 {/* Assignments Button - Small size, top right */}
-                <Link href={assignmentsUrl} passHref legacyBehavior>
+                <Link href={assignmentsUrl}>
                     <Button
                         variant="outline"
                         size="sm" // Keep size small as requested
@@ -57,7 +57,7 @@ export function DepCard({ department, orgId, onEdit, onDelete }: DepCardProps) {
                         Locations
                     </Button>
                 </Link>
-                <Link href={teamsUrl} passHref legacyBehavior>
+                <Link href={teamsUrl}>
                     <Button
                         variant="outline"
                         size="sm" // Keep size small as requested

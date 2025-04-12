@@ -111,7 +111,7 @@ export async function createDepTeam(
         );
     }
     if (!teamData.name || teamData.name.trim() === "") {
-        throw new Error("mJ4bF8wP - Department team name cannot be empty.");
+        throw new Error("vx2nySzw - Department team name cannot be empty.");
     }
 
     try {
@@ -261,59 +261,6 @@ export async function updateDepTeam(
         );
     }
 }
-//
-// export async function deleteDepTeam(id: string): Promise<void> {
-//     if (!id)
-//         throw new Error("pL8kR3vM - deleteDepTeam error: Team ID required.");
-//     console.log(`aF2dS7hN - Attempting delete Department Team: ${id}`);
-//
-//     // 1. Clean up NEW Team-Location assignments linked to this team
-//     try {
-//         console.log(
-//             `yG5bN1wQ - Deleting team-location assignments for team ${id}...`,
-//         );
-//         await deleteAssignmentsByTeam(id); // Use the new service function
-//         console.log(
-//             `sK3jP9zV - Deleted team-location assignments for team ${id}.`,
-//         );
-//     } catch (assError) {
-//         console.error(
-//             `bH7wE2sR - Failed to delete team-location assignments for team ${id}:`,
-//             assError,
-//         );
-//         let reason = "Unknown assignment cleanup error.";
-//         if (assError instanceof Error) reason = assError.message;
-//         throw new Error(
-//             `Cleanup failed before deleting team ${id}. Reason: ${reason}`,
-//         );
-//     }
-//
-//     // 2. Delete the Team document itself
-//     try {
-//         const teamRef: DocumentReference = doc(db, "department_teams", id); // Ensure correct collection name
-//         const checkSnap = await getDoc(teamRef);
-//         if (!checkSnap.exists()) {
-//             console.warn(`nC1xT8dR - Team ${id} not found. Deletion skipped.`);
-//             return;
-//         }
-//
-//         console.log(`hY9gT5dS - Deleting Department Team document: ${id}`);
-//         await deleteDoc(teamRef);
-//         console.log(
-//             `mJ4bF8wP - Successfully deleted Department Team document: ${id}`,
-//         );
-//     } catch (error) {
-//         console.error(
-//             `rG2sN8vC - Error deleting Department Team ${id}:`,
-//             error,
-//         );
-//         let reason = "Unknown team deletion error.";
-//         if (error instanceof Error) reason = error.message;
-//         throw new Error(
-//             `Failed to delete Department Team ${id}. Reason: ${reason}`,
-//         );
-//     }
-// }
 
 export async function deleteDepTeam(id: string): Promise<void> {
     if (!id) {
@@ -356,7 +303,7 @@ export async function deleteDepTeam(id: string): Promise<void> {
         console.log(`hY9gT5dS - Deleted USER-team assignments for team ${id}.`);
     } catch (userAssError) {
         console.error(
-            `mJ4bF8wP - CRITICAL Error: Failed to delete USER-team assignments for team ${id}. Aborting team deletion.`,
+            `CqG1et2u - CRITICAL Error: Failed to delete USER-team assignments for team ${id}. Aborting team deletion.`,
             userAssError,
         );
         let reason = "Unknown user assignment cleanup error.";

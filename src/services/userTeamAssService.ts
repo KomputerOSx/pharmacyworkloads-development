@@ -35,7 +35,7 @@ export async function getUserTeamAssignmentsByUser(
             .filter((ass): ass is UserTeamAss => ass !== null);
     } catch (error) {
         console.error(
-            `mJ4bF8wP - Error getting assignments for user ${userId}:`,
+            `sJMuXuH3 - Error getting assignments for user ${userId}:`,
             error,
         );
         throw error;

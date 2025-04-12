@@ -407,7 +407,7 @@ export async function deleteDep(id: string): Promise<void> {
     // 2. Clean up NEW Team-Location assignments linked via depId
     try {
         console.log(
-            `mJ4bF8wP - Deleting team-location assignments for department ${id}...`,
+            `bewJ6Bbq - Deleting team-location assignments for department ${id}...`,
         );
         await deleteAssignmentsByDepartment(id); // Use the new service function
         console.log(

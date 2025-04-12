@@ -227,7 +227,7 @@ export function useDeleteDepTeam() {
                 error,
             );
             toast.error(
-                `Error(mJ4bF8wP): Failed to delete team: ${error.message}`,
+                `Error(LUy4qd8r): Failed to delete team: ${error.message}`,
             );
         },
     });
