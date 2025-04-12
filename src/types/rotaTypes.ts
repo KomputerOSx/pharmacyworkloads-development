@@ -21,3 +21,32 @@ export type StoredAssignment = Assignment & {
     weekId: string;
     dayIndex: number;
 };
+
+export type ShiftPreset = {
+    id: string;
+    name: string;
+    startTime: string;
+    endTime: string;
+    description: string;
+};
+
+// Add hasChanges to WeekStatus
+export type WeekStatus = {
+    weekId: string;
+    status: "draft" | "published" | null;
+    hasChanges?: boolean;
+    lastModified?: Date;
+};
+
+// Add new types for clipboard functionality
+export type ClipboardItem = {
+    assignment: Assignment;
+};
+
+export type ContextMenuPosition = {
+    x: number;
+    y: number;
+    staffId: number;
+    dayIndex: number;
+    assignmentId?: string;
+};
