@@ -12,6 +12,7 @@ export type HospLoc = {
     contactEmail: string | null;
     contactPhone: string | null;
     active: boolean;
+    isDeleted: boolean;
     createdAt: Timestamp | null;
     updatedAt: Timestamp | null;
     createdById: string;

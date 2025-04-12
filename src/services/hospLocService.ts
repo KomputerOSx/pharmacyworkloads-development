@@ -107,14 +107,13 @@ export async function createHospLoc(
     }
 
     try {
-        // No pre-check needed - addDoc handles unique ID generation
-
         // 2. Prepare data for creation
         const dataToAdd: DocumentData = {
             ...hospLocData, // Spread the provided data (like address, etc.)
             name: hospLocData.name, // Use the trimmed name
             orgId: orgId, // Add the organization ID
             hospId: hospId, // Add the hospital ID
+            isDeleted: false,
             createdAt: serverTimestamp(), // Set creation timestamp
             updatedAt: serverTimestamp(), // Set initial update timestamp
             createdBy: userId, // Track who created it
@@ -176,7 +175,10 @@ export async function createHospLoc(
 
 export async function updateHospLoc(
     id: string,
-    data: Omit<Partial<HospLoc>, "id" | "orgId" | "createdAt" | "createdBy">,
+    data: Omit<
+        Partial<HospLoc>,
+        "id" | "orgId" | "createdAt" | "createdBy" | "isDeleted"
+    >,
     userId = "system",
 ): Promise<HospLoc> {
     if (!id) {
@@ -240,6 +242,7 @@ export async function updateHospLoc(
     }
 }
 
+//TODO - Soft delete location by setting isDeleted to true, if it has rota assignments
 export async function deleteHospLoc(id: string): Promise<void> {
     if (!id) {
         throw new Error(

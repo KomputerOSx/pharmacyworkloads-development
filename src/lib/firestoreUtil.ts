@@ -4,7 +4,8 @@ import { Org } from "@/types/orgTypes";
 import { Hosp } from "@/types/hospTypes";
 import { Department, DepHospLocAss, DepTeamHospLocAss } from "@/types/depTypes";
 import { User, UserTeamAss } from "@/types/userTypes";
-import { DepTeam, HospLoc } from "@/types/subDepTypes"; // Adjust path if needed
+import { DepTeam, HospLoc } from "@/types/subDepTypes";
+import { StoredAssignment } from "@/types/rotaType"; // Adjust path if needed
 
 export const formatFirestoreTimestamp = (timestamp: Timestamp) => {
     if (timestamp && typeof timestamp.toDate === "function") {
@@ -138,13 +139,11 @@ export const mapFirestoreDocToHospLoc = (
         contactEmail: (data.contactEmail as string) ?? "",
         contactPhone: (data.contactPhone as string) ?? "",
         active: (data.active as boolean) ?? false,
+        isDeleted: (data.isDeleted as boolean) ?? false,
         createdById: (data.createdById as string) ?? "system",
         updatedById: (data.updatedById as string) ?? "system",
 
         createdAt: (data.createdAt as Timestamp) ?? null,
-        // OR if you prefer JS Date:
-        // createdAt: data.createdAt ? (data.createdAt as Timestamp).toDate() : null,
-
         updatedAt: (data.updatedAt as Timestamp) ?? null,
     };
 
@@ -368,6 +367,59 @@ export const mapFirestoreDocToUserTeamAss = (
             `nC1xT8dR - mapFirestoreDocToUserTeamAss: Incomplete assignment data mapped for ID: ${id}. Missing required fields. Data:`,
             data,
         );
+        return null;
+    }
+
+    return assignment;
+};
+
+export const mapFirestoreDocToStoredAssignment = (
+    id: string,
+    data: DocumentData | undefined,
+): StoredAssignment | null => {
+    // Ensure data exists
+    if (!data) {
+        console.warn(
+            `vmLuFT3a - mapFirestoreDocToStoredAssignment: Received undefined data for ID ${id}.`,
+        );
+        return null;
+    }
+
+    // Construct the StoredAssignment object
+    const assignment: StoredAssignment = {
+        // Essential Fields from StoredAssignment
+        id: id,
+        staffId: (data.staffId as number) ?? -1, // Use a sensible default or throw if required
+        weekId: (data.weekId as string) ?? "",
+        dayIndex: (data.dayIndex as number) ?? -1, // Use a sensible default or throw if required
+
+        // Fields from base Assignment type
+        locationId: (data.locationId as number) ?? null,
+        customLocation: (data.customLocation as string) ?? undefined,
+        shiftType: (data.shiftType as string) ?? null,
+        customStartTime: (data.customStartTime as string) ?? undefined,
+        customEndTime: (data.customEndTime as string) ?? undefined,
+        notes: (data.notes as string) ?? undefined,
+
+        // Metadata Fields
+        createdById: (data.createdById as string) ?? "system",
+        updatedById: (data.updatedById as string) ?? "system",
+        createdAt: (data.createdAt as Timestamp) ?? null,
+        updatedAt: (data.updatedAt as Timestamp) ?? null,
+    };
+
+    // Basic validation - ensure critical linking fields are present
+    if (
+        !assignment.id ||
+        assignment.staffId === -1 ||
+        !assignment.weekId ||
+        assignment.dayIndex === -1
+    ) {
+        console.error(
+            `9vuKQPPp - mapFirestoreDocToStoredAssignment: Incomplete assignment data mapped for ID: ${id}. Missing one or more critical fields (id, staffId, weekId, dayIndex). Data:`,
+            data,
+        );
+        // Decide whether to return null or the incomplete object based on strictness needs
         return null;
     }
 
