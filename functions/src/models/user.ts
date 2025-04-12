@@ -8,7 +8,7 @@ export type User = {
     phoneNumber?: string;
     orgId: string;
     departmentId: string;
-    role: string;
+    role: "user" | "manager" | "admin" | "coordinator";
     jobTitle: string;
     specialty: string;
     active: boolean;

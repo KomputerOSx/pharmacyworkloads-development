@@ -5,15 +5,8 @@ import * as logger from "firebase-functions/logger"; // Use V2 logger
 import * as admin from "firebase-admin";
 import { User } from "../models/user"; // Import the User type
 
-// Initialize Admin SDK Auth service
-// Assumes admin SDK itself is initialized once in src/index.ts
 const auth = admin.auth();
 
-/**
- * Trigger: When a document is deleted from the 'users' collection (V2 Syntax).
- * Action: Deletes the corresponding Firebase Authentication user using the authUid
- *         stored in the deleted Firestore document.
- */
 export const autoDeleteAuthUser = onDocumentDeleted(
     "users/{userId}", // Listen to document deletions in 'users'
     async (event) => {
@@ -26,15 +19,15 @@ export const autoDeleteAuthUser = onDocumentDeleted(
                     params: event.params,
                 },
             );
-            return; // Cannot proceed without the snapshot data
+            return;
         }
 
-        const firestoreUserId = event.params.userId; // ID of the Firestore doc that was deleted
-        const deletedUser = snapshot.data() as User; // Get the data of the deleted user
+        const firestoreUserId = event.params.userId;
+        const deletedUser = snapshot.data() as User;
 
         logger.info(
             `V2: User document deleted with ID: ${firestoreUserId}. Checking for corresponding Auth user to delete.`,
-            { email: deletedUser.email }, // Log email if available for easier tracking
+            { email: deletedUser.email },
         );
 
         // --- 1. Check if we have an Auth UID to target ---
@@ -75,7 +68,6 @@ export const autoDeleteAuthUser = onDocumentDeleted(
                     { firestoreUserId: firestoreUserId },
                 );
             }
-            // You could add more specific error handling here if needed
         }
     },
 );

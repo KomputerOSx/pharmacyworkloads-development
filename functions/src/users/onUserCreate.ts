@@ -51,10 +51,6 @@ export const autoCreateAuthUser = onDocumentCreated(
             disabled: !newUser.active,
         };
 
-        // if (newUser.phoneNumber) {
-        //     userProps.phoneNumber = newUser.phoneNumber;
-        // }
-
         // --- 3. Create User in Firebase Authentication ---
         try {
             const userRecord = await auth.createUser(userProps);
