@@ -10,9 +10,6 @@ import {
     SquareTerminal,
 } from "lucide-react";
 
-// Remove NavProjects and NavMain imports if no longer used elsewhere
-// import { NavProjects } from "@/components/nav-projects";
-// import { NavMain } from "@/components/nav-main";
 import { CombinedNav } from "@/components/shadcn/CombinedNav"; // <-- Import the new component
 import { NavUser } from "@/components/shadcn/nav-user";
 import { OrgSwitcher } from "@/components/shadcn/org-switcher";
@@ -27,7 +24,6 @@ import {
 import { useParams, useRouter } from "next/navigation";
 import { useOrgs } from "@/hooks/useOrgs";
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
-// Import the types if defined here, or from a shared file
 export interface NavLinkItem {
     type: "link";
     title: string;
