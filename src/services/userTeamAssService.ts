@@ -257,7 +257,7 @@ export async function deleteUserTeamAssignmentsByUser(
         );
     } catch (error) {
         console.error(
-            `kqzrSX88 - Error bulk deleting assignments for user ${userId}:`,
+            `81ay9bQq - Error bulk deleting assignments for user ${userId}:`,
             error,
         );
         throw new Error(`Failed bulk delete assignments for user ${userId}.`);

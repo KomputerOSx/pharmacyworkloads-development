@@ -26,7 +26,7 @@ export async function getDepTeamHospLocAssignmentsByTeam(
     teamId: string,
 ): Promise<DepTeamHospLocAss[]> {
     if (!teamId) {
-        console.error("bN5hY8uJ - getAssignmentsByTeam: teamId is required.");
+        console.error("grb7cDT9 - getAssignmentsByTeam: teamId is required.");
         return [];
     }
     try {
@@ -39,7 +39,7 @@ export async function getDepTeamHospLocAssignmentsByTeam(
             .filter((ass): ass is DepTeamHospLocAss => ass !== null);
     } catch (error) {
         console.error(
-            `hY2gT6dS - Error getting assignments for team ${teamId}:`,
+            `w7NC4nq3 - Error getting assignments for team ${teamId}:`,
             error,
         );
         throw error;
@@ -56,7 +56,7 @@ export async function getDepTeamHospLocAssignmentsByLocation(
 ): Promise<DepTeamHospLocAss[]> {
     if (!locationId) {
         console.error(
-            "mJ4bF8wP - getAssignmentsByLocation: locationId is required.",
+            "y3FSVYrj - getAssignmentsByLocation: locationId is required.",
         );
         return [];
     }
@@ -70,7 +70,7 @@ export async function getDepTeamHospLocAssignmentsByLocation(
             .filter((ass): ass is DepTeamHospLocAss => ass !== null);
     } catch (error) {
         console.error(
-            `rG2sN8vC - Error getting assignments for location ${locationId}:`,
+            `cPNX2f5X - Error getting assignments for location ${locationId}:`,
             error,
         );
         throw error;
@@ -88,7 +88,7 @@ export async function getDepTeamHospLocAssignmentsByDepartment(
 ): Promise<DepTeamHospLocAss[]> {
     if (!depId) {
         console.error(
-            "eP3dN7hJ - getAssignmentsByDepartment: depId is required.",
+            "sLsBqD2Y - getAssignmentsByDepartment: depId is required.",
         );
         return [];
     }
@@ -102,7 +102,7 @@ export async function getDepTeamHospLocAssignmentsByDepartment(
             .filter((ass): ass is DepTeamHospLocAss => ass !== null);
     } catch (error) {
         console.error(
-            `tY5bV8wE - Error getting assignments for department ${depId}:`,
+            `FFvDbkT5 - Error getting assignments for department ${depId}:`,
             error,
         );
         throw error;
@@ -118,7 +118,7 @@ export async function getAssignmentById(
     id: string,
 ): Promise<DepTeamHospLocAss | null> {
     if (!id) {
-        console.error("yU7cF2mS - getAssignmentById: Assignment ID required.");
+        console.error("RV6SQtyD - getAssignmentById: Assignment ID required.");
         return null;
     }
     try {
@@ -128,7 +128,7 @@ export async function getAssignmentById(
             ? mapFirestoreDocToDepTeamHospLocAss(docSnap.id, docSnap.data())
             : null;
     } catch (error) {
-        console.error(`zX1gH9oL - Error fetching assignment ${id}:`, error);
+        console.error(`Yw8sUWAn - Error fetching assignment ${id}:`, error);
         throw error;
     }
 }
@@ -145,7 +145,7 @@ export async function checkAssignmentExists(
 ): Promise<boolean> {
     if (!teamId || !locationId) {
         console.error(
-            "wB4nT6kF - checkAssignmentExists: Both teamId and locationId required.",
+            "4ds2pkMd - checkAssignmentExists: Both teamId and locationId required.",
         );
         return false; // Or throw error? Returning false might be safer default
     }
@@ -159,7 +159,7 @@ export async function checkAssignmentExists(
         return !querySnapshot.empty;
     } catch (error) {
         console.error(
-            `qZ8vB3nW - Error checking assignment for team ${teamId} and loc ${locationId}:`,
+            `XeU1CK2z - Error checking assignment for team ${teamId} and loc ${locationId}:`,
             error,
         );
         throw new Error(`Failed to check for existing assignment.`);
@@ -184,7 +184,7 @@ export async function createDepTeamHospLocAssignment(
 ): Promise<DepTeamHospLocAss> {
     if (!teamId || !locationId || !orgId || !depId) {
         throw new Error(
-            "jM6fD1yX - createAssignment: teamId, locationId, orgId, and depId are required.",
+            "w4Gx5JXZ - createAssignment: teamId, locationId, orgId, and depId are required.",
         );
     }
 
@@ -212,7 +212,7 @@ export async function createDepTeamHospLocAssignment(
 
         if (!newAssDoc.exists()) {
             throw new Error(
-                `CREATE_TL_ASS_ERR_FETCH - Failed fetch new assignment ${newDocRef.id}.`,
+                `Qup6eC8v - Failed fetch new assignment ${newDocRef.id}.`,
             );
         }
         const createdAssignment = mapFirestoreDocToDepTeamHospLocAss(
@@ -221,17 +221,17 @@ export async function createDepTeamHospLocAssignment(
         );
         if (!createdAssignment) {
             throw new Error(
-                `CREATE_TL_ASS_ERR_MAP - Failed map new assignment ${newDocRef.id}.`,
+                `grb7cDT9 - Failed map new assignment ${newDocRef.id}.`,
             );
         }
 
         console.log(
-            `ycETLNy9 - Team-Location Assignment created: ${createdAssignment.id}`,
+            `dEWwS6zT - Team-Location Assignment created: ${createdAssignment.id}`,
         );
         return createdAssignment;
     } catch (error) {
         console.error(
-            `NsfNu5pM - Error creating assignment T:${teamId} L:${locationId} D:${depId} O:${orgId}:`,
+            `MBsn2kUj - Error creating assignment T:${teamId} L:${locationId} D:${depId} O:${orgId}:`,
             error,
         );
         if (
@@ -255,23 +255,23 @@ export async function deleteDepTeamHospLocAssignment(
     id: string,
 ): Promise<void> {
     if (!id) {
-        throw new Error("Nu6nrpLk - deleteAssignment: Assignment ID required.");
+        throw new Error("22MQM7un - deleteAssignment: Assignment ID required.");
     }
-    console.log(`ev9xS569 - Attempting delete assignment: ${id}`);
+    console.log(`tzW5XyBJ - Attempting delete assignment: ${id}`);
     try {
         const docRef = doc(assCollection, id);
         // Optional: check existence first
         const checkSnap = await getDoc(docRef);
         if (!checkSnap.exists()) {
             console.warn(
-                `ug2LFbWy - Assignment ${id} not found. Delete skipped.`,
+                `49FsGKQZ - Assignment ${id} not found. Delete skipped.`,
             );
             return;
         }
         await deleteDoc(docRef);
-        console.log(`D84NPvb2 - Deleted assignment: ${id}`);
+        console.log(`Tr5KSuv3 - Deleted assignment: ${id}`);
     } catch (error) {
-        console.error(`p5qC4J2p - Error deleting assignment ${id}:`, error);
+        console.error(`Vkaebs3G - Error deleting assignment ${id}:`, error);
         throw new Error(
             `Failed to delete assignment ${id}. Reason: ${error instanceof Error ? error.message : String(error)}`,
         );
@@ -290,25 +290,25 @@ export async function deleteTeamHospLocAssignmentsByTeam(
 ): Promise<void> {
     if (!teamId)
         throw new Error(
-            "bTJ7rHCD - deleteAssignmentsByTeam: Team ID required.",
+            "eeT6VBZq - deleteAssignmentsByTeam: Team ID required.",
         );
-    console.warn(`3UDqJNnd - Deleting ALL assignments for team: ${teamId}`);
+    console.warn(`vbEJgLT8 - Deleting ALL assignments for team: ${teamId}`);
     const q = query(assCollection, where("teamId", "==", teamId));
     try {
         const snapshot = await getDocs(q);
         if (snapshot.empty) {
-            console.log(`Nh1NLEbM - No assignments found for team ${teamId}.`);
+            console.log(`ahWKrkx5 - No assignments found for team ${teamId}.`);
             return;
         }
         const batch = writeBatch(db);
         snapshot.docs.forEach((doc) => batch.delete(doc.ref));
         await batch.commit();
         console.log(
-            `kqzrSX88 - Deleted ${snapshot.size} assignments for team ${teamId}.`,
+            `VBvkE5SA - Deleted ${snapshot.size} assignments for team ${teamId}.`,
         );
     } catch (error) {
         console.error(
-            `a8xPHXBH - Error bulk deleting assignments for team ${teamId}:`,
+            `D5Y5b2CD - Error bulk deleting assignments for team ${teamId}:`,
             error,
         );
         throw new Error(`Failed bulk delete assignments for team ${teamId}.`);

@@ -123,7 +123,7 @@ export function useUpdateHospLoc() {
                     updatedHospLoc,
                 );
                 console.log(
-                    `kqzrSX88 - Cache updated directly for hospital location detail: ${variables.id}`,
+                    `tJTq6SaQ - Cache updated directly for hospital location detail: ${variables.id}`,
                 );
             } else {
                 console.warn(
