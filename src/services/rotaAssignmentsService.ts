@@ -122,7 +122,7 @@ export async function createAssignment(
 ): Promise<StoredAssignment> {
     // 1. Validate essential inputs (can add more specific checks as needed)
     if (
-        !assignmentData.staffId ||
+        !assignmentData.userId ||
         !assignmentData.weekId ||
         assignmentData.dayIndex === undefined ||
         assignmentData.dayIndex === null
