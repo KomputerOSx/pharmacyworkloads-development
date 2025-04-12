@@ -12,7 +12,7 @@ export type Assignment = {
 };
 
 export type StoredAssignment = Assignment & {
-    staffId: number;
+    userId: string;
     teamId: string;
     weekId: string;
     dayIndex: number;
