@@ -5,14 +5,56 @@ import { Hosp } from "@/types/hospTypes";
 import { Department, DepHospLocAss, DepTeamHospLocAss } from "@/types/depTypes";
 import { User, UserTeamAss } from "@/types/userTypes";
 import { DepTeam, HospLoc } from "@/types/subDepTypes";
-import { StoredAssignment } from "@/types/rotaType"; // Adjust path if needed
+import { StoredAssignment } from "@/types/rotaTypes"; // Adjust path if needed
 
-export const formatFirestoreTimestamp = (timestamp: Timestamp) => {
-    if (timestamp && typeof timestamp.toDate === "function") {
-        return timestamp.toDate().toISOString().split("T")[0];
+export const formatFirestoreTimestamp = (
+    timestamp: Timestamp | null | undefined,
+): string => {
+    if (!timestamp) {
+        return "";
     }
-    // If it's already a string date or null/undefined, just return it
-    return timestamp || null;
+
+    try {
+        if (typeof timestamp.toDate === "function") {
+            const date = timestamp.toDate();
+
+            if (isNaN(date.getTime())) {
+                console.warn(
+                    "formatFirestoreTimestamp: Timestamp.toDate() resulted in invalid Date:",
+                    timestamp,
+                );
+                return "";
+            }
+
+            // 4. Format to YYYY-MM-DD
+            // Using Intl.DateTimeFormat is often more reliable and flexible than toISOString().split()
+            const options: Intl.DateTimeFormatOptions = {
+                year: "numeric",
+                month: "2-digit", // Use '2-digit' for MM
+                day: "2-digit", // Use '2-digit' for DD
+                hour: "2-digit", // Use '2-digit' for HH
+                minute: "2-digit", // Use '2-digit' for MM
+                second: "2-digit", // Use '2-digit' for SS
+                hour12: false,
+                timeZoneName: "short",
+            };
+            return date.toLocaleDateString("sv-SE", options);
+        } else {
+            console.warn(
+                "formatFirestoreTimestamp: Input was not a valid Firestore Timestamp:",
+                timestamp,
+            );
+            return "";
+        }
+    } catch (error) {
+        console.error(
+            "formatFirestoreTimestamp: Error formatting timestamp:",
+            error,
+            "Input:",
+            timestamp,
+        );
+        return "";
+    }
 };
 
 export const formatReferenceField = async (reference: string) => {
@@ -389,29 +431,24 @@ export const mapFirestoreDocToStoredAssignment = (
     const assignment: StoredAssignment = {
         // Essential Fields from StoredAssignment
         id: id,
-        staffId: (data.staffId as number) ?? -1, // Use a sensible default or throw if required
+        userId: (data.userId as string) ?? "", // Use a sensible default or throw if required
         weekId: (data.weekId as string) ?? "",
+        teamId: (data.teamId as string) ?? "",
         dayIndex: (data.dayIndex as number) ?? -1, // Use a sensible default or throw if required
 
         // Fields from base Assignment type
-        locationId: (data.locationId as number) ?? null,
+        locationId: (data.locationId as string) ?? null,
         customLocation: (data.customLocation as string) ?? undefined,
         shiftType: (data.shiftType as string) ?? null,
         customStartTime: (data.customStartTime as string) ?? undefined,
         customEndTime: (data.customEndTime as string) ?? undefined,
         notes: (data.notes as string) ?? undefined,
-
-        // Metadata Fields
-        createdById: (data.createdById as string) ?? "system",
-        updatedById: (data.updatedById as string) ?? "system",
-        createdAt: (data.createdAt as Timestamp) ?? null,
-        updatedAt: (data.updatedAt as Timestamp) ?? null,
     };
 
     // Basic validation - ensure critical linking fields are present
     if (
         !assignment.id ||
-        assignment.staffId === -1 ||
+        assignment.userId ||
         !assignment.weekId ||
         assignment.dayIndex === -1
     ) {

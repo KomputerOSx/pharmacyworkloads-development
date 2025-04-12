@@ -3,7 +3,7 @@ import { Timestamp } from "firebase/firestore";
 
 export type Assignment = {
     id: string;
-    locationId: number | null;
+    locationId: string | null;
     customLocation?: string;
     shiftType: string | null;
     customStartTime?: string;
@@ -43,9 +43,9 @@ export type ClipboardItem = {
 export type ContextMenuPosition = {
     x: number;
     y: number;
-    staffId: number;
+    userId: string;
     dayIndex: number;
-    assignmentId?: string;
+    assignmentId: string;
 };
 
 export const shiftPresets: ShiftPreset[] = [

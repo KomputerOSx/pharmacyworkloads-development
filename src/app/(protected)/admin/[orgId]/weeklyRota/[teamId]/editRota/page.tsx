@@ -1,8 +1,9 @@
+//src/app/(protected)/admin/[orgId]/weeklyRota/[teamId]/editRota/page.tsx
 "use client";
 
 import { useParams } from "next/navigation";
 import { useMemo } from "react"; // Import useMemo
-import { StaffRotaManager } from "@/components/rota/staff-rota-manager";
+import { UserRotaManager } from "@/components/rota/user-rota-manager";
 import { useUsers } from "@/hooks/useUsers"; // Gets specific user and all users
 import { useHospLocs } from "@/hooks/useHospLoc"; // Gets all locations in Org
 import { useDepTeam } from "@/hooks/useDepTeams"; // Gets SPECIFIC team details
@@ -138,11 +139,12 @@ export default function EditRota() {
                 <span className="text-primary">{team.name}</span>
             </h1>
             <div className="mt-6">
-                <StaffRotaManager
+                <UserRotaManager
                     users={usersForTeam}
                     locations={locationsForDepartment}
                     teamId={teamId}
                     orgId={orgId}
+                    allOrgUsers={allOrgUsers}
                     currentUserId={currentUserId}
                 />
             </div>
