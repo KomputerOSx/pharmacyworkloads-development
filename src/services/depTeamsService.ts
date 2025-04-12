@@ -90,6 +90,45 @@ export async function getDepTeam(id: string): Promise<DepTeam | null> {
     }
 }
 
+export async function getAllOrgTeams(orgId: string): Promise<DepTeam[]> {
+    // 1. Validate Input
+    if (!orgId) {
+        console.error("kL9pW2sC - getAllOrgTeams: orgId is required.");
+        // Return empty array if orgId is missing
+        return [];
+    }
+
+    try {
+        const teamsQuery = query(
+            depTeamsCollection,
+            where("orgId", "==", orgId),
+        );
+
+        const teamsSnapshot = await getDocs(teamsQuery);
+
+        return teamsSnapshot.docs
+            .map((doc) => {
+                try {
+                    // Use the existing mapping function
+                    return mapFirestoreDocToDepTeam(doc.id, doc.data());
+                } catch (mapError) {
+                    console.error(
+                        `fD7zV1xR - Error mapping org team document ${doc.id} (Org: ${orgId}):`,
+                        mapError,
+                    );
+                    return null;
+                }
+            })
+            .filter((team): team is DepTeam => team !== null);
+    } catch (error) {
+        console.error(
+            `bN5hY8uJ - Error getting all teams for organization ${orgId}:`,
+            error,
+        );
+        throw error;
+    }
+}
+
 export async function createDepTeam(
     teamData: Omit<
         Partial<DepTeam>,

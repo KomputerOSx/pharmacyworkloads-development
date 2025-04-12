@@ -1,3 +1,4 @@
+// src/types/depTypes.ts
 import { Timestamp } from "firebase/firestore";
 
 export type Department = {

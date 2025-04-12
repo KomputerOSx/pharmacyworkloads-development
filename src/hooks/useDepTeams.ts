@@ -4,6 +4,7 @@ import {
     createDepTeam,
     updateDepTeam,
     deleteDepTeam,
+    getAllOrgTeams,
 } from "@/services/depTeamsService";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,6 +15,8 @@ import { DepTeam } from "@/types/subDepTypes";
 export const depTeamKeys = {
     all: ["depTeams"] as const, // Base key
     lists: () => [...depTeamKeys.all, "list"] as const, // Distinguisher for lists
+    listByOrg: (orgId: string) =>
+        [...depTeamKeys.lists(), { scope: "org", orgId }] as const,
     listByOrgAndDep: (orgId: string, depId: string) =>
         [
             ...depTeamKeys.lists(),
@@ -46,6 +49,15 @@ export function useDepTeam(id?: string) {
         queryKey: depTeamKeys.detail(id!),
         queryFn: () => getDepTeam(id!),
         enabled: !!id, // Only run query if ID is provided
+    });
+}
+
+export function useAllOrgTeams(orgId?: string) {
+    return useQuery<DepTeam[], Error>({
+        queryKey: depTeamKeys.listByOrg(orgId!),
+        queryFn: () => getAllOrgTeams(orgId!),
+        enabled: !!orgId,
+        staleTime: 5 * 60 * 1000,
     });
 }
 

@@ -1,3 +1,5 @@
+// src/types/userTypes.ts
+
 import { Timestamp } from "firebase/firestore";
 
 export type User = {

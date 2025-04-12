@@ -1,3 +1,4 @@
+// src/types/orgTypes.ts
 import { Timestamp } from "firebase/firestore";
 
 export type Org = {

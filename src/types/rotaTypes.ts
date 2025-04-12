@@ -1,3 +1,4 @@
+// src/types/rotaTypes.ts
 import { Timestamp } from "firebase/firestore";
 
 export type Assignment = {
@@ -8,16 +9,11 @@ export type Assignment = {
     customStartTime?: string;
     customEndTime?: string;
     notes?: string;
-
-    //other fields
-    createdById: string;
-    updatedById: string;
-    createdAt: Timestamp | null;
-    updatedAt: Timestamp | null;
 };
 
 export type StoredAssignment = Assignment & {
     staffId: number;
+    teamId: string;
     weekId: string;
     dayIndex: number;
 };
@@ -35,7 +31,8 @@ export type WeekStatus = {
     weekId: string;
     status: "draft" | "published" | null;
     hasChanges?: boolean;
-    lastModified?: Date;
+    lastModified?: Timestamp;
+    lastModifiedById?: string;
 };
 
 // Add new types for clipboard functionality

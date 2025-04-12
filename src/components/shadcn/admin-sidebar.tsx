@@ -3,6 +3,7 @@
 import * as React from "react";
 import {
     Building,
+    CalendarDays,
     Frame,
     Hospital,
     PersonStanding,
@@ -82,6 +83,12 @@ const sidebarLayout = {
             title: "Users",
             url: "users",
             icon: PersonStanding,
+        } as NavLinkItem,
+        {
+            type: "link",
+            title: "Weekly Rota",
+            url: "weeklyRota",
+            icon: CalendarDays,
         } as NavLinkItem,
         {
             type: "link",

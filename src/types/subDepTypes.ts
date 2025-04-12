@@ -1,4 +1,4 @@
-//Locations can be: wards, clinics, carehomes, bed base rehabs, monufacturing, dispensary's, etc
+// src/types/subDepTypes.ts
 import { Timestamp } from "firebase/firestore";
 
 export type HospLoc = {

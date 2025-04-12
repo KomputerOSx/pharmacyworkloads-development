@@ -431,36 +431,6 @@ export async function updateLastLogin(id: string): Promise<void> {
         );
     }
 }
-//
-// export async function deleteUser(id: string): Promise<void> {
-//     if (!id) {
-//         throw new Error("deleteUser error: User ID is required for deletion.");
-//     }
-//
-//     console.log("Attempting to delete User with ID:", id);
-//
-//     try {
-//         const userRef = doc(UsersCollection, id);
-//
-//         // Optional: Check if user exists before deleting
-//         const docSnap = await getDoc(userRef);
-//         if (!docSnap.exists()) {
-//             console.warn(`User with ID ${id} not found. Skipping deletion.`);
-//             // Depending on desired behaviour, could throw an error or just return.
-//             // throw new Error(`Cannot delete. User with ID ${id} not found.`);
-//             return; // Exit gracefully if not found
-//         }
-//
-//         console.log("Deleting User document:", id);
-//         await deleteDoc(userRef);
-//         console.log("Successfully deleted User document:", id);
-//     } catch (error) {
-//         console.error(`Error deleting User with ID ${id}:`, error);
-//         throw new Error(
-//             `Failed to delete User (ID: ${id}). Reason: ${error instanceof Error ? error.message : String(error)}`,
-//         );
-//     }
-// }
 
 export async function deleteUser(id: string): Promise<void> {
     if (!id) {

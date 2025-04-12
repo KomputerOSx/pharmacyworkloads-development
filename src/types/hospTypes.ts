@@ -1,3 +1,4 @@
+// src/types/hospTypes.ts
 import { Timestamp } from "firebase/firestore";
 
 export type Hosp = {
@@ -15,13 +16,3 @@ export type Hosp = {
     createdById: string;
     updatedById: string;
 };
-
-// export type HospOrgAss = {
-//     id: string;
-//     hospital: DocumentReference;
-//     organisation: DocumentReference;
-//     createdAt: Timestamp | string | null;
-//     updatedAt: Timestamp | string | null;
-//     createdById: string;
-//     updatedById: string;
-// };
