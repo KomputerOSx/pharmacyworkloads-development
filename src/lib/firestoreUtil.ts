@@ -447,16 +447,18 @@ export const mapFirestoreDocToStoredAssignment = (
 
     // Basic validation - ensure critical linking fields are present
     if (
-        !assignment.id ||
-        assignment.userId ||
-        !assignment.weekId ||
-        assignment.dayIndex === -1
+        !assignment.id || // ID should exist
+        !assignment.userId || // Check if userId is FALSY (empty string)
+        !assignment.weekId || // Check if weekId is FALSY (empty string)
+        assignment.dayIndex === -1 // Check if dayIndex defaulted to -1 (meaning it was missing or not a number)
+        // NOTE: If dayIndex 0 is valid, this check is correct.
     ) {
         console.error(
-            `9vuKQPPp - mapFirestoreDocToStoredAssignment: Incomplete assignment data mapped for ID: ${id}. Missing one or more critical fields (id, staffId, weekId, dayIndex). Data:`,
-            data,
+            `9vuKQPPp - mapFirestoreDocToStoredAssignment: Incomplete assignment data mapped for ID: ${id}. Missing/invalid critical fields. Mapped Object:`,
+            assignment, // Log the object *after* mapping attempt
+            "Original Firestore Data:",
+            data, // Log the original data
         );
-        // Decide whether to return null or the incomplete object based on strictness needs
         return null;
     }
 

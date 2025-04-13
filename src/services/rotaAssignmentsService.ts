@@ -13,6 +13,7 @@ import {
     serverTimestamp,
     updateDoc,
     where,
+    writeBatch,
 } from "firebase/firestore";
 import { db } from "@/config/firebase"; // Adjust path as needed
 import { mapFirestoreDocToStoredAssignment } from "@/lib/firestoreUtil"; // Adjust path
@@ -64,6 +65,58 @@ export async function getAssignmentsByWeek(
             error,
         );
         throw new Error(`Failed to retrieve assignments for week ${weekId}.`); // Re-throw or handle as needed
+    }
+}
+
+export async function getAssignmentsByWeekAndTeam( // Renamed for clarity
+    weekId: string,
+    teamId: string, // Added teamId parameter
+): Promise<StoredAssignment[]> {
+    // Validate inputs
+    if (!weekId || !teamId) {
+        console.error(
+            "51BV4dcn - getAssignmentsByWeekAndTeam: weekId and teamId are required.",
+        );
+        return [];
+    }
+    try {
+        // Add 'where' clause for teamId
+        const assignmentsQuery = query(
+            assignmentsCollection,
+            where("weekId", "==", weekId),
+            where("teamId", "==", teamId), // Filter by teamId
+        );
+
+        const assignmentsSnapshot = await getDocs(assignmentsQuery);
+
+        console.log(
+            `Fetched ${assignmentsSnapshot.docs.length} assignments for ${weekId} / ${teamId}`,
+        ); // Add log
+
+        return assignmentsSnapshot.docs
+            .map((doc) => {
+                try {
+                    return mapFirestoreDocToStoredAssignment(
+                        doc.id,
+                        doc.data(),
+                    );
+                } catch (mapError) {
+                    console.error(
+                        `dqqvBdY4 - Error mapping assignment document ${doc.id}:`,
+                        mapError,
+                    );
+                    return null;
+                }
+            })
+            .filter((a): a is StoredAssignment => a !== null);
+    } catch (error) {
+        console.error(
+            `n45NRujy - Error fetching assignments for week ${weekId}, team ${teamId}:`,
+            error,
+        );
+        throw new Error(
+            `Failed to retrieve assignments for week ${weekId}, team ${teamId}.`,
+        );
     }
 }
 
@@ -324,6 +377,124 @@ export async function deleteAssignment(assignmentId: string): Promise<void> {
         );
         throw new Error(
             `Failed to delete assignment (ID: ${assignmentId}). Reason: ${error instanceof Error ? error.message : String(error)}`,
+        );
+    }
+}
+
+export async function saveWeekAssignmentsBatch(
+    weekId: string,
+    teamId: string,
+    assignmentsToSave: Omit<
+        StoredAssignment,
+        "id" | "createdAt" | "updatedAt"
+    >[], // Data before saving
+    userId: string,
+): Promise<void> {
+    if (!weekId || !teamId) {
+        throw new Error(
+            "6DgSdb18 - weekId and teamId are required for batch save.",
+        );
+    }
+    if (!userId) {
+        console.warn(
+            "b7XdJrUt - No userId provided for saveWeekAssignmentsBatch, using 'system'.",
+        );
+        userId = "system";
+    }
+
+    console.log(
+        `Pgb7vjF1 - Starting batch save for Week: ${weekId}, Team: ${teamId}. ${assignmentsToSave.length} assignments.`,
+    );
+
+    const batch = writeBatch(db);
+
+    try {
+        // 1. Find existing assignments for this week and team to delete
+        const q = query(
+            assignmentsCollection,
+            where("weekId", "==", weekId),
+            where("teamId", "==", teamId),
+        );
+        const existingSnapshot = await getDocs(q);
+
+        let deletedCount = 0;
+        if (!existingSnapshot.empty) {
+            existingSnapshot.docs.forEach((doc) => {
+                console.log(
+                    `zyZRGas2 -> Queuing delete for existing assignment: ${doc.id}`,
+                );
+                batch.delete(doc.ref);
+                deletedCount++;
+            });
+            console.log(
+                `5maSwbvb -> Queued ${deletedCount} existing assignments for deletion.`,
+            );
+        } else {
+            console.log(
+                `pF39cNSV -> No existing assignments found for Week: ${weekId}, Team: ${teamId} to delete.`,
+            );
+        }
+
+        // 2. Add new assignments to the batch
+        assignmentsToSave.forEach((assignmentData) => {
+            if (
+                !assignmentData.userId ||
+                assignmentData.dayIndex === undefined ||
+                assignmentData.dayIndex === null
+            ) {
+                console.warn(
+                    "56KmFkpt -> Skipping invalid assignment data during batch save:",
+                    assignmentData,
+                );
+                return; // Skip invalid data points
+            }
+            // Create a new document reference *within the batch*
+            const newAssignmentRef = doc(assignmentsCollection); // Auto-generates ID locally for the batch operation
+
+            const dataToAdd: DocumentData = {
+                // Include required fields explicitly first
+                userId: assignmentData.userId,
+                teamId: assignmentData.teamId,
+                weekId: assignmentData.weekId,
+                dayIndex: assignmentData.dayIndex,
+                locationId: assignmentData.locationId ?? null,
+                shiftType: assignmentData.shiftType ?? null,
+
+                // Convert other optional fields from undefined to null
+                customLocation: assignmentData.customLocation ?? null,
+                customStartTime: assignmentData.customStartTime ?? null,
+                customEndTime: assignmentData.customEndTime ?? null,
+                notes: assignmentData.notes ?? null,
+
+                // Add audit fields and timestamps
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp(),
+                createdById: userId,
+                updatedById: userId,
+            };
+
+            console.log(
+                `5HXun3V5 -> Queuing create for assignment for User: ${assignmentData.userId}, Day: ${assignmentData.dayIndex}`,
+            );
+            batch.set(newAssignmentRef, dataToAdd);
+        });
+        console.log(
+            `esd1H4JC -> Queued ${assignmentsToSave.length} new assignments for creation.`,
+        );
+
+        // 3. Commit the batch
+        console.log(`FYe8svUc - Committing batch save...`);
+        await batch.commit();
+        console.log(
+            `Q3Cxq3By - Batch save completed successfully for Week: ${weekId}, Team: ${teamId}.`,
+        );
+    } catch (error) {
+        console.error(
+            `4Fns4LDV - Error during batch save for Week ${weekId}, Team ${teamId}:`,
+            error,
+        );
+        throw new Error(
+            `Failed to save assignments for week ${weekId}. Reason: ${error instanceof Error ? error.message : String(error)}`,
         );
     }
 }
