@@ -5,7 +5,7 @@ import { Hosp } from "@/types/hospTypes";
 import { Department, DepHospLocAss, DepTeamHospLocAss } from "@/types/depTypes";
 import { User, UserTeamAss } from "@/types/userTypes";
 import { DepTeam, HospLoc } from "@/types/subDepTypes";
-import { StoredAssignment } from "@/types/rotaTypes"; // Adjust path if needed
+import { StoredAssignment, WeekStatus } from "@/types/rotaTypes"; // Adjust path if needed
 
 export const formatFirestoreTimestamp = (
     timestamp: Timestamp | null | undefined,
@@ -463,4 +463,49 @@ export const mapFirestoreDocToStoredAssignment = (
     }
 
     return assignment;
+};
+
+export const mapFirestoreDocToWeekStatus = (
+    data: DocumentData | undefined,
+    // id?: string // Optional: include ID if needed and not derived from weekId/teamId
+): WeekStatus | null => {
+    if (!data) {
+        console.warn(
+            `sK3jP9zV - mapFirestoreDocToWeekStatus: Received undefined data.`,
+        );
+        return null;
+    }
+
+    // Validate the status field specifically
+    const status = data.status as string;
+    if (status !== "draft" && status !== "published") {
+        console.warn(
+            `bH7wE2sR - mapFirestoreDocToWeekStatus: Invalid status value received:`,
+            status,
+        );
+        // Return null or default to 'draft'? Returning null is safer.
+        return null;
+    }
+
+    const weekStatus: WeekStatus = {
+        // id: id ?? "", // If using ID
+        weekId: (data.weekId as string) ?? "",
+        teamId: (data.teamId as string) ?? "",
+        orgId: (data.orgId as string) ?? "",
+        status: status, // Use the validated status
+        lastModified:
+            data.lastModified instanceof Timestamp ? data.lastModified : null,
+        lastModifiedById: (data.lastModifiedById as string) ?? null,
+    };
+
+    // Validate essential fields
+    if (!weekStatus.weekId || !weekStatus.teamId || !weekStatus.orgId) {
+        console.error(
+            `nC1xT8dR - mapFirestoreDocToWeekStatus: Incomplete WeekStatus data mapped. Missing weekId, teamId, or orgId. Data:`,
+            data,
+        );
+        return null;
+    }
+
+    return weekStatus;
 };

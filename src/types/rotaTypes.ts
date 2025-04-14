@@ -28,11 +28,12 @@ export type ShiftPreset = {
 
 // Add hasChanges to WeekStatus
 export type WeekStatus = {
-    weekId: string;
-    status: "draft" | "published" | null;
-    hasChanges?: boolean;
-    lastModified?: Timestamp;
-    lastModifiedById?: string;
+    weekId: string; // e.g., "2024-W15"
+    teamId: string; // ID of the team this status belongs to
+    orgId: string; // To scope status by organization
+    status: "draft" | "published"; // Explicitly only these two states
+    lastModified: Timestamp | null; // Firestore Timestamp
+    lastModifiedById: string | null; // User ID
 };
 
 // Add new types for clipboard functionality

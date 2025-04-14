@@ -21,6 +21,7 @@ export default function DepartmentTeamRotasPage() {
         isError: isErrorDeps,
         error: errorDeps,
         refetch: refetchDeps,
+        isRefetching: isRefetchingDeps,
     } = useDeps(orgId);
     const {
         data: allTeams,
@@ -28,6 +29,7 @@ export default function DepartmentTeamRotasPage() {
         isError: isErrorTeams,
         error: errorTeams,
         refetch: refetchTeams,
+        isRefetching: isRefetchingTeams,
     } = useAllOrgTeams(orgId); // Use the correct hook
 
     const isLoading = isLoadingDeps || isLoadingTeams;
@@ -113,15 +115,19 @@ export default function DepartmentTeamRotasPage() {
                     Departments & Team Rotas
                 </h1>
                 <Button
-                    variant="outline"
+                    variant={"outline"}
                     size="sm"
                     onClick={handleRefresh}
-                    disabled={isLoading}
+                    disabled={
+                        isLoading || isRefetchingTeams || isRefetchingDeps
+                    }
                 >
-                    {isLoading && (
+                    {isRefetchingTeams || isRefetchingDeps ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}{" "}
-                    Refresh Data
+                    ) : null}
+                    {isRefetchingTeams || isRefetchingDeps
+                        ? "Refreshing..."
+                        : "Refresh"}
                 </Button>
             </div>
 
