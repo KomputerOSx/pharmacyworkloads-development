@@ -11,9 +11,11 @@ import {
     deleteAssignment,
     saveWeekAssignmentsBatch,
     getAssignmentsByWeekAndTeam,
+    deleteWeekAssignmentsBatch,
 } from "@/services/rotaAssignmentsService";
 
 import { StoredAssignment } from "@/types/rotaTypes";
+import { rotaWeekStatusKeys } from "@/hooks/useRotaWeekStatus";
 
 export const assignmentKeys = {
     all: ["assignments"] as const,
@@ -278,15 +280,24 @@ export function useSaveWeekAssignments() {
             console.log(
                 `Batch save successful for week ${variables.weekId}, team ${variables.teamId}`,
             );
-            toast.success(
-                `Rota for week ${variables.weekId} saved successfully!`,
-            );
-
+            toast.success(`Rota saved successfully!`);
             await queryClient.invalidateQueries({
-                queryKey: assignmentKeys.listByWeek(variables.weekId),
+                queryKey: assignmentKeys.listByWeekAndTeam(
+                    variables.weekId,
+                    variables.teamId,
+                ),
             });
             console.log(
                 `Invalidated assignment list cache post-batch save for week: ${variables.weekId}`,
+            );
+            await queryClient.invalidateQueries({
+                queryKey: rotaWeekStatusKeys.detail(
+                    variables.weekId,
+                    variables.teamId,
+                ),
+            });
+            console.log(
+                `Invalidated status cache post-batch save for week: ${variables.weekId}`,
             );
         },
         onError: (error: Error, variables) => {
@@ -295,6 +306,37 @@ export function useSaveWeekAssignments() {
                 error,
             );
             toast.error(`Error saving rota: ${error.message}`);
+        },
+    });
+}
+
+export function useDeleteWeekAssignments() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (variables: { weekId: string; teamId: string }) =>
+            deleteWeekAssignmentsBatch(variables.weekId, variables.teamId),
+        onSuccess: (deletedCount, variables) => {
+            toast.success(
+                `Cleared ${deletedCount} assignment(s) for week ${variables.weekId}.`,
+            );
+            // Invalidate the list for the week/team
+            queryClient
+                .invalidateQueries({
+                    queryKey: assignmentKeys.listByWeekAndTeam(
+                        variables.weekId,
+                        variables.teamId,
+                    ),
+                })
+                .catch((err) =>
+                    console.error("Failed invalidate after delete:", err),
+                );
+        },
+        onError: (error: Error, variables) => {
+            console.error(
+                `aF2dS7hN - Error deleting assignments for week ${variables.weekId}, team ${variables.teamId}:`,
+                error,
+            );
+            toast.error(`Failed to clear assignments: ${error.message}`);
         },
     });
 }

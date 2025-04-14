@@ -443,7 +443,7 @@ export async function saveWeekAssignmentsBatch(
                 assignmentData.dayIndex === null
             ) {
                 console.warn(
-                    "56KmFkpt -> Skipping invalid assignment data during batch save:",
+                    "Hf2Hdyt8 -> Skipping invalid assignment data during batch save:",
                     assignmentData,
                 );
                 return; // Skip invalid data points
@@ -474,27 +474,77 @@ export async function saveWeekAssignmentsBatch(
             };
 
             console.log(
-                `5HXun3V5 -> Queuing create for assignment for User: ${assignmentData.userId}, Day: ${assignmentData.dayIndex}`,
+                `3V4tTjhg -> Queuing create for assignment for User: ${assignmentData.userId}, Day: ${assignmentData.dayIndex}`,
             );
             batch.set(newAssignmentRef, dataToAdd);
         });
         console.log(
-            `esd1H4JC -> Queued ${assignmentsToSave.length} new assignments for creation.`,
+            `NbgY3jqF -> Queued ${assignmentsToSave.length} new assignments for creation.`,
         );
 
         // 3. Commit the batch
-        console.log(`FYe8svUc - Committing batch save...`);
+        console.log(`6EPeUaMM - Committing batch save...`);
         await batch.commit();
         console.log(
-            `Q3Cxq3By - Batch save completed successfully for Week: ${weekId}, Team: ${teamId}.`,
+            `KkGpyC8B - Batch save completed successfully for Week: ${weekId}, Team: ${teamId}.`,
         );
     } catch (error) {
         console.error(
-            `4Fns4LDV - Error during batch save for Week ${weekId}, Team ${teamId}:`,
+            `f7J4HHbw - Error during batch save for Week ${weekId}, Team ${teamId}:`,
             error,
         );
         throw new Error(
             `Failed to save assignments for week ${weekId}. Reason: ${error instanceof Error ? error.message : String(error)}`,
+        );
+    }
+}
+
+export async function deleteWeekAssignmentsBatch(
+    weekId: string,
+    teamId: string,
+): Promise<number> {
+    if (!weekId || !teamId) {
+        throw new Error(
+            "P8hCCCm6 - deleteWeekAssignmentsBatch: weekId and teamId are required.",
+        );
+    }
+    console.log(
+        `fKXxx5Ca - Starting batch delete for assignments: Week ${weekId}, Team ${teamId}.`,
+    );
+    const batch = writeBatch(db);
+    let deletedCount = 0;
+
+    try {
+        const q = query(
+            assignmentsCollection,
+            where("weekId", "==", weekId),
+            where("teamId", "==", teamId),
+        );
+        const snapshot = await getDocs(q);
+
+        if (!snapshot.empty) {
+            snapshot.docs.forEach((doc) => {
+                console.log(` -> Queuing delete for assignment: ${doc.id}`);
+                batch.delete(doc.ref);
+                deletedCount++;
+            });
+            await batch.commit();
+            console.log(
+                `19cvHGbB - Batch delete successful. Deleted ${deletedCount} assignments.`,
+            );
+        } else {
+            console.log(
+                `9EBfWdnW - No assignments found to delete for Week ${weekId}, Team ${teamId}.`,
+            );
+        }
+        return deletedCount; // Return the count
+    } catch (error) {
+        console.error(
+            `6zpdHzb4 - Error during batch assignment delete for Week ${weekId}, Team ${teamId}:`,
+            error,
+        );
+        throw new Error(
+            `Failed to delete assignments for week ${weekId}. Reason: ${error instanceof Error ? error.message : String(error)}`,
         );
     }
 }

@@ -6,6 +6,7 @@ import {
     serverTimestamp,
     DocumentReference,
     collection,
+    deleteDoc,
     // query, where, getDocs // Needed if you add query functions later
 } from "firebase/firestore";
 import { db } from "@/config/firebase";
@@ -84,17 +85,17 @@ export async function setWeekStatus(
 ): Promise<void> {
     if (!weekId || !teamId || !orgId) {
         throw new Error(
-            "sUsvJ3ye - setWeekStatus: weekId, teamId, and orgId are required.",
+            "8gGC1agR - setWeekStatus: weekId, teamId, and orgId are required.",
         );
     }
     if (status !== "draft" && status !== "published") {
         throw new Error(
-            "TR4AbpCT - setWeekStatus: status must be 'draft' or 'published'.",
+            "N3prewwR - setWeekStatus: status must be 'draft' or 'published'.",
         );
     }
     if (!userId) {
         console.warn(
-            "c59f6hCX - No userId provided for setWeekStatus, using 'system'.",
+            "JFExLK4w - No userId provided for setWeekStatus, using 'system'.",
         );
         userId = "system";
     }
@@ -115,11 +116,11 @@ export async function setWeekStatus(
         // Use setDoc with merge:false (default) to overwrite or create
         await setDoc(docRef, dataToSet);
         console.log(
-            `rAyf4b5F - Status successfully set to '${status}' for ${docId}.`,
+            `zLjvS5GE - Status successfully set to '${status}' for ${docId}.`,
         );
     } catch (error) {
         console.error(
-            `49TCNTNf - Error setting status for ${weekId}_${teamId}:`,
+            `zbdLG5W1 - Error setting status for ${weekId}_${teamId}:`,
             error,
         );
         throw new Error(
@@ -128,5 +129,30 @@ export async function setWeekStatus(
     }
 }
 
-// Add deleteWeekStatus if needed (e.g., when a team or week is deleted)
-// Add query functions like getStatusesByOrg or getStatusesByTeam if needed elsewhere.
+export async function deleteWeekStatus(
+    weekId: string,
+    teamId: string,
+): Promise<void> {
+    if (!weekId || !teamId) {
+        throw new Error(
+            "aF4muGm4 - deleteWeekStatus: weekId and teamId are required.",
+        );
+    }
+    console.log(
+        `uskxBY6k - Attempting delete status doc for: ${weekId}_${teamId}`,
+    );
+    try {
+        const docId = getWeekStatusDocId(weekId, teamId);
+        const docRef = doc(statusCollection, docId);
+        await deleteDoc(docRef);
+        console.log(`7xw3PYb3 - Successfully deleted status doc: ${docId}.`);
+    } catch (error) {
+        console.error(
+            `bHW3FgRs - Error deleting status doc ${weekId}_${teamId}:`,
+            error,
+        );
+        throw new Error(
+            `Failed to delete status for week ${weekId}. Reason: ${error instanceof Error ? error.message : String(error)}`,
+        );
+    }
+}
