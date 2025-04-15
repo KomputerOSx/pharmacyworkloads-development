@@ -14,6 +14,8 @@ import { ShiftSelector } from "./shift-selector";
 import { AssignmentNotes } from "./assignment-notes";
 import { shiftPresets } from "./data/shift-presets";
 import { CombinedTimePicker } from "./combined-time-picker";
+import { getShiftPreset } from "@/lib/rota-utils";
+import { cn } from "@/lib/utils";
 
 interface AssignmentCardProps {
     assignment: StoredAssignment;
@@ -62,6 +64,15 @@ export function AssignmentCard({
     const [customEndTime, setCustomEndTime] = useState(
         assignment.customEndTime || "17:00",
     );
+
+    const shiftPreset = assignment.shiftType
+        ? getShiftPreset(assignment.shiftType)
+        : null;
+    const colorClasses = shiftPreset?.colorClasses || {
+        bg: "bg-gray-50",
+        border: "border-l-gray-300",
+        text: "text-gray-700",
+    };
 
     const handleLocationSelect = (
         locationId: string | null,
@@ -124,7 +135,11 @@ export function AssignmentCard({
 
     return (
         <div
-            className="border rounded-md p-2 relative flex flex-col"
+            className={cn(
+                "border-l-4 rounded-md p-2 relative flex flex-col",
+                colorClasses.bg,
+                colorClasses.border,
+            )}
             onContextMenu={handleContextMenu}
         >
             <div className="flex justify-between items-start">
@@ -182,7 +197,12 @@ export function AssignmentCard({
 
             {/* Display shift time if a shift is selected */}
             {assignment.shiftType && assignment.shiftType !== "custom" && (
-                <div className="text-xs text-muted-foreground mt-1">
+                <div
+                    className={cn(
+                        "text-xs text-muted-foreground mt-1",
+                        colorClasses.text,
+                    )}
+                >
                     {formatShiftTime(assignment)}
                 </div>
             )}
