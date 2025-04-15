@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { addDays, format, getISOWeek, startOfWeek } from "date-fns";
+import { addDays, format, getISOWeek, startOfWeek, subWeeks } from "date-fns";
 import {
     Table,
     TableBody,
@@ -48,6 +48,7 @@ import {
 } from "@/components/ui/tooltip";
 import { UserRow } from "@/components/rota/user-row";
 import {
+    assignmentKeys,
     useDeleteWeekAssignments,
     useRotaAssignmentsByWeekAndTeam,
     useSaveWeekAssignments,
@@ -62,6 +63,7 @@ import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useQueryClient } from "@tanstack/react-query";
 import { useDepTeam } from "@/hooks/useDepTeams";
+import { getAssignmentsByWeekAndTeam } from "@/services/rotaAssignmentsService";
 
 interface UserRotaManagerProps {
     users: User[];
@@ -107,6 +109,7 @@ export function UserRotaManager({
     const [activeUserIds, setActiveUserIds] = useState<string[]>(() =>
         initialUsers.map((u) => u.id),
     );
+    const [isLoadingCopy, setIsLoadingCopy] = useState(false);
 
     const weekStart = startOfWeek(date, { weekStartsOn: 1 });
     const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -837,9 +840,109 @@ export function UserRotaManager({
         closeContextMenu();
     }, [contextMenu, assignments, weekId, closeContextMenu, teamId]);
 
-    const copyFromPreviousWeek = useCallback(() => {
-        toast.error("Copy from Previous Week: Not implemented.");
-    }, []);
+    // const copyFromPreviousWeek = useCallback(() => {
+    //     toast.error("Copy from Previous Week: Not implemented.");
+    // }, []);
+
+    const copyFromPreviousWeek = useCallback(async () => {
+        const previousWeekDate = subWeeks(date, 1);
+        const previousWeekNumber = getISOWeek(previousWeekDate);
+        const previousWeekYear = format(previousWeekDate, "yyyy");
+        const previousWeekId = `${previousWeekYear}-W${previousWeekNumber}`;
+
+        // Show confirmation before potentially overwriting data
+        showConfirmation(
+            "Copy from Previous Week",
+            `This will fetch assignments from Week ${previousWeekNumber} (${previousWeekYear}) and overwrite any existing assignments for the current week (${weekNumber}, ${weekYear}). Continue?`,
+            async () => {
+                // Make the confirmation callback async
+                setIsLoadingCopy(true); // Set loading state
+                setHasUnsavedChanges(true); // Mark as changed immediately
+
+                try {
+                    // Fetch previous week's data using fetchQuery
+                    const previousWeekAssignments =
+                        await queryClient.fetchQuery<StoredAssignment[], Error>(
+                            {
+                                queryKey: assignmentKeys.listByWeekAndTeam(
+                                    previousWeekId,
+                                    teamId,
+                                ),
+                                queryFn: () =>
+                                    getAssignmentsByWeekAndTeam(
+                                        previousWeekId,
+                                        teamId,
+                                    ), // Service fn defined elsewhere
+                                staleTime: 5 * 60 * 1000, // Cache fetched prev week data for a bit
+                            },
+                        );
+
+                    if (
+                        !previousWeekAssignments ||
+                        previousWeekAssignments.length === 0
+                    ) {
+                        toast.info(
+                            `No assignments found for the previous week (${previousWeekId}) to copy.`,
+                        );
+                        setIsLoadingCopy(false);
+                        // Keep hasUnsavedChanges=true because user intended to change
+                        return;
+                    }
+
+                    // Prepare new assignments state for the *current* week
+                    const newAssignmentsState: Record<
+                        string,
+                        StoredAssignment[]
+                    > = {};
+                    const newActiveUserIds = new Set<string>(activeUserIds); // Keep current users + add from copied
+
+                    previousWeekAssignments.forEach((prevAss) => {
+                        // Create new assignment object for the current week
+                        const newAssignment: StoredAssignment = {
+                            ...prevAss, // Copy most fields
+                            id: generateAssignmentId(), // GENERATE NEW ID
+                            weekId: weekId, // Set to CURRENT weekId
+                        };
+
+                        // Add to the new state object
+                        const cellKey = `${newAssignment.weekId}-${newAssignment.userId}-${newAssignment.dayIndex}-${newAssignment.teamId}`;
+                        if (!newAssignmentsState[cellKey]) {
+                            newAssignmentsState[cellKey] = [];
+                        }
+                        newAssignmentsState[cellKey].push(newAssignment);
+                        newActiveUserIds.add(newAssignment.userId); // Ensure user is active
+                    });
+
+                    // Update the local state
+                    setAssignments(newAssignmentsState);
+                    setActiveUserIds(Array.from(newActiveUserIds)); // Update active users if new ones were copied
+                    setHasUnsavedChanges(true); // Data has changed
+                    toast.success(
+                        `Copied ${previousWeekAssignments.length} assignments from Week ${previousWeekNumber}. Remember to save.`,
+                    );
+                } catch (error) {
+                    console.error(
+                        "Failed to fetch or copy previous week assignments:",
+                        error,
+                    );
+                    toast.error(
+                        `Failed to copy from previous week: ${error instanceof Error ? error.message : "Unknown error"}`,
+                    );
+                    setHasUnsavedChanges(false); // Revert change flag on error? Or keep true? Debatable.
+                } finally {
+                    setIsLoadingCopy(false); // Reset loading state
+                }
+            },
+        );
+    }, [
+        date,
+        weekId,
+        teamId,
+        currentUserId,
+        queryClient,
+        showConfirmation,
+        activeUserIds,
+    ]);
 
     const isInitiallyLoading =
         (isLoadingAssignments && !fetchedAssignments) ||
@@ -970,11 +1073,12 @@ export function UserRotaManager({
                                     size="sm"
                                     onClick={copyFromPreviousWeek}
                                     className="flex items-center gap-1"
+                                    disabled={isLoadingCopy}
                                 >
-                                    <Copy className="h-4 w-4" />
-                                    <span className="hidden sm:inline">
-                                        Copy Prev. Week
-                                    </span>
+                                    {isLoadingCopy && (
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    )}
+                                    <Copy className="h-4 w-4" /> Copy Prev. Week
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent className="sm:hidden">
