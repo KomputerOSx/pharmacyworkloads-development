@@ -39,6 +39,7 @@ import { ContextMenu } from "./context-menu";
 import { ConfirmationDialog } from "./confirmation-dialog";
 import { NotificationDialog } from "./notification-dialog";
 import { ExportDialog, type ExportFormat } from "./export-dialog";
+import { exportToCSV, exportToExcel, exportToPDF } from "./utils/export-utils";
 import {
     Tooltip,
     TooltipContent,
@@ -60,6 +61,7 @@ import {
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useQueryClient } from "@tanstack/react-query";
+import { useDepTeam } from "@/hooks/useDepTeams";
 
 interface UserRotaManagerProps {
     users: User[];
@@ -105,13 +107,18 @@ export function UserRotaManager({
     const [activeUserIds, setActiveUserIds] = useState<string[]>(() =>
         initialUsers.map((u) => u.id),
     );
-    // const [customLocations, setCustomLocations] = useState<HospLoc[]>([]);
 
     const weekStart = startOfWeek(date, { weekStartsOn: 1 });
     const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
     const weekNumber = getISOWeek(date);
     const weekYear = format(date, "yyyy");
     const weekId = `${weekYear}-W${weekNumber}`;
+
+    const { data: teamData, isLoading: isLoadingTeam } = useDepTeam(teamId);
+    const teamName = useMemo(
+        () => teamData?.name ?? "Unknown Team",
+        [teamData],
+    );
 
     const {
         data: fetchedAssignments,
@@ -666,37 +673,49 @@ export function UserRotaManager({
             includeNotes: boolean,
             includeEmptyCells: boolean,
         ) => {
+            // Ensure team name is available before exporting
+            if (isLoadingTeam) {
+                toast.info("Team information is loading, please wait...");
+                return;
+            }
+
             try {
                 setExportDialog((prev) => ({ ...prev, isExporting: true }));
-                const exportUtils = await import("./utils/export-utils");
                 const getAssignmentsForCell = (
                     userId: string,
                     dayIndex: number,
                 ) => getCellAssignments(userId, dayIndex, weekId);
-                const exportArgs = [
+
+                // --- Pass teamName to export functions ---
+                const commonArgs = [
                     usersToDisplay,
                     weekDays,
                     weekId,
                     weekNumber,
                     weekYear,
+                    teamName, // <-- Pass the fetched teamName here
                     getAssignmentsForCell,
                     allAvailableLocations,
                     shiftPresets,
                     includeNotes,
                     includeEmptyCells,
-                ] as const;
-                if (format === "csv") exportUtils.exportToCSV(...exportArgs);
-                else if (format === "excel")
-                    await exportUtils.exportToExcel(...exportArgs);
-                else if (format === "pdf")
-                    await exportUtils.exportToPDF(...exportArgs);
+                ] as const; // Use 'as const' for better type inference
+
+                if (format === "csv") {
+                    exportToCSV(...commonArgs);
+                } else if (format === "excel") {
+                    await exportToExcel(...commonArgs);
+                } else if (format === "pdf") {
+                    await exportToPDF(...commonArgs);
+                }
+                // -----------------------------------------
+
                 toast.success(`Rota Exported as ${format.toUpperCase()}.`);
                 setExportDialog({ open: false, isExporting: false });
             } catch (error) {
                 console.error("Export error:", error);
                 toast.error("Export Failed. Please try again.");
-            } finally {
-                setExportDialog((prev) => ({ ...prev, isExporting: false }));
+                setExportDialog((prev) => ({ ...prev, isExporting: false })); // Ensure loading state is reset on error
             }
         },
         [
@@ -705,8 +724,10 @@ export function UserRotaManager({
             weekId,
             weekNumber,
             weekYear,
+            teamName, // <-- Add teamName dependency
             getCellAssignments,
             allAvailableLocations,
+            isLoadingTeam, // <-- Add isLoadingTeam dependency
         ],
     );
 
@@ -821,7 +842,9 @@ export function UserRotaManager({
     }, []);
 
     const isInitiallyLoading =
-        (isLoadingAssignments && !fetchedAssignments) || isLoadingStatus;
+        (isLoadingAssignments && !fetchedAssignments) ||
+        isLoadingStatus ||
+        (isLoadingTeam && !teamData);
 
     if (isInitiallyLoading) {
         return (
@@ -1009,7 +1032,7 @@ export function UserRotaManager({
                     <TableCaption className="mt-4 mb-2">
                         {" "}
                         {/* Added margin bottom */}
-                        User Rota for Week {weekNumber} - Team ID: {teamId}
+                        {teamName} Rota - Week {weekNumber} ({weekYear})
                     </TableCaption>
                     {/* Sticky Header */}
                     <TableHeader className="bg-muted/50 sticky top-0 z-20">
