@@ -65,12 +65,15 @@ export function AssignmentCard({
 
     const handleLocationSelect = (
         locationId: string | null,
-        customLocation?: string,
+        customLocationName?: string,
     ) => {
-        onUpdate(userId, dayIndex, weekId, assignment.id, {
-            locationId,
-            customLocation,
-        });
+        const updateData: Partial<Assignment> = {
+            locationId: customLocationName ? null : locationId,
+            customLocation: customLocationName || undefined, // Use name or undefined
+        };
+
+        onUpdate(userId, dayIndex, weekId, assignment.id, updateData);
+        setLocationPopoverOpen(false);
     };
 
     const handleShiftSelect = (shiftType: string, isCustom: boolean) => {
