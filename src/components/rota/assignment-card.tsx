@@ -69,9 +69,8 @@ export function AssignmentCard({
     ) => {
         const updateData: Partial<Assignment> = {
             locationId: customLocationName ? null : locationId,
-            customLocation: customLocationName || undefined, // Use name or undefined
+            customLocation: customLocationName || undefined,
         };
-
         onUpdate(userId, dayIndex, weekId, assignment.id, updateData);
         setLocationPopoverOpen(false);
     };
