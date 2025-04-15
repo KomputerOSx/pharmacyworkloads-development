@@ -936,12 +936,13 @@ export function UserRotaManager({
         );
     }, [
         date,
-        weekId,
-        teamId,
-        currentUserId,
-        queryClient,
         showConfirmation,
+        weekNumber,
+        weekYear,
+        queryClient,
+        teamId,
         activeUserIds,
+        weekId,
     ]);
 
     const isInitiallyLoading =

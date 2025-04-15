@@ -2,17 +2,17 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import React, { useMemo } from "react"; // Import useMemo
+import React, { useMemo } from "react";
 import { UserRotaManager } from "@/components/rota/user-rota-manager";
-import { useUsers } from "@/hooks/useUsers"; // Gets specific user and all users
-import { useHospLocs } from "@/hooks/useHospLoc"; // Gets all locations in Org
-import { useDepTeam } from "@/hooks/useDepTeams"; // Gets SPECIFIC team details
-import { useDepHospLocAssignments } from "@/hooks/useDepHospLocAss"; // ASSUMED HOOK: Gets Loc IDs for a Dep
-import { useUserTeamAssignmentsByTeam } from "@/hooks/useUserTeamAss"; // Gets User IDs for a Team
+import { useUsers } from "@/hooks/useUsers";
+import { useHospLocs } from "@/hooks/useHospLoc";
+import { useDepTeam } from "@/hooks/useDepTeams";
+import { useDepHospLocAssignments } from "@/hooks/useDepHospLocAss";
+import { useUserTeamAssignmentsByTeam } from "@/hooks/useUserTeamAss";
 import { useAuth } from "@/lib/context/AuthContext";
-import { Skeleton } from "@/components/ui/skeleton"; // For loading state
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // For error state
-import { ArrowLeft, Eye, Pencil, Terminal, View } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ArrowLeft, Eye, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 

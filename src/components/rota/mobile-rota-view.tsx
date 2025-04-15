@@ -24,8 +24,6 @@ interface MobileRotaViewProps {
 }
 
 export function MobileRotaView({
-    weekNumber,
-    teamName,
     weekDays,
     usersToDisplay,
     assignmentsMap,
