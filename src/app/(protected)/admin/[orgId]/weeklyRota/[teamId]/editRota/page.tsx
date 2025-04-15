@@ -133,7 +133,7 @@ export default function EditRota() {
 
     // --- Render StaffRotaManager with Correct Data ---
     return (
-        <div className="container mx-auto p-4 md:p-6">
+        <div className="mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <h1 className="text-2xl font-semibold mb-4">
                 Edit Rota for Team:{" "}
                 <span className="text-primary">{team.name}</span>
