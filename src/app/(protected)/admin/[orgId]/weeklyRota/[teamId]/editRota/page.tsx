@@ -2,7 +2,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useMemo } from "react"; // Import useMemo
+import React, { useMemo } from "react"; // Import useMemo
 import { UserRotaManager } from "@/components/rota/user-rota-manager";
 import { useUsers } from "@/hooks/useUsers"; // Gets specific user and all users
 import { useHospLocs } from "@/hooks/useHospLoc"; // Gets all locations in Org
@@ -12,7 +12,9 @@ import { useUserTeamAssignmentsByTeam } from "@/hooks/useUserTeamAss"; // Gets U
 import { useAuth } from "@/lib/context/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton"; // For loading state
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // For error state
-import { Terminal } from "lucide-react";
+import { ArrowLeft, Eye, Pencil, Terminal, View } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function EditRota() {
     const params = useParams();
@@ -137,7 +139,25 @@ export default function EditRota() {
             <h1 className="text-2xl font-semibold mb-4">
                 Edit Rota for Team:{" "}
                 <span className="text-primary">{team.name}</span>
+                <span className="flex justify-end">
+                    <div className="flex items-center gap-2">
+                        <Link
+                            href={`/admin/${orgId}/weeklyRota/${teamId}/viewRota`}
+                            passHref
+                        >
+                            <Button variant="outline">
+                                <Eye className="mr-2 h-4 w-4" /> View Rota
+                            </Button>
+                        </Link>
+                        <Link href={`/admin/${orgId}/weeklyRota/`} passHref>
+                            <Button variant="default" size={"sm"}>
+                                <ArrowLeft className="mr-2 h-4 w-4" /> Go back
+                            </Button>
+                        </Link>
+                    </div>
+                </span>
             </h1>
+
             <div className="mt-6">
                 <UserRotaManager
                     users={usersForTeam}

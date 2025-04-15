@@ -24,6 +24,11 @@ export type ShiftPreset = {
     startTime: string;
     endTime: string;
     description: string;
+    colorClasses?: {
+        bg: string;
+        border: string;
+        text: string;
+    };
 };
 
 // Add hasChanges to WeekStatus
@@ -49,6 +54,11 @@ export type ContextMenuPosition = {
     assignmentId: string;
 };
 
+export const defaultShiftColor = {
+    bg: "bg-gray-50",
+    border: "border-l-gray-300",
+    text: "text-gray-600",
+};
 export const shiftPresets: ShiftPreset[] = [
     {
         id: "normal",
@@ -56,6 +66,11 @@ export const shiftPresets: ShiftPreset[] = [
         startTime: "08:30",
         endTime: "17:00",
         description: "8:30am - 5pm",
+        colorClasses: {
+            bg: "bg-sky-100",
+            border: "border-l-sky-400",
+            text: "text-sky-800",
+        },
     },
     {
         id: "am",
@@ -63,6 +78,11 @@ export const shiftPresets: ShiftPreset[] = [
         startTime: "08:30",
         endTime: "12:00",
         description: "8:30am - 12pm",
+        colorClasses: {
+            bg: "bg-emerald-100",
+            border: "border-l-emerald-400",
+            text: "text-emerald-800",
+        },
     },
     {
         id: "pm",
@@ -70,13 +90,24 @@ export const shiftPresets: ShiftPreset[] = [
         startTime: "12:00",
         endTime: "17:00",
         description: "12pm - 5pm",
+        colorClasses: {
+            bg: "bg-amber-100",
+            border: "border-l-amber-400",
+            text: "text-amber-800",
+        },
     },
+
     {
         id: "late",
         name: "LATE",
         startTime: "12:00",
         endTime: "20:00",
         description: "12pm - 8pm",
+        colorClasses: {
+            bg: "bg-blue-100",
+            border: "border-l-blue-400",
+            text: "text-blue-800",
+        },
     },
     {
         id: "longday",
@@ -84,6 +115,11 @@ export const shiftPresets: ShiftPreset[] = [
         startTime: "08:30",
         endTime: "20:00",
         description: "8:30am - 8pm",
+        colorClasses: {
+            bg: "bg-purple-100",
+            border: "border-l-purple-400",
+            text: "text-purple-800",
+        },
     },
     {
         id: "custom",
@@ -91,5 +127,10 @@ export const shiftPresets: ShiftPreset[] = [
         startTime: "",
         endTime: "",
         description: "Custom hours",
+        colorClasses: {
+            bg: "bg-gray-100",
+            border: "border-l-gray-400",
+            text: "text-gray-700",
+        },
     },
 ];

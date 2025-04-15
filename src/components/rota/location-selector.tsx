@@ -19,8 +19,6 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import type { HospLoc } from "@/types/subDepTypes";
-import { useHosp, useHosps } from "@/hooks/useHosps";
-import { useParams } from "next/navigation";
 
 interface LocationSelectorProps {
     allLocations: HospLoc[];
@@ -50,7 +48,18 @@ export function LocationSelector({
         if (customLocation) return customLocation;
         if (!selectedLocationId) return "";
         const location = allLocations.find((l) => l.id === selectedLocationId);
-        return location ? location.name : "";
+        return location
+            ? location.name
+            : `ID: ${selectedLocationId.substring(0, 6)}...`;
+    };
+
+    const handleAddClick = () => {
+        const trimmedName = newCustomLocation.trim();
+        if (trimmedName) {
+            onAddCustomLocation(trimmedName);
+            setNewCustomLocation("");
+            onPopoverOpenChange(false);
+        }
     };
 
     return (
@@ -87,16 +96,7 @@ export function LocationSelector({
                                         className="w-full mt-1 h-8"
                                         size="sm"
                                         onClick={() => {
-                                            if (newCustomLocation.trim()) {
-                                                onAddCustomLocation(
-                                                    newCustomLocation,
-                                                );
-                                                onLocationSelect(
-                                                    null,
-                                                    newCustomLocation,
-                                                );
-                                                setNewCustomLocation("");
-                                            }
+                                            handleAddClick();
                                         }}
                                     >
                                         Add
@@ -105,6 +105,19 @@ export function LocationSelector({
                             </div>
                         </CommandEmpty>
                         <CommandGroup heading="Locations">
+                            <CommandItem
+                                key="clear-location"
+                                value=""
+                                onSelect={() => {
+                                    onLocationSelect(null, undefined); // Clear both ID and custom name
+                                    onPopoverOpenChange(false);
+                                }}
+                            >
+                                <span className="italic text-muted-foreground">
+                                    {" "}
+                                    (Clear Location){" "}
+                                </span>
+                            </CommandItem>
                             {allLocations.map((location) => (
                                 <CommandItem
                                     key={location.id}
