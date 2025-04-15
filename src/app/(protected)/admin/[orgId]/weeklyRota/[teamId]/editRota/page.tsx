@@ -12,7 +12,7 @@ import { useUserTeamAssignmentsByTeam } from "@/hooks/useUserTeamAss";
 import { useAuth } from "@/lib/context/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ArrowLeft, Eye, Terminal } from "lucide-react";
+import { ArrowLeft, CalendarDays, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -146,7 +146,8 @@ export default function EditRota() {
                             passHref
                         >
                             <Button variant="outline">
-                                <Eye className="mr-2 h-4 w-4" /> View Rota
+                                <CalendarDays className="mr-2 h-4 w-4" /> View
+                                Rota
                             </Button>
                         </Link>
                         <Link href={`/admin/${orgId}/weeklyRota/`} passHref>

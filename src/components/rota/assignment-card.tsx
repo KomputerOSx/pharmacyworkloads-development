@@ -12,9 +12,9 @@ import { formatShiftTime } from "./utils/rota-utils";
 import { LocationSelector } from "./location-selector";
 import { ShiftSelector } from "./shift-selector";
 import { AssignmentNotes } from "./assignment-notes";
-import { shiftPresets } from "./data/shift-presets";
 import { CombinedTimePicker } from "./combined-time-picker";
 import { getShiftPreset } from "@/lib/rota-utils";
+import { shiftPresets } from "@/types/rotaTypes";
 import { cn } from "@/lib/utils";
 
 interface AssignmentCardProps {

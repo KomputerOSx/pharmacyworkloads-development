@@ -1,5 +1,5 @@
 import type { Assignment, ShiftPreset } from "@/types/rotaTypes";
-import { shiftPresets } from "../data/sample-data";
+import { shiftPresets } from "@/types/rotaTypes";
 
 // Generate a unique ID for a new assignment
 export const generateAssignmentId = (): string => {
