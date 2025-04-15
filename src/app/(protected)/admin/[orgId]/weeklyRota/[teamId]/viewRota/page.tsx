@@ -174,7 +174,7 @@ export default function ViewRotaPage() {
                         <span className="text-primary">{team.name}</span>
                     </h1>
                     <p className="text-sm text-muted-foreground">
-                        Organization: {orgId} | Week {weekNumber}, {weekYear}
+                        Week {weekNumber}, {weekYear}
                     </p>
                 </div>
                 {/* Status Display */}

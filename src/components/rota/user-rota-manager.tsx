@@ -60,7 +60,6 @@ import {
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useQueryClient } from "@tanstack/react-query";
-import { Timestamp } from "firebase/firestore"; // Assuming queryClient export for invalidation
 
 interface UserRotaManagerProps {
     users: User[];
@@ -106,7 +105,7 @@ export function UserRotaManager({
     const [activeUserIds, setActiveUserIds] = useState<string[]>(() =>
         initialUsers.map((u) => u.id),
     );
-    const [customLocations, setCustomLocations] = useState<HospLoc[]>([]);
+    // const [customLocations, setCustomLocations] = useState<HospLoc[]>([]);
 
     const weekStart = startOfWeek(date, { weekStartsOn: 1 });
     const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -223,12 +222,16 @@ export function UserRotaManager({
         return (allOrgUsers ?? []).filter((user) => !activeIdSet.has(user.id));
     }, [activeUserIds, allOrgUsers]);
 
+    // const allAvailableLocations = useMemo(() => {
+    //     const locationMap = new Map<string, HospLoc>();
+    //     departmentLocations.forEach((loc) => locationMap.set(loc.id, loc));
+    //     customLocations.forEach((loc) => locationMap.set(loc.id, loc));
+    //     return Array.from(locationMap.values());
+    // }, [departmentLocations, customLocations]);
+
     const allAvailableLocations = useMemo(() => {
-        const locationMap = new Map<string, HospLoc>();
-        departmentLocations.forEach((loc) => locationMap.set(loc.id, loc));
-        customLocations.forEach((loc) => locationMap.set(loc.id, loc));
-        return Array.from(locationMap.values());
-    }, [departmentLocations, customLocations]);
+        return departmentLocations;
+    }, [departmentLocations]);
 
     const currentStatus = useMemo(
         () => currentWeekStatusData?.status ?? null,
@@ -370,59 +373,82 @@ export function UserRotaManager({
         });
     }, []);
 
-    const addCustomLocationToList = useCallback(
-        (name: string): HospLoc | null => {
-            if (name.trim() === "") return null;
-            const trimmedName = name.trim();
-            const nameLower = trimmedName.toLowerCase();
+    // const addCustomLocationToList = useCallback(
+    //     (name: string): HospLoc | null => {
+    //         if (name.trim() === "") return null;
+    //         const trimmedName = name.trim();
+    //         const nameLower = trimmedName.toLowerCase();
+    //
+    //         // Check against ALL available locations (dept + existing custom state)
+    //         if (
+    //             allAvailableLocations.some(
+    //                 (loc) => loc.name.toLowerCase() === nameLower,
+    //             )
+    //         ) {
+    //             toast.error(`Location "${trimmedName}" already exists.`);
+    //             // Find and return the existing one if needed? Or just return null?
+    //             return (
+    //                 allAvailableLocations.find(
+    //                     (loc) => loc.name.toLowerCase() === nameLower,
+    //                 ) || null
+    //             );
+    //             // return null;
+    //         }
+    //
+    //         // Create the new custom location object
+    //         const newId = `custom-${Date.now()}-${Math.random().toString(16).substring(2, 8)}`;
+    //         const newCustomLoc: HospLoc = {
+    //             id: newId,
+    //             name: trimmedName,
+    //             type: "custom",
+    //             hospId: "",
+    //             orgId: orgId,
+    //             description: "Custom added location",
+    //             address: null,
+    //             contactEmail: null,
+    //             contactPhone: null,
+    //             active: true,
+    //             isDeleted: false,
+    //             createdAt: Timestamp.now(),
+    //             updatedAt: Timestamp.now(),
+    //             createdById: currentUserId,
+    //             updatedById: currentUserId,
+    //         };
+    //
+    //         // Add to the customLocations state
+    //         setCustomLocations((prev) => [...prev, newCustomLoc]);
+    //         console.log(
+    //             "Added custom location to temporary list:",
+    //             newCustomLoc,
+    //         );
+    //         return newCustomLoc; // Return the newly created object
+    //     },
+    //     [allAvailableLocations, orgId, currentUserId],
+    // );
 
-            // Check against ALL available locations (dept + existing custom state)
-            if (
-                allAvailableLocations.some(
-                    (loc) => loc.name.toLowerCase() === nameLower,
-                )
-            ) {
-                toast.error(`Location "${trimmedName}" already exists.`);
-                // Find and return the existing one if needed? Or just return null?
-                return (
-                    allAvailableLocations.find(
-                        (loc) => loc.name.toLowerCase() === nameLower,
-                    ) || null
-                );
-                // return null;
-            }
-
-            // Create the new custom location object
-            const newId = `custom-${Date.now()}-${Math.random().toString(16).substring(2, 8)}`;
-            const newCustomLoc: HospLoc = {
-                id: newId,
-                name: trimmedName,
-                type: "custom",
-                hospId: "",
-                orgId: orgId,
-                description: "Custom added location",
-                address: null,
-                contactEmail: null,
-                contactPhone: null,
-                active: true,
-                isDeleted: false,
-                createdAt: Timestamp.now(),
-                updatedAt: Timestamp.now(),
-                createdById: currentUserId,
-                updatedById: currentUserId,
-            };
-
-            // Add to the customLocations state
-            setCustomLocations((prev) => [...prev, newCustomLoc]);
+    const handleAddCustomLocationAssignment = useCallback(
+        (
+            userId: string,
+            dayIndex: number,
+            currentWeekId: string,
+            assignmentId: string,
+            customName: string,
+        ) => {
+            if (!customName || customName.trim() === "") return;
+            const trimmedName = customName.trim();
             console.log(
-                "Added custom location to temporary list:",
-                newCustomLoc,
+                `Setting custom location "${trimmedName}" for assignment ${assignmentId}`,
             );
-            return newCustomLoc; // Return the newly created object
-        },
-        [allAvailableLocations, orgId, currentUserId],
-    );
 
+            // Directly update the assignment state to use the custom name
+            updateAssignment(userId, dayIndex, currentWeekId, assignmentId, {
+                locationId: null, // Ensure locationId is null
+                customLocation: trimmedName, // Set the custom name
+            });
+            // No need to update customLocations state anymore
+        },
+        [updateAssignment], // Depends on the updateAssignment callback
+    );
     const showConfirmation = useCallback(
         (title: string, description: string, onConfirm: () => void) => {
             setConfirmationDialog({
@@ -1044,8 +1070,20 @@ export function UserRotaManager({
                                         addAssignment={addAssignment}
                                         onUpdateAssignment={updateAssignment}
                                         onRemoveAssignment={removeAssignment}
-                                        onAddCustomLocation={
-                                            addCustomLocationToList
+                                        onAddCustomLocationAssignment={(
+                                            userId,
+                                            dayIndex,
+                                            currentWeekId,
+                                            assignmentId,
+                                            customName,
+                                        ) =>
+                                            handleAddCustomLocationAssignment(
+                                                userId,
+                                                dayIndex,
+                                                currentWeekId,
+                                                assignmentId,
+                                                customName,
+                                            )
                                         }
                                         onContextMenu={handleContextMenu}
                                     />

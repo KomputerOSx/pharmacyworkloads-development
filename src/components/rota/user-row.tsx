@@ -46,7 +46,13 @@ interface UserRowProps {
         currentWeekId: string,
         assignmentId: string,
     ) => void;
-    onAddCustomLocation: (name: string) => void;
+    onAddCustomLocationAssignment: (
+        userId: string,
+        dayIndex: number,
+        currentWeekId: string,
+        assignmentId: string,
+        customName: string,
+    ) => void;
     onContextMenu: (
         e: React.MouseEvent,
         userId: string,
@@ -69,7 +75,7 @@ export function UserRow({
     addAssignment,
     onUpdateAssignment,
     onRemoveAssignment,
-    onAddCustomLocation,
+    onAddCustomLocationAssignment,
     onContextMenu,
 }: UserRowProps) {
     const isFirstUser = activeUserIds.indexOf(user.id) === 0;
@@ -171,7 +177,15 @@ export function UserRow({
                                     weekId={weekId}
                                     onUpdate={onUpdateAssignment}
                                     onRemove={onRemoveAssignment}
-                                    onAddCustomLocation={onAddCustomLocation}
+                                    onAddCustomLocation={(customName) =>
+                                        onAddCustomLocationAssignment(
+                                            user.id,
+                                            dayIndex,
+                                            weekId,
+                                            assignment.id,
+                                            customName,
+                                        )
+                                    }
                                     onContextMenu={onContextMenu}
                                 />
                             ))}

@@ -51,6 +51,19 @@ export function ShiftSelector({
                 <Command>
                     <CommandList>
                         <CommandGroup heading="Shift Types">
+                            <CommandItem
+                                key="clear-shift"
+                                value=""
+                                onSelect={() => {
+                                    onShiftSelect("", false); // Clear both ID and custom name
+                                    onPopoverOpenChange(false);
+                                }}
+                            >
+                                <span className="italic text-muted-foreground">
+                                    {" "}
+                                    (Clear Selection){" "}
+                                </span>
+                            </CommandItem>
                             {shiftPresets.map((preset) => (
                                 <CommandItem
                                     key={preset.id}
