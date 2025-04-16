@@ -79,6 +79,7 @@ export default function EditRota() {
         const assignedLocationIds = new Set(
             depLocationAssignments.map((a) => a.locationId),
         );
+
         return allOrgLocations.filter((loc) => assignedLocationIds.has(loc.id));
     }, [depLocationAssignments, allOrgLocations]);
 

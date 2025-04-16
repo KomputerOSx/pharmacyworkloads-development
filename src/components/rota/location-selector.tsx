@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import type { HospLoc } from "@/types/subDepTypes";
+import { useHospLocs } from "@/hooks/useHospLoc";
+import { useParams } from "next/navigation";
 
 interface LocationSelectorProps {
     allLocations: HospLoc[];
@@ -44,13 +46,19 @@ export function LocationSelector({
 }: LocationSelectorProps) {
     const [newCustomLocation, setNewCustomLocation] = useState("");
 
+    const params = useParams();
+    const orgId = params.orgId as string;
+
+    const { data: hospitalLocations } = useHospLocs(orgId);
+
     const getLocationName = () => {
         if (customLocation) return customLocation;
         if (!selectedLocationId) return "";
         const location = allLocations.find((l) => l.id === selectedLocationId);
-        return location
-            ? location.name
-            : `ID: ${selectedLocationId.substring(0, 6)}...`;
+        const locationBackup = hospitalLocations?.find(
+            (l) => l.id === selectedLocationId,
+        );
+        return location ? location.name : locationBackup?.name;
     };
 
     const handleAddClick = () => {

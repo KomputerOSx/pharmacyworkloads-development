@@ -8,7 +8,7 @@ import { useHospLocs } from "@/hooks/useHospLoc";
 import { AssignedLocationData } from "@/types/depTypes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Goal, Loader2, MapPin, Terminal } from "lucide-react";
+import { Loader2, MapPin, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
