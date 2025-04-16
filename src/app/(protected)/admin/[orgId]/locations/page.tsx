@@ -3,8 +3,6 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-
-// UI Components
 import {
     Dialog,
     DialogContent,
@@ -16,13 +14,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Terminal } from "lucide-react"; // Added Loader2 for loading state, Building for title icon
-
-// Custom Hooks and Components
-import { useDeleteHospLoc, useHospLocs } from "@/hooks/useHospLoc"; // Ensure path is correct
-import { AddHospLocForm } from "@/components/locations/AddHospLocForm"; // Ensure path is correct
+import { Loader2, Terminal } from "lucide-react";
+import { useDeleteHospLoc, useHospLocs } from "@/hooks/useHospLoc";
+import { AddHospLocForm } from "@/components/locations/AddHospLocForm";
 import { HospLocDataTable } from "@/components/locations/HospLocDataTable";
-// *** IMPORT THE DATA TABLE COMPONENT ***
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
 import { EditHospLocForm } from "@/components/locations/EditHospLocForm";
 import { Hosp } from "@/types/hospTypes";
@@ -43,11 +38,11 @@ export default function LocationsPage() {
 
     // Fetch data using your React Query hook
     const {
-        data: locations, // locations will be HospLoc[] | undefined
+        data: locations,
         isLoading,
         isError,
         refetch,
-        isRefetching, // Use isRefetching for refresh button state
+        isRefetching,
     } = useHospLocs(orgId);
 
     const {
@@ -96,7 +91,7 @@ export default function LocationsPage() {
     // Handle Refresh Button Click
     const handleRefresh = useCallback(() => {
         console.log("Refetching locations for org:", orgId);
-        void refetch(); // Use void for promises you don't need to await
+        void refetch();
     }, [refetch, orgId]);
 
     // Close dialog and refetch after successful form submission
@@ -117,8 +112,7 @@ export default function LocationsPage() {
         deleteHospLocMutation.mutate(
             {
                 id: hospLocForDelete.id,
-                orgId: orgId, // Needed by the hook for cache invalidation
-                // No hospId needed here based on the hook definition
+                orgId: orgId,
             },
             {
                 onSuccess: () => {
@@ -224,14 +218,8 @@ export default function LocationsPage() {
 
     return (
         <div className="mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            {" "}
-            {/* Added container and padding */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                {" "}
-                {/* Improved header layout */}
                 <div className="flex items-center gap-2 flex-shrink-0">
-                    {" "}
-                    {/* Buttons group */}
                     <Dialog
                         open={isCreateDialogOpen}
                         onOpenChange={setIsCreateDialogOpen}
@@ -240,8 +228,6 @@ export default function LocationsPage() {
                             <Button size="sm">Create Location</Button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-[425px]">
-                            {" "}
-                            {/* Adjust width as needed */}
                             <DialogHeader>
                                 <DialogTitle>Create New Location</DialogTitle>
                                 <DialogDescription>
@@ -251,7 +237,6 @@ export default function LocationsPage() {
                             </DialogHeader>
                             <AddHospLocForm
                                 orgId={orgId}
-                                // Pass the callback to handle success
                                 onSuccessfulSubmitAction={
                                     handleSuccessfulCreate
                                 }
@@ -262,7 +247,7 @@ export default function LocationsPage() {
                         variant={"outline"}
                         size="sm"
                         onClick={handleRefresh}
-                        disabled={isLoading || isRefetching} // Disable while loading or refetching
+                        disabled={isLoading || isRefetching}
                     >
                         {isRefetching ? (
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -271,10 +256,8 @@ export default function LocationsPage() {
                     </Button>
                 </div>
             </div>
-            {/* Render the appropriate content (loading, error, or table) */}
             {renderContent()}
             {/* --- Edit Dialog --- */}
-            {/* Render only when a location is selected */}
             {hospLocForEdit && (
                 <Dialog
                     open={isEditDialogOpen}
@@ -289,7 +272,6 @@ export default function LocationsPage() {
                                 Make changes to {hospLocForEdit.name}.
                             </DialogDescription>
                         </DialogHeader>
-                        {/* Important: Ensure locationToEdit is not null before rendering */}
                         <EditHospLocForm
                             orgId={orgId}
                             locationToEdit={hospLocForEdit}
@@ -299,17 +281,16 @@ export default function LocationsPage() {
                 </Dialog>
             )}
             {/* --- Delete Confirmation Dialog --- */}
-            {/* Render only when a location is selected for deletion */}
             {hospLocForDelete && (
                 <DeleteConfirmationDialog
                     open={isDeleteDialogOpen}
                     onOpenChange={(open) => {
                         if (!open) handleCloseDeleteDialog();
                     }}
-                    itemName={hospLocForDelete.name ?? "this location"} // Provide a fallback name
+                    itemName={hospLocForDelete.name ?? "this location"}
                     itemType="location"
                     onConfirm={handleConfirmDelete}
-                    isPending={deleteHospLocMutation.isPending} // Pass loading state
+                    isPending={deleteHospLocMutation.isPending}
                 />
             )}
         </div>

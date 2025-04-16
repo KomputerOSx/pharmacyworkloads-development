@@ -8,7 +8,7 @@ import { useHospLocs } from "@/hooks/useHospLoc";
 import { AssignedLocationData } from "@/types/depTypes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Goal, Loader2, Terminal } from "lucide-react";
+import { Goal, Loader2, MapPin, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
@@ -34,11 +34,11 @@ export default function DepartmentAssignmentsPage() {
 
     // --- Data Fetching ---
     const {
-        data: department, // Fetch single department info if needed for title
+        data: department,
         isLoading: isLoadingDept,
         isError: isErrorDept,
         error: errorDept,
-    } = useDep(depId); // Assuming useDeps can fetch a single one
+    } = useDep(depId);
 
     // ADDED: Fetch Hospitals
     const {
@@ -47,33 +47,38 @@ export default function DepartmentAssignmentsPage() {
         isError: isErrorHospitals,
         error: errorHospitals,
         refetch: refetchHospitals,
+        isRefetching: isRefetchingHospitals,
     } = useHosps(orgId);
 
     const {
-        data: assignedRaw, // Raw assignment data { departmentId, locationId, ... }
+        data: assignedRaw,
         isLoading: isLoadingAssignments,
         isError: isErrorAssignments,
         error: errorAssignments,
         refetch: refetchAssignments,
+        isRefetching: isRefetchingAssignments,
     } = useDepHospLocAssignments(depId);
 
     const {
-        data: locations, // All locations { id, name, ... }
+        data: locations,
         isLoading: isLoadingLocations,
         isError: isErrorLocations,
         error: errorLocations,
         refetch: refetchLocations,
+        isRefetching: isRefetchingLocations,
     } = useHospLocs(orgId);
 
-    // --- Data Processing ---
+    const isRefetching =
+        isRefetchingAssignments ||
+        isRefetchingLocations ||
+        isRefetchingHospitals;
 
-    // CORRECTED: Map for location ID -> full location object
+    // --- Data Processing ---
     const locationsMap = useMemo(() => {
         if (!locations) return new Map<string, HospLoc>();
         return new Map(locations.map((loc) => [loc.id, loc]));
     }, [locations]);
 
-    // ADDED: Map for hospital ID -> hospital name
     const hospitalNameMap = useMemo(() => {
         if (!hospitals) return new Map<string, string>();
         return new Map(
@@ -81,28 +86,25 @@ export default function DepartmentAssignmentsPage() {
         );
     }, [hospitals]);
 
-    // CORRECTED: Process assigned locations to include names AND hospId
     const processedAssignments = useMemo((): AssignedLocationData[] => {
         if (!assignedRaw) return [];
 
         return assignedRaw.map((ass) => {
-            // Find the corresponding full location object to get name AND hospId
             const locationDetails = locationsMap.get(ass.locationId);
 
-            // Ensure the returned object matches the AssignedLocationData type
             const processed: AssignedLocationData = {
                 assignmentId: ass.id,
                 locationId: ass.locationId,
-                locationName: locationDetails?.name ?? null, // Get name from details
-                hospId: locationDetails?.hospId ?? null, // <-- Get hospId from details
+                locationName: locationDetails?.name ?? null,
+                hospId: locationDetails?.hospId ?? null,
                 assignedAt: ass.createdAt,
                 id: ass.id,
                 createdAt: ass.createdAt,
                 updatedAt: ass.updatedAt,
             };
             return processed;
-        }); //.filter(item => item !== null); // Filter nulls if map could potentially return null
-    }, [assignedRaw, locationsMap]); // Depend on raw assignments and the locations map
+        });
+    }, [assignedRaw, locationsMap]);
 
     // --- Mutations ---
     const { mutate: deleteAssignment, isPending: isDeleting } =
@@ -121,7 +123,6 @@ export default function DepartmentAssignmentsPage() {
         void refetchAssignments();
         void refetchLocations();
         void refetchHospitals();
-        // refetch department if needed
     };
 
     const handleOpenDeleteDialog = (
@@ -250,18 +251,24 @@ export default function DepartmentAssignmentsPage() {
                             isLoadingDept) && (
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         )}
-                        Refresh Data
+
+                        {isRefetching ? "Refreshing..." : "Refresh"}
                     </Button>
+
                     <Link
                         href={`/admin/${orgId}/departments/${depId}/departmentTeams`}
+                        className="col-span-2 sm:col-span-1"
                     >
-                        <Button size="sm" variant="outline">
-                            <Goal className="mr-2 h-4 w-4" />
-                            Teams{" "}
+                        <Button size="sm" variant="outline" className="w-full">
+                            <MapPin className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
+                            Assignments
                         </Button>
                     </Link>
-                    <Link href={`/admin/${orgId}/departments/`}>
-                        <Button size="sm" variant={"default"}>
+                    <Link
+                        href={`/admin/${orgId}/departments/`}
+                        className="col-span-2 sm:col-span-1"
+                    >
+                        <Button size="sm" variant="default" className="w-full">
                             Back to Departments
                         </Button>
                     </Link>
@@ -269,10 +276,9 @@ export default function DepartmentAssignmentsPage() {
             </div>
 
             {/* Add Assignment Form */}
-            <AddDepAssForm
-                onSuccess={refetchAssignments} // Refetch assignments list on successful add
-                // onCancel can be added if needed
-            />
+            <div className={"mt-4"}>
+                <AddDepAssForm onSuccess={refetchAssignments} />
+            </div>
 
             {/* Assigned Locations Table Section */}
             <div className="mt-8">
@@ -289,7 +295,7 @@ export default function DepartmentAssignmentsPage() {
                     onOpenChange={(open) => {
                         if (!open) handleCloseDeleteDialog();
                     }}
-                    itemName={`assignment for "${assignmentToDelete.name}"`}
+                    itemName={`assignment ${assignmentToDelete.name}`}
                     itemType="location assignment"
                     onConfirm={handleConfirmDelete}
                     isPending={isDeleting} // Pass loading state to dialog

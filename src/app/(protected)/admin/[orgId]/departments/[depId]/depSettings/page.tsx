@@ -1,12 +1,19 @@
-//src/app/(protected)/admin/[orgId]/settings/page.tsx
+// src/app/(protected)/admin/[orgId]/departments/[depId]/settings/page.tsx
 
 "use client";
 
 import React, { useState, useEffect, FormEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useOrg, useUpdateOrg, useDeleteOrg } from "@/hooks/useOrgs";
-import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
-import { LoadingSpinner } from "@/components/ui/loadingSpinner";
+import Link from "next/link"; // Import Link
+
+// Hooks (Assuming these exist based on your other components)
+import { useDep, useUpdateDep, useDeleteDep } from "@/hooks/useDeps";
+
+// Common Components
+import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog"; // Adjust path if needed
+import { LoadingSpinner } from "@/components/ui/loadingSpinner"; // Adjust path if needed
+
+// Shadcn UI Imports
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,92 +38,121 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import {
+    AlertTriangle,
+    CheckCircle,
+    XCircle,
+    Cog,
+    ArrowLeft,
+} from "lucide-react"; // Added Icons
 
-export default function OrgSettingsPage() {
+export default function DepartmentSettingsPage() {
     const params = useParams();
     const router = useRouter();
     const orgId = params.orgId as string;
+    const depId = params.depId as string; // Get depId from params
 
+    // State for form fields and UI control
     const [name, setName] = useState("");
-    const [type, setType] = useState("");
-    const [contactEmail, setContactEmail] = useState("");
-    const [contactPhone, setContactPhone] = useState("");
     const [active, setActive] = useState(false); // Reflects DB state
     const [uiActiveSelection, setUiActiveSelection] = useState<
         "active" | "inactive" | ""
     >(""); // Controls ToggleGroup UI
 
+    // State for dialogs and loading
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [isDeactivationDialogOpen, setIsDeactivationDialogOpen] =
         useState(false);
     const [isTogglingActive, setIsTogglingActive] = useState(false);
 
+    // Data Fetching and Mutations
     const {
-        data: orgData,
-        isLoading: isLoadingOrg,
-        isError: isErrorOrg,
-        error: errorOrg,
-    } = useOrg(orgId);
+        data: depData,
+        isLoading: isLoadingDep,
+        isError: isErrorDep,
+        error: errorDep,
+        refetch: refetchDep, // Add refetch if needed
+    } = useDep(depId); // Use useDep hook
 
-    const updateMutation = useUpdateOrg(); // For name, type, contacts
-    const updateActiveStatusMutation = useUpdateOrg(); // For immediate active toggle
-    const deleteMutation = useDeleteOrg();
+    const updateMutation = useUpdateDep(); // For name update
+    const updateActiveStatusMutation = useUpdateDep(); // For immediate active toggle
+    const deleteMutation = useDeleteDep(); // Use useDeleteDep hook
 
-    // Populate form state when orgData loads
+    // Populate form state when department data loads
     useEffect(() => {
-        if (orgData) {
-            setName(orgData.name || "");
-            setType(orgData.type || "");
-            setContactEmail(orgData.contactEmail || "");
-            setContactPhone(orgData.contactPhone || "");
-            const currentDbActiveState = orgData.active ?? false;
+        if (depData) {
+            setName(depData.name || "");
+            const currentDbActiveState = depData.active ?? false;
             setActive(currentDbActiveState);
             setUiActiveSelection(currentDbActiveState ? "active" : "inactive");
         }
-    }, [orgData]);
+    }, [depData]);
 
     // Redirect on successful deletion
     useEffect(() => {
         if (deleteMutation.isSuccess) {
-            toast.info(`Organisation ${orgData?.name} deleted. Redirecting...`);
-            router.push("/admin/orgsConsole"); // Adjust target route if needed
+            toast.info(`Department ${depData?.name} deleted. Redirecting...`);
+            // Redirect back to the main departments list for the org
+            router.push(`/admin/${orgId}/departments`);
         }
-    }, [deleteMutation.isSuccess, router, orgData?.name]);
+    }, [deleteMutation.isSuccess, router, orgId, depData?.name]);
 
+    // Handler for saving name changes
     const handleSaveChanges = async (e: FormEvent) => {
         e.preventDefault();
-        if (!orgId || !orgData) return;
+        if (!orgId || !depId || !depData) return;
+        void refetchDep();
 
-        const fieldsToUpdate = { name, type, contactEmail, contactPhone };
+        // Basic validation (can be enhanced with zod if needed)
+        if (!name.trim()) {
+            toast.error("Department name cannot be empty.");
+            return;
+        }
+
+        const fieldsToUpdate = { name: name.trim() }; // Only update name here
 
         updateMutation.mutate(
-            { id: orgId, orgData: fieldsToUpdate },
+            { id: depId, data: fieldsToUpdate, orgId: orgId }, // Pass necessary IDs and data
             {
+                onSuccess: (updatedDep) => {
+                    toast.success(`Department "${updatedDep.name}" updated.`);
+                    // Optionally refetch data if needed, though mutation might handle cache update
+                    // refetchDep();
+                },
                 onError: (error) => {
-                    console.error("Failed to update non-active fields:", error);
+                    console.error("Failed to update department name:", error);
+                    toast.error(`Update failed: ${error.message}`);
                 },
             },
         );
     };
 
+    // Handler for confirming deletion
     const handleDeleteConfirm = () => {
-        if (!orgId) return;
-        deleteMutation.mutate(orgId, {
-            onSuccess: () => setIsDeleteDialogOpen(false),
-            onError: (error) => console.error("Delete failed:", error),
-        });
+        if (!orgId || !depId) return;
+        // Assuming useDeleteDep needs { id, orgId } or similar context
+        deleteMutation.mutate(
+            { id: depId, orgId: orgId },
+            {
+                onSuccess: () => setIsDeleteDialogOpen(false), // Dialog closed automatically on success redirect
+                onError: (error) => {
+                    console.error("Delete failed:", error);
+                    toast.error(`Delete failed: ${error.message}`);
+                },
+            },
+        );
     };
 
+    // Handler for toggling the active/inactive status
     const handleActiveToggleChange = (newValue: string) => {
-        if (!newValue || isTogglingActive) return; // Can be "" if deselected
+        if (!newValue || isTogglingActive || !orgId || !depId) return;
 
         const intendedToBeActive = newValue === "active";
         const currentDbState = active;
 
         if (intendedToBeActive === currentDbState) {
             setUiActiveSelection(newValue as "active" | "inactive");
-            return;
+            return; // No change needed
         }
 
         setUiActiveSelection(newValue as "active" | "inactive"); // Optimistic UI update
@@ -125,11 +161,11 @@ export default function OrgSettingsPage() {
             // Activate Immediately
             setIsTogglingActive(true);
             updateActiveStatusMutation.mutate(
-                { id: orgId, orgData: { active: true } },
+                { id: depId, data: { active: true }, orgId: orgId },
                 {
-                    onSuccess: () => {
+                    onSuccess: (updatedDep) => {
                         toast.success(
-                            `Organisation "${orgData?.name}" activated.`,
+                            `Department "${updatedDep.name}" activated.`,
                         );
                         setActive(true);
                         setUiActiveSelection("active");
@@ -149,17 +185,18 @@ export default function OrgSettingsPage() {
         }
     };
 
+    // Handler for confirming deactivation from the dialog
     const handleConfirmDeactivation = () => {
-        if (!orgId) return;
+        if (!orgId || !depId) return;
         setIsDeactivationDialogOpen(false);
         setIsTogglingActive(true);
 
         updateActiveStatusMutation.mutate(
-            { id: orgId, orgData: { active: false } },
+            { id: depId, data: { active: false }, orgId: orgId },
             {
-                onSuccess: () => {
+                onSuccess: (updatedDep) => {
                     toast.warning(
-                        `Organisation "${orgData?.name}" deactivated.`,
+                        `Department "${updatedDep.name}" deactivated.`,
                     );
                     setActive(false);
                     setUiActiveSelection("inactive");
@@ -173,32 +210,37 @@ export default function OrgSettingsPage() {
         );
     };
 
+    // Handler for cancelling deactivation
     const handleCancelDeactivation = () => {
         setIsDeactivationDialogOpen(false);
-        setUiActiveSelection("active"); // Revert optimistic UI selection
+        // Revert optimistic UI selection only if deactivation was attempted
+        if (uiActiveSelection === "inactive") {
+            setUiActiveSelection("active");
+        }
     };
 
     // --- Render Logic ---
-    if (isLoadingOrg) {
+    if (isLoadingDep) {
         return (
             <div className="flex justify-center items-center min-h-[300px] p-4">
-                <LoadingSpinner text="Loading organisation details..." />
+                <LoadingSpinner text="Loading department details..." />
             </div>
         );
     }
 
-    if (isErrorOrg || !orgData) {
+    if (isErrorDep || !depData) {
         return (
             <div className="text-center text-red-600 py-10 px-4">
-                Error loading organisation:{" "}
-                {errorOrg?.message || "Organisation not found."}
-                <Button
-                    onClick={() => router.back()}
-                    variant="outline"
-                    className="mt-4"
-                >
-                    Go Back
-                </Button>
+                Error loading department:{" "}
+                {errorDep?.message || "Department not found."}
+                <div className="mt-4">
+                    <Link href={`/admin/${orgId}/departments`} passHref>
+                        <Button variant="outline">
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Back to Departments
+                        </Button>
+                    </Link>
+                </div>
             </div>
         );
     }
@@ -212,78 +254,54 @@ export default function OrgSettingsPage() {
     return (
         <div className="flex flex-col min-h-screen">
             <main className="flex-grow w-full max-w-4xl mx-auto px-4 md:px-6 py-8 space-y-8">
-                <h1 className="text-3xl font-bold tracking-tight">
-                    Organisation Settings: {orgData.name}
-                </h1>
+                {/* Header and Back Button */}
+                <div className="flex items-center justify-between mb-4">
+                    <h1 className="text-3xl font-bold tracking-tight">
+                        Department Settings: {depData.name}
+                    </h1>
+                    <Link href={`/admin/${orgId}/departments`} passHref>
+                        <Button variant="outline" size="sm">
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Back to Departments List
+                        </Button>
+                    </Link>
+                </div>
 
-                {/* Card for Name, Type, Contacts */}
+                {/* Card for Name */}
                 <Card>
                     <form onSubmit={handleSaveChanges}>
                         <CardHeader>
-                            <CardTitle>Details & Contacts</CardTitle>
-                            <CardDescription>
-                                Update organisation name, type, and contact
-                                information.
-                            </CardDescription>
+                            <CardTitle>Department Details</CardTitle>
+                            <CardDescription></CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            <div className="grid gap-2">
-                                <Label htmlFor="org-name">
-                                    Organisation Name
+                            <div className="grid gap-2 mt-4">
+                                <Label htmlFor="dep-name">
+                                    Department Name
                                 </Label>
                                 <Input
-                                    id="org-name"
+                                    id="dep-name"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     required
                                     disabled={isProcessingGeneral}
                                     className="max-w-lg"
+                                    placeholder="e.g., Cardiology, Emergency"
                                 />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="org-type">Type</Label>
-                                <Input
-                                    id="org-type"
-                                    value={type}
-                                    onChange={(e) => setType(e.target.value)}
-                                    placeholder="e.g., NHS Trust"
-                                    disabled={isProcessingGeneral}
-                                    className="max-w-lg"
-                                />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="org-email">Contact Email</Label>
-                                <Input
-                                    id="org-email"
-                                    type="email"
-                                    value={contactEmail}
-                                    onChange={(e) =>
-                                        setContactEmail(e.target.value)
-                                    }
-                                    placeholder="e.g., admin@org.com"
-                                    disabled={isProcessingGeneral}
-                                    className="max-w-lg"
-                                />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="org-phone">Contact Phone</Label>
-                                <Input
-                                    id="org-phone"
-                                    type="tel"
-                                    value={contactPhone}
-                                    onChange={(e) =>
-                                        setContactPhone(e.target.value)
-                                    }
-                                    placeholder="e.g., 01234 567890"
-                                    disabled={isProcessingGeneral}
-                                    className="max-w-lg"
-                                />
+                                {updateMutation.isError && (
+                                    <p className="text-sm text-red-600 mt-1">
+                                        {updateMutation.error?.message ||
+                                            "Failed to save name."}
+                                    </p>
+                                )}
                             </div>
                         </CardContent>
                         <CardFooter className="border-t pt-6 mt-6">
                             <Button
                                 type="submit"
-                                disabled={isProcessingGeneral || !orgData}
+                                disabled={
+                                    isProcessingGeneral || name === depData.name
+                                } // Disable if name hasn't changed
                             >
                                 {updateMutation.isPending ? (
                                     <LoadingSpinner
@@ -291,7 +309,7 @@ export default function OrgSettingsPage() {
                                         className="mr-2"
                                     />
                                 ) : null}
-                                Save Detail Changes
+                                Save Changes
                             </Button>
                         </CardFooter>
                     </form>
@@ -300,10 +318,11 @@ export default function OrgSettingsPage() {
                 {/* Card for Active Status */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Organisation Status</CardTitle>
+                        <CardTitle>Department Status</CardTitle>
                         <CardDescription>
-                            Set the organisation active or inactive. Changes are
-                            applied immediately.
+                            Set the department active or inactive. Changes are
+                            applied immediately. Inactive departments may not be
+                            visible or assignable.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -329,7 +348,7 @@ export default function OrgSettingsPage() {
                                 onValueChange={handleActiveToggleChange}
                                 disabled={isToggleDisabled}
                                 className="justify-start gap-2"
-                                aria-label="Organisation status toggle"
+                                aria-label="Department status toggle"
                             >
                                 <ToggleGroupItem
                                     value="active"
@@ -349,11 +368,41 @@ export default function OrgSettingsPage() {
                                 </ToggleGroupItem>
                             </ToggleGroup>
                             <p className="text-xs text-muted-foreground pt-2">
-                                Toggling to &apos;Inactive&apos; requires
+                                Toggling to &#39;Inactive&#39; requires
                                 confirmation.
                             </p>
+                            {updateActiveStatusMutation.isError && (
+                                <p className="text-sm text-red-600 mt-1">
+                                    {updateActiveStatusMutation.error
+                                        ?.message || "Failed to update status."}
+                                </p>
+                            )}
                         </div>
                     </CardContent>
+                </Card>
+
+                {/* Card for Module Assignments (Placeholder) */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Cog className="h-5 w-5" /> Module Assignments
+                        </CardTitle>
+                        <CardDescription>
+                            Manage which modules or features are enabled for
+                            this department. (Functionality coming soon)
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="p-4 border border-dashed rounded-md text-center text-muted-foreground">
+                            Module assignment controls will appear here.
+                            {/* Future: Add list/checkboxes/selection component for modules */}
+                        </div>
+                    </CardContent>
+                    {/* <CardFooter className="border-t pt-6 mt-6">
+                        <Button disabled>
+                            Save Module Changes (Coming Soon)
+                        </Button>
+                    </CardFooter> */}
                 </Card>
 
                 {/* Delete Section */}
@@ -364,8 +413,9 @@ export default function OrgSettingsPage() {
                             Danger Zone
                         </CardTitle>
                         <CardDescription className="text-destructive/90">
-                            Permanently delete this organisation ({orgData.name}
-                            ).
+                            Permanently delete this department ({depData.name}).
+                            This action cannot be undone and will remove
+                            associated teams and assignments.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -386,9 +436,15 @@ export default function OrgSettingsPage() {
                                     Deleting...
                                 </>
                             ) : (
-                                "Delete Organisation Permanently"
+                                "Delete Department Permanently"
                             )}
                         </Button>
+                        {deleteMutation.isError && (
+                            <p className="text-sm text-red-600 mt-2">
+                                {deleteMutation.error?.message ||
+                                    "Failed to delete department."}
+                            </p>
+                        )}
                     </CardContent>
                 </Card>
             </main>
@@ -404,10 +460,10 @@ export default function OrgSettingsPage() {
                         <AlertDialogDescription>
                             Setting{" "}
                             <strong className="text-foreground">
-                                {orgData.name}
+                                {depData.name}
                             </strong>{" "}
-                            as inactive may prevent user access and hide data.
-                            This change is applied immediately. Are you sure?
+                            as inactive may prevent assigning users/locations to
+                            it and hide it in some lists. Are you sure?
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -438,14 +494,12 @@ export default function OrgSettingsPage() {
                 <DeleteConfirmationDialog
                     open={isDeleteDialogOpen}
                     onOpenChange={setIsDeleteDialogOpen}
-                    itemName={orgData.name}
-                    itemType="organisation"
+                    itemName={depData.name}
+                    itemType="department"
                     onConfirm={handleDeleteConfirm}
                     isPending={deleteMutation.isPending}
                 />
             )}
-
-            <footer className="py-4"></footer>
         </div>
     );
 }

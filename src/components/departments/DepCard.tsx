@@ -1,6 +1,5 @@
 import * as React from "react";
-import { Pencil, Trash2, Plus, Goal } from "lucide-react"; // Import Plus icon
-
+import { Pencil, Plus, Goal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -22,17 +21,18 @@ interface DepCardProps {
     // Add a new handler prop for the Assignments button if needed
 }
 
-export function DepCard({ department, orgId, onEdit, onDelete }: DepCardProps) {
+export function DepCard({ department, orgId }: DepCardProps) {
     const assignmentsUrl = `/admin/${orgId}/departments/${department.id}/locationAssignments`;
     const teamsUrl = `/admin/${orgId}/departments/${department.id}/departmentTeams`;
+    const settingsUrl = `/admin/${orgId}/departments/${department.id}/depSettings`;
 
-    const handleEditClick = () => {
-        onEdit(department);
-    };
+    // const handleEditClick = () => {
+    //     onEdit(department);
+    // };
 
-    const handleDeleteClick = () => {
-        onDelete(department.id, department.name);
-    };
+    // const handleDeleteClick = () => {
+    //     onDelete(department.id, department.name);
+    // };
 
     return (
         // Ensure card takes full height in a grid and uses flex-col
@@ -49,9 +49,9 @@ export function DepCard({ department, orgId, onEdit, onDelete }: DepCardProps) {
                 <Link href={assignmentsUrl}>
                     <Button
                         variant="outline"
-                        size="sm" // Keep size small as requested
+                        size="sm"
                         aria-label={`Assignments for ${department.name}`}
-                        className="flex-shrink-0" // Prevent shrinking if title is long
+                        className="flex-shrink-0"
                     >
                         <Plus className="h-4 w-4 mr-1" />
                         Locations
@@ -97,22 +97,23 @@ export function DepCard({ department, orgId, onEdit, onDelete }: DepCardProps) {
                 </div>
                 {/* Edit/Delete Buttons */}
                 <div className="flex gap-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleEditClick}
-                        aria-label={`Edit ${department.name}`}
-                    >
-                        <Pencil className="h-4 w-4 mr-1" /> Edit
-                    </Button>
-                    <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={handleDeleteClick}
-                        aria-label={`Delete ${department.name}`}
-                    >
-                        <Trash2 className="h-4 w-4 mr-1" /> Delete
-                    </Button>
+                    <Link href={settingsUrl}>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            aria-label={`Edit ${department.name}`}
+                        >
+                            <Pencil className="h-4 w-4 mr-1" /> Settings
+                        </Button>
+                    </Link>
+                    {/*<Button*/}
+                    {/*    variant="destructive"*/}
+                    {/*    size="sm"*/}
+                    {/*    onClick={handleDeleteClick}*/}
+                    {/*    aria-label={`Delete ${department.name}`}*/}
+                    {/*>*/}
+                    {/*    <Trash2 className="h-4 w-4 mr-1" /> Delete*/}
+                    {/*</Button>*/}
                 </div>
             </CardFooter>
         </Card>

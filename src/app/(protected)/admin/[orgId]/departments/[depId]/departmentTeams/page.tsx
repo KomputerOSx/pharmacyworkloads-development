@@ -89,6 +89,7 @@ export default function DepartmentTeamsManagementPage() {
         data: teams,
         isLoading: isLoadingTeams,
         refetch: refetchTeams,
+        isRefetching: isRefetchingTeams,
     } = useDepTeams(orgId, depId);
     const { data: allOrgLocations, isLoading: isLoadingOrgLocs } =
         useHospLocs(orgId);
@@ -330,29 +331,30 @@ export default function DepartmentTeamsManagementPage() {
         : (department?.name ?? "Manage Teams");
 
     return (
-        <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 max-w-5xl">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className="mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            {/*  Buttons and Title */}
+            <div className="flex flex-col space-y-4 mb-6">
                 <div>
-                    <h1 className="text-2xl font-semibold tracking-tight">
+                    <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">
                         Manage Teams for: {currentDepartmentName}
                     </h1>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs sm:text-sm text-muted-foreground">
                         Create, view, edit, and delete teams for this
                         department.
                     </p>
                 </div>
-                <div className="flex gap-2 flex-shrink-0">
+
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:gap-2">
                     <Button
-                        variant="outline"
+                        variant={"outline"}
                         size="sm"
                         onClick={handleRefresh}
                         disabled={isLoadingTeams || isLoadingDept}
-                        aria-label="Refresh teams list"
                     >
-                        {(isLoadingTeams || isLoadingDept) && (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        )}{" "}
-                        Refresh
+                        {isLoadingDept || isLoadingTeams ? (
+                            <Loader2 className="mr-1 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                        ) : null}
+                        {isRefetchingTeams ? "Refreshing..." : "Refresh"}
                     </Button>
                     <Dialog
                         open={isAddDialogOpen}
@@ -360,8 +362,8 @@ export default function DepartmentTeamsManagementPage() {
                     >
                         <DialogTrigger asChild>
                             <Button size="sm">
-                                <PlusCircle className="mr-2 h-4 w-4" /> Create
-                                Team
+                                <PlusCircle className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
+                                Create Team
                             </Button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-[480px]">
@@ -381,15 +383,19 @@ export default function DepartmentTeamsManagementPage() {
                     </Dialog>
                     <Link
                         href={`/admin/${orgId}/departments/${depId}/locationAssignments`}
+                        className="col-span-2 sm:col-span-1"
                     >
-                        <Button size="sm" variant="outline">
-                            <MapPin className="mr-2 h-4 w-4" /> Assignments{" "}
+                        <Button size="sm" variant="outline" className="w-full">
+                            <MapPin className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
+                            Assignments
                         </Button>
                     </Link>
-                    <Link href={`/admin/${orgId}/departments/`}>
-                        <Button size="sm" variant="default">
-                            {" "}
-                            Back to Departments{" "}
+                    <Link
+                        href={`/admin/${orgId}/departments/`}
+                        className="col-span-2 sm:col-span-1"
+                    >
+                        <Button size="sm" variant="default" className="w-full">
+                            Back to Departments
                         </Button>
                     </Link>
                 </div>
@@ -422,12 +428,11 @@ export default function DepartmentTeamsManagementPage() {
                                 name="name"
                                 render={({ field }) => (
                                     <FormItem>
-                                        {" "}
-                                        <FormLabel>Team Name</FormLabel>{" "}
+                                        <FormLabel>Team Name</FormLabel>
                                         <FormControl>
                                             <Input {...field} />
-                                        </FormControl>{" "}
-                                        <FormMessage />{" "}
+                                        </FormControl>
+                                        <FormMessage />
                                     </FormItem>
                                 )}
                             />
@@ -436,15 +441,14 @@ export default function DepartmentTeamsManagementPage() {
                                 name="description"
                                 render={({ field }) => (
                                     <FormItem>
-                                        {" "}
-                                        <FormLabel>Description</FormLabel>{" "}
+                                        <FormLabel>Description</FormLabel>
                                         <FormControl>
                                             <Textarea
                                                 {...field}
                                                 value={field.value ?? ""}
                                             />
-                                        </FormControl>{" "}
-                                        <FormMessage />{" "}
+                                        </FormControl>
+                                        <FormMessage />
                                     </FormItem>
                                 )}
                             />
@@ -454,7 +458,7 @@ export default function DepartmentTeamsManagementPage() {
                                 render={({ field }) => (
                                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                                         <div className="space-y-0.5">
-                                            <FormLabel>Active Status</FormLabel>{" "}
+                                            <FormLabel>Active Status</FormLabel>
                                             <FormMessage />
                                         </div>
                                         <FormControl>
@@ -477,7 +481,7 @@ export default function DepartmentTeamsManagementPage() {
                                 <Button type="submit" disabled={isUpdatingTeam}>
                                     {isUpdatingTeam && (
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    )}{" "}
+                                    )}
                                     Save Changes
                                 </Button>
                             </div>
@@ -497,7 +501,7 @@ export default function DepartmentTeamsManagementPage() {
                 >
                     <DialogHeader>
                         <DialogTitle>
-                            Manage Locations for Team:{" "}
+                            Manage Locations for Team:
                             {managingLocationsForTeam?.name}
                         </DialogTitle>
                         <DialogDescription>
@@ -510,8 +514,7 @@ export default function DepartmentTeamsManagementPage() {
                         <div className="space-y-3 py-4">
                             {isLoadingDepLocs || isLoadingOrgLocs ? (
                                 <div className="flex justify-center items-center p-4">
-                                    {" "}
-                                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />{" "}
+                                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                                 </div>
                             ) : departmentLocationsDetails.length === 0 ? (
                                 <p className="text-sm text-center text-muted-foreground py-4">
@@ -641,7 +644,7 @@ export default function DepartmentTeamsManagementPage() {
                     onOpenChange={(open) => {
                         if (!open) handleCloseDeleteDialog();
                     }}
-                    itemName={`team "${teamToDelete.name}"`}
+                    itemName={`team ${teamToDelete.name}`}
                     itemType="department team"
                     onConfirm={handleConfirmDelete}
                     isPending={isDeletingTeam}

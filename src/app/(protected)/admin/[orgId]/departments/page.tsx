@@ -1,10 +1,8 @@
 "use client";
 
-import React, { useState, useCallback } from "react"; // Added useCallback
+import React, { useState, useCallback } from "react";
 import { useParams } from "next/navigation";
-import { Loader2, Terminal } from "lucide-react"; // Added Terminal for errors
-
-// UI Components
+import { Loader2, Terminal } from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -14,17 +12,13 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // Added for errors
-import { LoadingSpinner } from "@/components/ui/loadingSpinner"; // Assuming you have this
-
-// Custom Components & Hooks
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 import { AddDepFrom } from "@/components/departments/AddDepFrom";
 import { DepCard } from "@/components/departments/DepCard";
-import { EditDepForm } from "@/components/departments/EditDepForm"; // Import the corrected Edit form
-import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog"; // Import delete dialog
-import { useDeps, useDeleteDep } from "@/hooks/useDeps"; // *** Assuming useDeleteDep hook exists ***
-
-// Types
+import { EditDepForm } from "@/components/departments/EditDepForm";
+import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
+import { useDeps, useDeleteDep } from "@/hooks/useDeps";
 import { Department } from "@/types/depTypes";
 
 export default function DepartmentsPage() {
