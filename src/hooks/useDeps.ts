@@ -40,9 +40,9 @@ export function useCreateDep() {
 
     return useMutation({
         mutationFn: (variables: {
-            departmentData: Partial<Department>; // The data for the new hospital
-            orgId: string; // The organisation to assign it to
-            userId?: string; // Optional user ID for auditing
+            departmentData: Partial<Department>;
+            orgId: string;
+            userId?: string;
         }) =>
             createDep(
                 variables.departmentData,

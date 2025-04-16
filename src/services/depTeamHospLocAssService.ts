@@ -320,7 +320,7 @@ export async function deleteTeamHospLocAssignmentsByTeam(
  * @param depId - The ID of the department.
  * @returns Promise<void>
  */
-export async function deleteAssignmentsByDepartment(
+export async function deleteDepTeamHospLocAssignmentsByDepartment(
     depId: string,
 ): Promise<void> {
     if (!depId)

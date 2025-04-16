@@ -5,7 +5,8 @@ import { Hosp } from "@/types/hospTypes";
 import { Department, DepHospLocAss, DepTeamHospLocAss } from "@/types/depTypes";
 import { User, UserTeamAss } from "@/types/userTypes";
 import { DepTeam, HospLoc } from "@/types/subDepTypes";
-import { StoredAssignment, WeekStatus } from "@/types/rotaTypes"; // Adjust path if needed
+import { StoredAssignment, WeekStatus } from "@/types/rotaTypes";
+import { DepModuleAssignment, Module } from "@/types/moduleTypes"; // Adjust path if needed
 
 export const formatFirestoreTimestamp = (
     timestamp: Timestamp | null | undefined,
@@ -509,3 +510,51 @@ export const mapFirestoreDocToWeekStatus = (
 
     return weekStatus;
 };
+
+export function mapFirestoreDocToModule(
+    id: string,
+    data: DocumentData | undefined,
+): Module | null {
+    if (!data) return null;
+    try {
+        return {
+            id: id,
+            name: data.name ?? "",
+            description: data.description ?? null,
+            active: data.active ?? false,
+            createdAt: (data.createdAt as Timestamp) ?? null,
+            updatedAt: (data.updatedAt as Timestamp) ?? null,
+            createdBy: data.createdBy ?? "",
+            updatedBy: data.updatedBy ?? "",
+        };
+    } catch (error) {
+        console.error(
+            `8PXUqbr2 - Error mapping Firestore doc to Module (ID: ${id}):`,
+            error,
+        );
+        return null;
+    }
+}
+
+export function mapFirestoreDocToDepModuleAssignment(
+    id: string,
+    data: DocumentData | undefined,
+): DepModuleAssignment | null {
+    if (!data) return null;
+    try {
+        return {
+            id: id,
+            depId: data.depId ?? "",
+            moduleId: data.moduleId ?? "",
+            orgId: data.orgId ?? "",
+            createdAt: (data.createdAt as Timestamp) ?? null,
+            createdBy: data.createdBy ?? "",
+        };
+    } catch (error) {
+        console.error(
+            `1weyX5CH - Error mapping Firestore doc to DepModuleAssignment (ID: ${id}):`,
+            error,
+        );
+        return null;
+    }
+}

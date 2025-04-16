@@ -18,6 +18,7 @@ import {
 import React, { useState } from "react";
 import { RefreshCw, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
 export default function OrgConsole() {
     // Use the React Query hook to get data and state
@@ -108,6 +109,12 @@ export default function OrgConsole() {
                             <RefreshCw className="h-4 w-4" />
                         )}
                     </Button>
+
+                    <Link href="/admin/moduleConsole">
+                        <Button variant={"outline"} size="sm">
+                            Modules Console
+                        </Button>
+                    </Link>
                 </div>
                 {/* Right aligned search */}
                 <div className="relative w-full sm:w-auto">

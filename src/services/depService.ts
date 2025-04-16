@@ -18,7 +18,8 @@ import { db } from "@/config/firebase";
 import { mapFirestoreDocToDep } from "@/lib/firestoreUtil";
 import { Department } from "@/types/depTypes";
 
-import { deleteAssignmentsByDepartment } from "@/services/depTeamHospLocAssService";
+import { deleteDepTeamHospLocAssignmentsByDepartment } from "@/services/depTeamHospLocAssService";
+import { deleteDepModuleAssignmentsByDepartment } from "@/services/depModulesAssService";
 
 const DepartmentsCollection = collection(db, "departments");
 
@@ -391,47 +392,151 @@ export async function updateDep(
     }
 }
 
+// export async function deleteDep(id: string): Promise<void> {
+//     if (!id)
+//         throw new Error("hY2gT6dS - deleteDep error: Department ID required.");
+//     console.log("fpBqeu8X - Attempting delete Department:", id);
+//
+//     // 1. Safety Check: Locations assigned directly to department (if applicable)
+//     const hasLocationAssignments = await checkDepHasLocationAssignments(id); // Your existing check
+//     if (hasLocationAssignments) {
+//         throw new Error(
+//             `Cannot delete department ${id}: It has assigned locations.`,
+//         );
+//     }
+//
+//     // 2. Clean up NEW Team-Location assignments linked via depId
+//     try {
+//         console.log(
+//             `bewJ6Bbq - Deleting team-location assignments for department ${id}...`,
+//         );
+//         await deleteAssignmentsByDepartment(id); // Use the new service function
+//         console.log(
+//             `rG2sN8vC - Deleted team-location assignments for department ${id}.`,
+//         );
+//     } catch (assError) {
+//         console.error(
+//             `eP3dN7hJ - Failed to delete team-location assignments for dep ${id}:`,
+//             assError,
+//         );
+//         let reason = "Unknown assignment cleanup error.";
+//         if (assError instanceof Error) reason = assError.message;
+//         throw new Error(
+//             `Cleanup failed before deleting department ${id}. Reason: ${reason}`,
+//         );
+//     }
+//
+//     // 3. Prepare Batch Deletion for Department and its Teams (remains the same)
+//     const batch = writeBatch(db);
+//     const departmentRef = doc(db, "departments", id);
+//     const teamsCollectionRef = collection(db, "department_teams"); // Ensure correct collection name
+//
+//     try {
+//         // Find teams associated with this department
+//         const teamsQuery = query(teamsCollectionRef, where("depId", "==", id));
+//         const teamsSnapshot = await getDocs(teamsQuery);
+//
+//         let teamCount = 0;
+//         if (!teamsSnapshot.empty) {
+//             teamsSnapshot.forEach((teamDoc) => {
+//                 console.log(
+//                     `tY5bV8wE - Queuing deletion for associated team: ${teamDoc.id}`,
+//                 );
+//                 batch.delete(teamDoc.ref);
+//                 teamCount++;
+//             });
+//         } else {
+//             console.log(
+//                 `yU7cF2mS - No associated teams found for department ${id}.`,
+//             );
+//         }
+//
+//         // Add the main department deletion to the batch
+//         console.log("Cq2CkYZb - Queuing deletion for Department document:", id);
+//         batch.delete(departmentRef);
+//
+//         // 4. Commit the Batch Operation
+//         console.log(
+//             `zX1gH9oL - Committing batch deletion for department ${id} and ${teamCount} team(s)...`,
+//         );
+//         await batch.commit();
+//         console.log(
+//             `wB4nT6kF - Successfully deleted Department ${id} and ${teamCount} associated team(s).`,
+//         );
+//     } catch (error) {
+//         console.error(
+//             `qZ8vB3nW - Error during batch deletion process for Department ID ${id}:`,
+//             error,
+//         );
+//         let reason = "Unknown batch deletion error.";
+//         if (error instanceof Error) reason = error.message;
+//         throw new Error(
+//             `Failed to delete Department ${id} and/or its teams. Reason: ${reason}`,
+//         );
+//     }
+// }
+
+// Department Cannot be deleted if it has direct location assignments
+// When deleting a department -- Department Teams, Department Team
 export async function deleteDep(id: string): Promise<void> {
     if (!id)
-        throw new Error("hY2gT6dS - deleteDep error: Department ID required.");
-    console.log("fpBqeu8X - Attempting delete Department:", id);
+        throw new Error(`zeZuvb4c- deleteDep error: Department ID required.`);
+    console.log(`VGucBFx2 - Attempting delete Department: ${id}`);
 
-    // 1. Safety Check: Locations assigned directly to department (if applicable)
-    const hasLocationAssignments = await checkDepHasLocationAssignments(id); // Your existing check
+    const hasLocationAssignments = await checkDepHasLocationAssignments(id);
     if (hasLocationAssignments) {
+        console.warn(
+            `e965FHNK - Department ${id} has direct location assignments. Deletion blocked (revisit this logic if locations are only via teams).`,
+        );
         throw new Error(
-            `Cannot delete department ${id}: It has assigned locations.`,
+            `Cannot delete department ${id}: It has assigned locations directly. Remove them first.`,
         );
     }
 
-    // 2. Clean up NEW Team-Location assignments linked via depId
+    // --- Begin Cleanup Phase ---
     try {
         console.log(
-            `bewJ6Bbq - Deleting team-location assignments for department ${id}...`,
+            `QKUGH2ud - Deleting team-location assignments for department ${id}...`,
         );
-        await deleteAssignmentsByDepartment(id); // Use the new service function
+        // Ensure you use the correctly imported function
+        await deleteDepTeamHospLocAssignmentsByDepartment(id);
         console.log(
-            `rG2sN8vC - Deleted team-location assignments for department ${id}.`,
+            `8U6FCgaX - Deleted team-location assignments for department ${id}.`,
         );
-    } catch (assError) {
+
+        // 3. *** NEW: Clean up Department-Module assignments ***
+        console.log(
+            `ZrCm57S7 - Deleting module assignments for department ${id}...`,
+        );
+        await deleteDepModuleAssignmentsByDepartment(id);
+        console.log(
+            `F4ZTGnD7 - Deleted module assignments for department ${id}.`,
+        );
+
+        // --- Cleanup successful, proceed to delete department and teams ---
+    } catch (cleanupError) {
         console.error(
-            `eP3dN7hJ - Failed to delete team-location assignments for dep ${id}:`,
-            assError,
+            `g88Xj6gU - Failed during cleanup phase for dep ${id}:`,
+            cleanupError,
         );
-        let reason = "Unknown assignment cleanup error.";
-        if (assError instanceof Error) reason = assError.message;
+        let reason = "Unknown cleanup error.";
+        if (cleanupError instanceof Error) reason = cleanupError.message;
+        // Provide more specific error message based on which cleanup might have failed
         throw new Error(
             `Cleanup failed before deleting department ${id}. Reason: ${reason}`,
         );
     }
 
-    // 3. Prepare Batch Deletion for Department and its Teams (remains the same)
+    // 4. Prepare Batch Deletion for Department and its Teams
     const batch = writeBatch(db);
     const departmentRef = doc(db, "departments", id);
-    const teamsCollectionRef = collection(db, "department_teams"); // Ensure correct collection name
+    const teamsCollectionRef = collection(db, "department_teams");
+    const depTeamHospLocCollectionRef = collection(
+        db,
+        "department_team_location_assignments",
+    );
 
     try {
-        // Find teams associated with this department
         const teamsQuery = query(teamsCollectionRef, where("depId", "==", id));
         const teamsSnapshot = await getDocs(teamsQuery);
 
@@ -439,38 +544,58 @@ export async function deleteDep(id: string): Promise<void> {
         if (!teamsSnapshot.empty) {
             teamsSnapshot.forEach((teamDoc) => {
                 console.log(
-                    `tY5bV8wE - Queuing deletion for associated team: ${teamDoc.id}`,
+                    `SLuLj25R - Queuing deletion for associated team: ${teamDoc.id}`,
                 );
                 batch.delete(teamDoc.ref);
                 teamCount++;
             });
         } else {
             console.log(
-                `yU7cF2mS - No associated teams found for department ${id}.`,
+                `msRDHsr4 - No associated teams found for department ${id}.`,
+            );
+        }
+
+        const depTeamHospLocQuery = query(
+            depTeamHospLocCollectionRef,
+            where("depId", "==", id),
+        );
+        const depTeamHospLocSnapshot = await getDocs(depTeamHospLocQuery);
+        if (!depTeamHospLocSnapshot.empty) {
+            depTeamHospLocSnapshot.forEach((depTeamHospLocDoc) => {
+                console.log(
+                    `tV8x2dz4 - Queuing deletion for associated depTeamHospLoc: ${depTeamHospLocDoc.id}`,
+                );
+                batch.delete(depTeamHospLocDoc.ref);
+            });
+        } else {
+            console.log(
+                `msRDHsr4 - No associated depTeamHospLocs found for department ${id}.`,
             );
         }
 
         // Add the main department deletion to the batch
-        console.log("Cq2CkYZb - Queuing deletion for Department document:", id);
+        console.log(
+            `2BcheXun - Queuing deletion for Department document: ${id}`,
+        );
         batch.delete(departmentRef);
 
-        // 4. Commit the Batch Operation
+        // 5. Commit the Batch Operation
         console.log(
-            `zX1gH9oL - Committing batch deletion for department ${id} and ${teamCount} team(s)...`,
+            `qUgM8GXt - Committing batch deletion for department ${id} and ${teamCount} team(s)...`,
         );
         await batch.commit();
         console.log(
-            `wB4nT6kF - Successfully deleted Department ${id} and ${teamCount} associated team(s).`,
+            `WZ8d5VZJ - Successfully deleted Department ${id} and ${teamCount} associated team(s) after cleanup.`,
         );
     } catch (error) {
         console.error(
-            `qZ8vB3nW - Error during batch deletion process for Department ID ${id}:`,
+            `aN8cTXkE - Error during batch deletion process for Department ID ${id}:`,
             error,
         );
         let reason = "Unknown batch deletion error.";
         if (error instanceof Error) reason = error.message;
         throw new Error(
-            `Failed to delete Department ${id} and/or its teams. Reason: ${reason}`,
+            `Failed to delete Department ${id} and/or its teams after cleanup. Reason: ${reason}`,
         );
     }
 }

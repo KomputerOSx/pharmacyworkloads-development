@@ -13,7 +13,7 @@ import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 
 // --- Imports for Authorization ---
 import { useAuth } from "@/lib/context/AuthContext";
-import { useUser } from "@/hooks/useUsers"; // Use the correct hook
+import { useUser } from "@/hooks/useUsers";
 
 export default function AdminOrgLayout({ children }: { children: ReactNode }) {
     // --- Hooks ---

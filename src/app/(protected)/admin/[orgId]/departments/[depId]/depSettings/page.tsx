@@ -38,13 +38,8 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import {
-    AlertTriangle,
-    CheckCircle,
-    XCircle,
-    Cog,
-    ArrowLeft,
-} from "lucide-react"; // Added Icons
+import { AlertTriangle, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
+import { DepartmentModuleAssignmentSection } from "@/components/modules/DepartmentModuleAssignmentSection"; // Added Icons
 
 export default function DepartmentSettingsPage() {
     const params = useParams();
@@ -316,94 +311,61 @@ export default function DepartmentSettingsPage() {
                 </Card>
 
                 {/* Card for Active Status */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Department Status</CardTitle>
-                        <CardDescription>
-                            Set the department active or inactive. Changes are
-                            applied immediately. Inactive departments may not be
-                            visible or assignable.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-3 rounded-md border border-border p-4 max-w-lg">
-                            <Label className="font-medium text-base flex items-center gap-2">
-                                Current Status:
-                                {isTogglingActive ? (
-                                    <LoadingSpinner size="sm" />
-                                ) : active ? (
-                                    <span className="flex items-center gap-1 text-green-600">
-                                        <CheckCircle className="h-4 w-4" />{" "}
-                                        Active
-                                    </span>
-                                ) : (
-                                    <span className="flex items-center gap-1 text-destructive">
-                                        <XCircle className="h-4 w-4" /> Inactive
-                                    </span>
-                                )}
-                            </Label>
-                            <ToggleGroup
-                                type="single"
-                                value={uiActiveSelection}
-                                onValueChange={handleActiveToggleChange}
-                                disabled={isToggleDisabled}
-                                className="justify-start gap-2"
-                                aria-label="Department status toggle"
-                            >
-                                <ToggleGroupItem
-                                    value="active"
-                                    aria-label="Set active"
-                                    className="data-[state=on]:bg-green-100 data-[state=on]:text-green-700 dark:data-[state=on]:bg-green-900/50 dark:data-[state=on]:text-green-300 border-green-300 dark:border-green-700"
-                                >
-                                    <CheckCircle className="h-4 w-4 mr-2" />{" "}
-                                    Active
-                                </ToggleGroupItem>
-                                <ToggleGroupItem
-                                    value="inactive"
-                                    aria-label="Set inactive"
-                                    className="data-[state=on]:bg-red-100 data-[state=on]:text-red-700 dark:data-[state=on]:bg-red-900/50 dark:data-[state=on]:text-red-300 border-red-300 dark:border-red-700"
-                                >
-                                    <XCircle className="h-4 w-4 mr-2" />{" "}
-                                    Inactive
-                                </ToggleGroupItem>
-                            </ToggleGroup>
-                            <p className="text-xs text-muted-foreground pt-2">
-                                Toggling to &#39;Inactive&#39; requires
-                                confirmation.
-                            </p>
-                            {updateActiveStatusMutation.isError && (
-                                <p className="text-sm text-red-600 mt-1">
-                                    {updateActiveStatusMutation.error
-                                        ?.message || "Failed to update status."}
-                                </p>
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
 
-                {/* Card for Module Assignments (Placeholder) */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Cog className="h-5 w-5" /> Module Assignments
-                        </CardTitle>
-                        <CardDescription>
-                            Manage which modules or features are enabled for
-                            this department. (Functionality coming soon)
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="p-4 border border-dashed rounded-md text-center text-muted-foreground">
-                            Module assignment controls will appear here.
-                            {/* Future: Add list/checkboxes/selection component for modules */}
-                        </div>
-                    </CardContent>
-                    {/* <CardFooter className="border-t pt-6 mt-6">
-                        <Button disabled>
-                            Save Module Changes (Coming Soon)
-                        </Button>
-                    </CardFooter> */}
-                </Card>
+                <div className="space-y-3 rounded-md border border-border p-4 max-w-lg">
+                    <Label className="font-medium text-base flex items-center gap-2">
+                        Current Status:
+                        {isTogglingActive ? (
+                            <LoadingSpinner size="sm" />
+                        ) : active ? (
+                            <span className="flex items-center gap-1 text-green-600">
+                                <CheckCircle className="h-4 w-4" /> Active
+                            </span>
+                        ) : (
+                            <span className="flex items-center gap-1 text-destructive">
+                                <XCircle className="h-4 w-4" /> Inactive
+                            </span>
+                        )}
+                    </Label>
+                    <ToggleGroup
+                        type="single"
+                        value={uiActiveSelection}
+                        onValueChange={handleActiveToggleChange}
+                        disabled={isToggleDisabled}
+                        className="justify-start gap-2"
+                        aria-label="Department status toggle"
+                    >
+                        <ToggleGroupItem
+                            value="active"
+                            aria-label="Set active"
+                            className="data-[state=on]:bg-green-100 data-[state=on]:text-green-700 dark:data-[state=on]:bg-green-900/50 dark:data-[state=on]:text-green-300 border-green-300 dark:border-green-700"
+                        >
+                            <CheckCircle className="h-4 w-4 mr-2" /> Active
+                        </ToggleGroupItem>
+                        <ToggleGroupItem
+                            value="inactive"
+                            aria-label="Set inactive"
+                            className="data-[state=on]:bg-red-100 data-[state=on]:text-red-700 dark:data-[state=on]:bg-red-900/50 dark:data-[state=on]:text-red-300 border-red-300 dark:border-red-700"
+                        >
+                            <XCircle className="h-4 w-4 mr-2" /> Inactive
+                        </ToggleGroupItem>
+                    </ToggleGroup>
+                    <p className="text-xs text-muted-foreground pt-2">
+                        Toggling to &#39;Inactive&#39; requires confirmation.
+                    </p>
+                    {updateActiveStatusMutation.isError && (
+                        <p className="text-sm text-red-600 mt-1">
+                            {updateActiveStatusMutation.error?.message ||
+                                "Failed to update status."}
+                        </p>
+                    )}
+                </div>
+
+                <DepartmentModuleAssignmentSection
+                    depId={depId}
+                    orgId={orgId}
+                    departmentName={depData.name}
+                />
 
                 {/* Delete Section */}
                 <Separator className="my-8" />
