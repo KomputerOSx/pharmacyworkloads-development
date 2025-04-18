@@ -2,12 +2,8 @@
 
 "use client";
 
-import React, { useState } from "react"; // Removed useEffect here
-
-// Hooks
+import React, { useState } from "react";
 import { useAllModules, useDeleteModule } from "@/hooks/useModules";
-
-// Components
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -15,22 +11,27 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ModuleTable } from "@/components/modules/ModuleTable"; // Import table
-import { AddModuleForm } from "@/components/modules/AddModuleForm"; // Import add form
-import { EditModuleForm } from "@/components/modules/EditModuleForm"; // Import edit form
+import { ModuleTable } from "@/components/modules/ModuleTable";
+import { AddModuleForm } from "@/components/modules/AddModuleForm";
+import { EditModuleForm } from "@/components/modules/EditModuleForm";
 
-// Icons
-import { Loader2, Terminal, PlusCircle, RefreshCw } from "lucide-react";
+import {
+    Loader2,
+    Terminal,
+    PlusCircle,
+    RefreshCw,
+    Settings2,
+} from "lucide-react";
 
-// Types
 import { Module } from "@/types/moduleTypes";
 import Link from "next/link";
-// Removed zod, useForm, form components, Textarea, Checkbox - they are in the forms now
+import { ManageModuleAssignmentsDialogContent } from "@/components/modules/ManageModuleAssignmentsDialogContent";
 
 export default function ModuleConsolePage() {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -39,8 +40,12 @@ export default function ModuleConsolePage() {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [moduleToDelete, setModuleToDelete] = useState<{
         id: string;
-        name: string;
+        displayName: string;
     } | null>(null);
+    const [isManageAssignmentsDialogOpen, setIsManageAssignmentsDialogOpen] =
+        useState(false);
+    const [managingAssignmentsForModule, setManagingAssignmentsForModule] =
+        useState<Module | null>(null);
 
     // Data Fetching
     const {
@@ -54,11 +59,6 @@ export default function ModuleConsolePage() {
 
     // Mutations (Only Delete is needed directly here)
     const deleteMutation = useDeleteModule();
-
-    // Form Hook REMOVED - Handled within EditModuleForm
-
-    // useEffect for populating form REMOVED - Handled within EditModuleForm
-
     // --- Handlers ---
     const handleRefresh = () => {
         void refetchModules();
@@ -75,8 +75,8 @@ export default function ModuleConsolePage() {
         setTimeout(() => setEditingModule(null), 150);
     };
 
-    const handleOpenDeleteDialog = (id: string, name: string) => {
-        setModuleToDelete({ id, name });
+    const handleOpenDeleteDialog = (id: string, displayName: string) => {
+        setModuleToDelete({ id, displayName });
         setIsDeleteDialogOpen(true);
     };
 
@@ -85,9 +85,19 @@ export default function ModuleConsolePage() {
         setModuleToDelete(null);
     };
 
-    const handleEditSubmit = () => {
-        // Renamed from handleEditSubmit
-        handleCloseEditDialog(); // Logic moved to EditModuleForm, just close dialog on success
+    const handleOpenManageAssignmentsDialog = (module: Module) => {
+        setManagingAssignmentsForModule(module);
+        setIsManageAssignmentsDialogOpen(true);
+    };
+
+    const handleCloseManageAssignmentsDialog = () => {
+        setIsManageAssignmentsDialogOpen(false);
+        // Optional: Delay clearing state slightly for transition
+        setTimeout(() => setManagingAssignmentsForModule(null), 150);
+    };
+
+    const handleEditSuccess = () => {
+        handleCloseEditDialog();
     };
 
     const handleConfirmDelete = () => {
@@ -149,6 +159,9 @@ export default function ModuleConsolePage() {
                     isLoading={isLoadingModules || isRefetchingModules} // Pass combined loading state
                     onEditRequest={handleOpenEditDialog}
                     onDeleteRequest={handleOpenDeleteDialog}
+                    onManageAssignmentsRequest={
+                        handleOpenManageAssignmentsDialog
+                    }
                 />
             </CardContent>
         );
@@ -234,7 +247,7 @@ export default function ModuleConsolePage() {
                     >
                         <DialogHeader>
                             <DialogTitle>
-                                Edit Module: {editingModule?.name}
+                                Edit Module: {editingModule?.displayName}
                             </DialogTitle>
                             <DialogDescription>
                                 Update the details for this module. Click save
@@ -244,9 +257,48 @@ export default function ModuleConsolePage() {
                         {/* Use EditModuleForm */}
                         <EditModuleForm
                             moduleToEdit={editingModule}
-                            onSuccess={handleEditSubmit} // Use renamed handler
+                            onSuccess={handleEditSuccess}
                             onCancel={handleCloseEditDialog}
                         />
+                    </DialogContent>
+                )}
+            </Dialog>
+
+            {/* --- Manage Assignments Dialog --- */}
+            <Dialog
+                open={isManageAssignmentsDialogOpen}
+                onOpenChange={setIsManageAssignmentsDialogOpen}
+            >
+                {managingAssignmentsForModule && (
+                    <DialogContent className="sm:max-w-lg">
+                        {" "}
+                        {/* Make it slightly wider? */}
+                        <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                                <Settings2 className="h-5 w-5" /> Manage
+                                Assignments for:{" "}
+                                {managingAssignmentsForModule.displayName}
+                            </DialogTitle>
+                            <DialogDescription>
+                                View which departments this module is currently
+                                assigned to.
+                                {/* Add note about adding/removing assignments elsewhere for now */}
+                                (Assignment changes are managed in department
+                                settings).
+                            </DialogDescription>
+                        </DialogHeader>
+                        {/* Render the dedicated content component */}
+                        <ManageModuleAssignmentsDialogContent
+                            module={managingAssignmentsForModule}
+                        />
+                        <DialogFooter className="mt-4">
+                            <Button
+                                variant="outline"
+                                onClick={handleCloseManageAssignmentsDialog}
+                            >
+                                Close
+                            </Button>
+                        </DialogFooter>
                     </DialogContent>
                 )}
             </Dialog>
@@ -254,10 +306,9 @@ export default function ModuleConsolePage() {
             {/* --- Delete Confirmation Dialog --- */}
             {moduleToDelete && (
                 <DeleteConfirmationDialog
-                    // ... props remain the same
                     open={isDeleteDialogOpen}
                     onOpenChange={setIsDeleteDialogOpen} // Simplified change handler
-                    itemName={`module ${moduleToDelete.name}`}
+                    itemName={`module ${moduleToDelete.displayName}`}
                     itemType="global module"
                     onConfirm={handleConfirmDelete}
                     isPending={deleteMutation.isPending}

@@ -490,27 +490,28 @@ export default function DepartmentTeamsManagementPage() {
                 </DialogContent>
             </Dialog>
 
-            <Dialog
-                open={isManageLocDialogOpen}
-                onOpenChange={setIsManageLocDialogOpen}
-            >
-                <DialogContent
-                    className="sm:max-w-md"
-                    onInteractOutside={handleCloseManageLocationsDialog}
-                    onEscapeKeyDown={handleCloseManageLocationsDialog}
+            <ScrollArea className="max-h-[60vh] pr-4">
+                <Dialog
+                    open={isManageLocDialogOpen}
+                    onOpenChange={setIsManageLocDialogOpen}
                 >
-                    <DialogHeader>
-                        <DialogTitle>
-                            Manage Locations for Team:
-                            {managingLocationsForTeam?.name}
-                        </DialogTitle>
-                        <DialogDescription>
-                            Select the locations (assigned to &#39;
-                            {currentDepartmentName}&#39;) that this team should
-                            manage.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <ScrollArea className="max-h-[60vh] pr-4">
+                    <DialogContent
+                        className="sm:max-w-md"
+                        onInteractOutside={handleCloseManageLocationsDialog}
+                        onEscapeKeyDown={handleCloseManageLocationsDialog}
+                    >
+                        <DialogHeader>
+                            <DialogTitle>
+                                Manage Locations for Team:
+                                {managingLocationsForTeam?.name}
+                            </DialogTitle>
+                            <DialogDescription>
+                                Select the locations (assigned to &#39;
+                                {currentDepartmentName}&#39;) that this team
+                                should manage.
+                            </DialogDescription>
+                        </DialogHeader>
+
                         <div className="space-y-3 py-4">
                             {isLoadingDepLocs || isLoadingOrgLocs ? (
                                 <div className="flex justify-center items-center p-4">
@@ -581,18 +582,19 @@ export default function DepartmentTeamsManagementPage() {
                                 })
                             )}
                         </div>
-                    </ScrollArea>
-                    <DialogFooter className="mt-4 sm:justify-end">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={handleCloseManageLocationsDialog}
-                        >
-                            Close
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+
+                        <DialogFooter className="mt-4 sm:justify-end">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={handleCloseManageLocationsDialog}
+                            >
+                                Close
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            </ScrollArea>
 
             {/* Manage Users Dialog */}
             <Dialog

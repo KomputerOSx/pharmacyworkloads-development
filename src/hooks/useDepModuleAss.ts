@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     createDepModuleAssignment,
     deleteDepModuleAssignment,
+    getAssignmentsByModule,
     getModuleAssignmentsByDepartment,
 } from "@/services/depModulesAssService";
 import { toast } from "sonner";
@@ -13,10 +14,10 @@ import { DepModuleAssignment } from "@/types/moduleTypes";
 const depModuleAssKeys = {
     all: ["depModuleAssignments"] as const,
     lists: () => [...depModuleAssKeys.all, "list"] as const,
-    // List assignments primarily by the department they belong to
     listByDep: (depId: string) =>
         [...depModuleAssKeys.lists(), { depId }] as const,
-    // Detail key might be less used if list is always fetched, but maintain pattern
+    listByModule: (moduleId: string) =>
+        [...depModuleAssKeys.lists(), { moduleId }] as const,
     details: () => [...depModuleAssKeys.all, "detail"] as const,
     detail: (id: string) => [...depModuleAssKeys.details(), id] as const,
 };
@@ -36,9 +37,14 @@ export function useDepModuleAssignments(depId?: string) {
     });
 }
 
-// Note: A hook for useDepModuleAssignment(id) is less common, as you usually view/manage
-// assignments in the context of a department list. If needed, it would follow the pattern:
-// export function useDepModuleAssignment(id?: string) { ... queryKey: depModuleAssKeys.detail(id!) ... }
+export function useAssignmentsByModule(moduleId?: string) {
+    return useQuery<DepModuleAssignment[], Error>({
+        queryKey: depModuleAssKeys.listByModule(moduleId!),
+        queryFn: () => getAssignmentsByModule(moduleId!),
+        staleTime: 1 * 60 * 1000,
+        gcTime: 5 * 60 * 1000,
+    });
+}
 
 /**
  * Hook for creating (assigning) a module to a department.

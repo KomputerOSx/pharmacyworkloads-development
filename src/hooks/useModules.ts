@@ -7,42 +7,57 @@ import {
     getModule,
     getAllModules,
     updateModule,
+    getModulesByIds,
 } from "@/services/modulesService";
 import { Module } from "@/types/moduleTypes";
 import { toast } from "sonner";
+import { useMemo } from "react";
 
-// --- Query Keys (Simplified) ---
 const moduleKeys = {
     all: ["modules"] as const,
     lists: () => [...moduleKeys.all, "list"] as const,
-    // listByOrg removed
     details: () => [...moduleKeys.all, "detail"] as const,
     detail: (id: string) => [...moduleKeys.details(), id] as const,
+    detailsByIds: (ids: string[]) =>
+        [...moduleKeys.details(), { ids: [...ids].sort() }] as const,
 };
 
-/**
- * Hook to fetch *all* global modules.
- */
 export function useAllModules() {
     // Renamed from useModules
     return useQuery<Module[], Error>({
-        queryKey: moduleKeys.lists(), // Use the simplified list key
-        queryFn: getAllModules, // Use the updated service function
-        // enabled removed (always enabled)
+        queryKey: moduleKeys.lists(),
+        queryFn: getAllModules,
         staleTime: 5 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
     });
 }
 
-/**
- * Hook to fetch details for a single module. (No change needed here)
- * @param id - The ID of the module (optional, query disabled if falsy).
- */
 export function useModule(id?: string) {
     return useQuery<Module | null, Error>({
         queryKey: moduleKeys.detail(id!),
         queryFn: () => getModule(id!),
         enabled: !!id,
+    });
+}
+
+export function useModulesByIds(
+    ids: string[] | undefined,
+    options?: { enabled?: boolean },
+) {
+    const sortedIds = useMemo(() => {
+        if (!ids) return [];
+        return [...ids].sort();
+    }, [ids]);
+
+    const isEnabled =
+        options?.enabled !== false && sortedIds && sortedIds.length > 0;
+
+    return useQuery<Module[], Error>({
+        queryKey: moduleKeys.detailsByIds(sortedIds),
+        queryFn: () => getModulesByIds(sortedIds),
+        enabled: isEnabled,
+        staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
     });
 }
 

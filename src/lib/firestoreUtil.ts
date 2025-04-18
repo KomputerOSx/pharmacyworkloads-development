@@ -520,10 +520,14 @@ export function mapFirestoreDocToModule(
         return {
             id: id,
             name: data.name ?? "",
+            displayName: data.displayName ?? data.name ?? "",
             description: data.description ?? null,
+            urlPath: data.urlPath ?? "",
+            icon: data.icon ?? null,
+            accessLevel: data.accessLevel ?? "admin",
             active: data.active ?? false,
-            createdAt: (data.createdAt as Timestamp) ?? null,
-            updatedAt: (data.updatedAt as Timestamp) ?? null,
+            createdAt: (data.createdAt as Timestamp)?.toDate() ?? null,
+            updatedAt: (data.updatedAt as Timestamp)?.toDate() ?? null,
             createdBy: data.createdBy ?? "",
             updatedBy: data.updatedBy ?? "",
         };

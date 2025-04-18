@@ -11,6 +11,7 @@ import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import {
     Form,
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -18,27 +19,49 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 
-// Schema Definition (can be shared or redefined here)
+// Schema Definition (Ensure it matches your latest version)
 const moduleFormSchema = z.object({
-    name: z.string().min(2, "Module name must be at least 2 characters."),
+    name: z.string().min(2, "Internal name must be >= 2 chars."),
+    displayName: z.string().min(2, "Display name must be >= 2 chars."),
+    urlPath: z
+        .string()
+        .min(2, "URL Path must be >= 2 chars.")
+        .regex(
+            /^[a-z0-9-]+$/,
+            "URL Path: only lowercase letters, numbers, hyphens.",
+        ),
     description: z.string().optional(),
+    icon: z.string().optional(),
+    accessLevel: z.enum(["admin", "manager", "all"]),
     active: z.boolean(),
 });
 type ModuleFormValues = z.infer<typeof moduleFormSchema>;
 
 interface AddModuleFormProps {
     onSuccess: () => void;
-    onCancel: () => void; // Keep onCancel if needed, though DialogClose might suffice
+    onCancel: () => void;
 }
 
 export function AddModuleForm({ onSuccess, onCancel }: AddModuleFormProps) {
     const form = useForm<ModuleFormValues>({
         resolver: zodResolver(moduleFormSchema),
+        // *** PROVIDE DEFAULTS FOR *ALL* FIELDS ***
         defaultValues: {
             name: "",
-            description: "",
+            displayName: "", // Added default
+            urlPath: "", // Added default
+            description: "", // Use "" for optional text fields
+            icon: "", // Added default (use "" or null consistently)
+            accessLevel: "all", // Added default enum value
             active: true,
         },
     });
@@ -46,21 +69,25 @@ export function AddModuleForm({ onSuccess, onCancel }: AddModuleFormProps) {
     const createMutation = useCreateModule();
 
     const onSubmit = (values: ModuleFormValues) => {
+        // Prepare data, ensuring optional fields are null if empty
+        const moduleData = {
+            ...values,
+            description: values.description?.trim() || null,
+            icon: values.icon?.trim() || null,
+        };
+
         createMutation.mutate(
-            { moduleData: values },
+            { moduleData: moduleData }, // Pass prepared data
             {
                 onSuccess: () => {
                     form.reset();
-                    onSuccess(); // Close dialog
-                    // Toast handled by hook
+                    onSuccess();
                 },
                 onError: (error) => {
-                    // Toast handled by hook
                     console.error(
                         `aQ1sWdE4 - Failed to submit new module:`,
                         error,
                     );
-                    // Optionally: form.setError("root", { message: error.message });
                 },
             },
         );
@@ -68,20 +95,44 @@ export function AddModuleForm({ onSuccess, onCancel }: AddModuleFormProps) {
 
     return (
         <Form {...form}>
+            {/* Pass mutation pending state to disable form elements */}
             <form
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-4 py-2 pb-4"
             >
+                {/* Internal Name */}
                 <FormField
                     control={form.control}
                     name="name"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Module Name</FormLabel>
+                            <FormLabel>Internal Name/Key *</FormLabel>
                             <FormControl>
                                 <Input
                                     {...field}
-                                    placeholder="e.g., Pharmacy Orders"
+                                    placeholder="e.g., weeklyRota (camelCase, unique)"
+                                    disabled={createMutation.isPending}
+                                />
+                            </FormControl>
+                            <FormDescription>
+                                Unique identifier for the module (cannot be
+                                changed after creation).
+                            </FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                {/* Display Name */}
+                <FormField
+                    control={form.control}
+                    name="displayName"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Display Name *</FormLabel>
+                            <FormControl>
+                                <Input
+                                    {...field}
+                                    placeholder="e.g., Weekly Rota Management"
                                     disabled={createMutation.isPending}
                                 />
                             </FormControl>
@@ -89,6 +140,29 @@ export function AddModuleForm({ onSuccess, onCancel }: AddModuleFormProps) {
                         </FormItem>
                     )}
                 />
+                {/* URL Path */}
+                <FormField
+                    control={form.control}
+                    name="urlPath"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>URL Path *</FormLabel>
+                            <FormControl>
+                                <Input
+                                    {...field}
+                                    placeholder="e.g., weekly-rota (no spaces/caps)"
+                                    disabled={createMutation.isPending}
+                                />
+                            </FormControl>
+                            <FormDescription>
+                                Used in the URL. Lowercase letters, numbers,
+                                hyphens only.
+                            </FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                {/* Description */}
                 <FormField
                     control={form.control}
                     name="description"
@@ -96,8 +170,10 @@ export function AddModuleForm({ onSuccess, onCancel }: AddModuleFormProps) {
                         <FormItem>
                             <FormLabel>Description (Optional)</FormLabel>
                             <FormControl>
+                                {/* Use controlled value consistently */}
                                 <Textarea
                                     {...field}
+                                    value={field.value ?? ""}
                                     placeholder="Briefly describe the module's purpose"
                                     disabled={createMutation.isPending}
                                 />
@@ -106,6 +182,69 @@ export function AddModuleForm({ onSuccess, onCancel }: AddModuleFormProps) {
                         </FormItem>
                     )}
                 />
+                {/* Icon */}
+                <FormField
+                    control={form.control}
+                    name="icon"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Icon Name (Optional)</FormLabel>
+                            <FormControl>
+                                {/* Use controlled value consistently */}
+                                <Input
+                                    {...field}
+                                    value={field.value ?? ""}
+                                    placeholder="e.g., CalendarDays (from lucide-react)"
+                                    disabled={createMutation.isPending}
+                                />
+                            </FormControl>
+                            <FormDescription>
+                                Specify an icon identifier (e.g., from
+                                lucide-react).
+                            </FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                {/* Access Level */}
+                <FormField
+                    control={form.control}
+                    name="accessLevel"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Access Level *</FormLabel>
+                            {/* Ensure the Select component handles the value correctly */}
+                            <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                                disabled={createMutation.isPending}
+                            >
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select who can access" />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    <SelectItem value="all">
+                                        All Users
+                                    </SelectItem>
+                                    <SelectItem value="manager">
+                                        Managers & Admins
+                                    </SelectItem>
+                                    <SelectItem value="admin">
+                                        Admins Only
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <FormDescription>
+                                Determines base access (can be refined by
+                                roles).
+                            </FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                {/* Active Checkbox */}
                 <FormField
                     control={form.control}
                     name="active"
@@ -114,7 +253,7 @@ export function AddModuleForm({ onSuccess, onCancel }: AddModuleFormProps) {
                             <FormLabel>Active on Creation</FormLabel>
                             <FormControl>
                                 <Checkbox
-                                    checked={field.value}
+                                    checked={field.value} // Use checked for Checkbox
                                     onCheckedChange={field.onChange}
                                     disabled={createMutation.isPending}
                                 />
@@ -122,12 +261,7 @@ export function AddModuleForm({ onSuccess, onCancel }: AddModuleFormProps) {
                         </FormItem>
                     )}
                 />
-                {/* Optional: Display root form errors */}
-                {form.formState.errors.root && (
-                    <p className="text-sm font-medium text-destructive">
-                        {form.formState.errors.root.message}
-                    </p>
-                )}
+                {/* ... Footer ... */}
                 <DialogFooter className="mt-4">
                     <DialogClose asChild>
                         <Button

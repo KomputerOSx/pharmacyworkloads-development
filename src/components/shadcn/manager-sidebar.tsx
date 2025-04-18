@@ -107,7 +107,7 @@ const sidebarLayout = {
     ] as CombinedNavItem[],
 };
 
-export function ManagerSidebar({
+export function UserSidebar({
     ...props
 }: React.ComponentProps<typeof Sidebar>) {
     const { orgId } = useParams();

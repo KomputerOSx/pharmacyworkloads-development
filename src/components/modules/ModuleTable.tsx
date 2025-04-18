@@ -12,13 +12,14 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Settings2, Trash2 } from "lucide-react";
 
 interface ModuleTableProps {
     modules: Module[];
     isLoading: boolean;
     onEditRequest: (module: Module) => void;
     onDeleteRequest: (id: string, name: string) => void;
+    onManageAssignmentsRequest: (module: Module) => void;
 }
 
 export function ModuleTable({
@@ -26,11 +27,11 @@ export function ModuleTable({
     isLoading,
     onEditRequest,
     onDeleteRequest,
+    onManageAssignmentsRequest,
 }: ModuleTableProps) {
     if (isLoading) {
         return (
             <div className="space-y-2 px-6 pb-4">
-                {" "}
                 {/* Add padding if CardContent padding removed */}
                 {[...Array(3)].map((_, i) => (
                     <Skeleton key={i} className="h-12 w-full rounded-md" />
@@ -51,57 +52,82 @@ export function ModuleTable({
         <Table>
             <TableHeader>
                 <TableRow>
-                    <TableHead>Name</TableHead>
+                    <TableHead>Display Name</TableHead>
+                    <TableHead className="hidden md:table-cell">
+                        URL Path
+                    </TableHead>
                     <TableHead className="hidden sm:table-cell">
-                        Description
+                        Access
                     </TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead className="text-right w-[100px]">
+                    <TableHead className="text-right w-[140px]">
                         Actions
                     </TableHead>
+                    {/* Increased width */}
                 </TableRow>
             </TableHeader>
             <TableBody>
                 {modules.map((module) => (
                     <TableRow key={module.id}>
                         <TableCell className="font-medium">
-                            {module.name}
+                            {module.displayName}
                         </TableCell>
-                        <TableCell className="hidden sm:table-cell text-sm text-muted-foreground max-w-xs truncate">
-                            {module.description || "-"}
+                        <TableCell className="hidden md:table-cell text-sm text-muted-foreground font-mono">
+                            /{module.urlPath}
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell text-sm capitalize">
+                            {module.accessLevel}
                         </TableCell>
                         <TableCell>
+                            {/* Status Badge remains the same */}
                             <span
-                                className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
-                                    module.active
-                                        ? "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
-                                        : "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300"
-                                }`}
+                                className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${module.active ? "..." : "..."}`}
                             >
                                 {module.active ? "Active" : "Inactive"}
                             </span>
                         </TableCell>
                         <TableCell className="text-right space-x-1">
+                            {/* Manage Assignments Button */}
                             <Button
                                 variant="ghost"
                                 size="icon"
+                                title="Manage Assignments"
+                                onClick={() =>
+                                    onManageAssignmentsRequest(module)
+                                }
+                            >
+                                <Settings2 className="h-4 w-4" />
+                                <span className="sr-only">
+                                    Manage Assignments for {module.displayName}
+                                </span>
+                            </Button>
+                            {/* Edit Button */}
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                title="Edit Module"
                                 onClick={() => onEditRequest(module)}
                             >
                                 <Edit className="h-4 w-4" />
                                 <span className="sr-only">
-                                    Edit {module.name}
+                                    Edit {module.displayName}
                                 </span>
                             </Button>
+                            {/* Delete Button */}
                             <Button
                                 variant="ghost"
                                 size="icon"
+                                title="Delete Module"
                                 onClick={() =>
-                                    onDeleteRequest(module.id, module.name)
+                                    onDeleteRequest(
+                                        module.id,
+                                        module.displayName,
+                                    )
                                 }
                             >
                                 <Trash2 className="h-4 w-4 text-destructive" />
                                 <span className="sr-only">
-                                    Delete {module.name}
+                                    Delete {module.displayName}
                                 </span>
                             </Button>
                         </TableCell>

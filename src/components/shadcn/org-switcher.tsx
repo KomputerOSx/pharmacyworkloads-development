@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ChevronsUpDown, House } from "lucide-react";
+import { ChevronsUpDown, Cog, House } from "lucide-react";
 
 import {
     DropdownMenu,
@@ -122,7 +122,18 @@ export function OrgSwitcher({
                                     <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                                         <House className="size-4" />
                                     </div>
-                                    Return to Orgs Console
+                                    Orgs Console
+                                </DropdownMenuItem>
+                            </Link>
+                            <Link
+                                href="/admin/moduleConsole"
+                                className="text-muted-foreground font-medium"
+                            >
+                                <DropdownMenuItem className="gap-2 p-2">
+                                    <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
+                                        <Cog className="size-4" />
+                                    </div>
+                                    Module Console
                                 </DropdownMenuItem>
                             </Link>
                         </DropdownMenuContent>
