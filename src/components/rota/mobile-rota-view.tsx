@@ -19,7 +19,7 @@ interface MobileRotaViewProps {
     teamName: string;
     weekDays: Date[];
     usersToDisplay: User[];
-    assignmentsMap: Map<string, StoredAssignment[]>; // Key: `${userId}-${dayIndex}`
+    assignmentsMap: Map<string, StoredAssignment[]>;
     allOrgLocationsMap: Map<string, HospLoc>;
 }
 
@@ -37,7 +37,7 @@ export function MobileRotaView({
                 className="w-full border-collapse"
                 style={{ minWidth: `${minTableWidth}px` }}
             >
-                <TableCaption className="mt-4 mb-2 text-xs">
+                <TableCaption className=" mt-4 mb-2 text-xs">
                     Scroll right to see all users →
                 </TableCaption>
                 <TableHeader className="sticky top-0 z-10 bg-muted/80 backdrop-blur-sm">
@@ -137,8 +137,8 @@ export function MobileRotaView({
                 </TableBody>
             </Table>
             {/* Scroll indicators */}
-            <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-background to-transparent pointer-events-none" />
-            <div className="absolute left-[100px] top-0 bottom-0 w-3 bg-gradient-to-r from-background to-transparent pointer-events-none" />
+            {/*<div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-background to-transparent pointer-events-none" />*/}
+            {/*<div className="absolute left-[50px] top-0 bottom-0 w-3 bg-gradient-to-r from-background to-transparent pointer-events-none" />*/}
         </div>
     );
 }
