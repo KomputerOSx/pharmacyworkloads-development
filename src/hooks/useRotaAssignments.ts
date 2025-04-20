@@ -280,7 +280,6 @@ export function useSaveWeekAssignments() {
             console.log(
                 `Batch save successful for week ${variables.weekId}, team ${variables.teamId}`,
             );
-            toast.success(`Rota saved successfully!`);
             await queryClient.invalidateQueries({
                 queryKey: assignmentKeys.listByWeekAndTeam(
                     variables.weekId,
@@ -316,10 +315,9 @@ export function useDeleteWeekAssignments() {
         mutationFn: (variables: { weekId: string; teamId: string }) =>
             deleteWeekAssignmentsBatch(variables.weekId, variables.teamId),
         onSuccess: (deletedCount, variables) => {
-            toast.success(
-                `Cleared ${deletedCount} assignment(s) for week ${variables.weekId}.`,
+            console.log(
+                `Deleted ${deletedCount} assignments for week ${variables.weekId}, team ${variables.teamId}`,
             );
-            // Invalidate the list for the week/team
             queryClient
                 .invalidateQueries({
                     queryKey: assignmentKeys.listByWeekAndTeam(

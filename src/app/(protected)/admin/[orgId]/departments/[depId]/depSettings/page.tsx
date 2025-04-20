@@ -1,17 +1,15 @@
-// src/app/(protected)/admin/[orgId]/departments/[depId]/settings/page.tsx
-
 "use client";
 
 import React, { useState, useEffect, FormEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link"; // Import Link
+import Link from "next/link";
 
-// Hooks (Assuming these exist based on your other components)
+// Hooks
 import { useDep, useUpdateDep, useDeleteDep } from "@/hooks/useDeps";
 
 // Common Components
-import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog"; // Adjust path if needed
-import { LoadingSpinner } from "@/components/ui/loadingSpinner"; // Adjust path if needed
+import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
+import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 
 // Shadcn UI Imports
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -39,7 +37,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { AlertTriangle, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
-import { DepartmentModuleAssignmentSection } from "@/components/modules/DepartmentModuleAssignmentSection"; // Added Icons
+import { DepartmentModuleAssignmentSection } from "@/components/modules/DepartmentModuleAssignmentSection";
 
 export default function DepartmentSettingsPage() {
     const params = useParams();

@@ -128,7 +128,6 @@ export function useUpdateDep() {
             console.log(
                 `b2jbhDXQ - Department update successful for ID ${variables.id}. Invalidated list for org ${variables.orgId} and detail query.`,
             );
-            toast.success("Department updated successfully!");
         },
 
         onError: (error, variables) => {

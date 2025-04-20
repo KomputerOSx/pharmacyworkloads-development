@@ -85,7 +85,7 @@ export function useSetWeekStatus() {
             ),
 
         onSuccess: async (data, variables) => {
-            toast.success(`Rota status updated to ${variables.status}.`);
+            // toast.success(`Rota status updated to ${variables.status}.`);
             await queryClient.invalidateQueries({
                 queryKey: rotaWeekStatusKeys.detail(
                     variables.weekId,
