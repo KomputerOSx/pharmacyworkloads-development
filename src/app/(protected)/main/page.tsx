@@ -25,13 +25,12 @@ import {
 import { useDep } from "@/hooks/useDeps";
 
 const iconMap: Record<string, LucideIcon> = {
-    Package: Package, // Include default just in case
+    Package: Package,
     CalendarDays: CalendarDays,
     Pill: Pill,
     Users: Users,
     ClipboardList: ClipboardList,
-    // Add more mappings here...
-    "weekly-rota": CalendarDays, // You could use urlPath as keys too
+    "weekly-rota": CalendarDays,
     pharmacy: Pill,
 };
 
