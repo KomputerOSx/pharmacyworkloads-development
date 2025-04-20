@@ -1,9 +1,9 @@
 // functions/src/users/onUserUpdate.ts
 
-import { onDocumentUpdated } from "firebase-functions/v2/firestore"; // Use V2 trigger
-import * as logger from "firebase-functions/logger"; // Use V2 logger
+import { onDocumentUpdated } from "firebase-functions/v2/firestore";
+import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
-import { User } from "../models/user"; // Import the User type
+import { User } from "../models/user";
 
 const auth = admin.auth();
 

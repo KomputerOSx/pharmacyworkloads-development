@@ -3,8 +3,13 @@ import "./globals.css";
 import "@/styles/themes.css"; // Ensure path is correct
 
 import React, { ReactNode } from "react";
-import Providers from "./providers"; // Import the client wrapper
+import Providers from "./providers";
+import { Metadata } from "next"; // Import the client wrapper
 
+export const metadata: Metadata = {
+    title: "Pharmacy Workloads",
+    description: "Manage your pharmacy workloads",
+};
 export default function RootLayout({ children }: { children: ReactNode }) {
     return (
         <html lang="en">

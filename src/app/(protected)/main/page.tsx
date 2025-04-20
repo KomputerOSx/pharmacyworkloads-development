@@ -126,6 +126,7 @@ export default function UserPage() {
                     <AlertDescription>
                         Your profile is incomplete (missing organization or
                         department). Please contact support.
+                        <br />
                         <Button
                             variant="destructive"
                             size="sm"
@@ -134,6 +135,18 @@ export default function UserPage() {
                         >
                             <LogOut className="mr-2 h-4 w-4" /> Logout
                         </Button>
+                        {userProfile.role === "admin" && (
+                            <Link href={"/admin"}>
+                                <Button
+                                    variant="default"
+                                    size="sm"
+                                    className="mt-4 ml-4"
+                                >
+                                    <Users className="mr-2 h-4 w-4" /> Admin
+                                    Dashboard
+                                </Button>
+                            </Link>
+                        )}
                     </AlertDescription>
                 </Alert>
             </div>

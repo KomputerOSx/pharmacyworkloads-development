@@ -24,13 +24,10 @@ const UsersCollection = collection(db, "users");
 export async function getUsers(orgId: string): Promise<User[]> {
     if (!orgId) {
         console.error("getUsers error: orgId cannot be empty.");
-        return []; // Return empty array if orgId is missing
+        return [];
     }
     try {
-        const userQuery = query(
-            UsersCollection, // Use the specific collection reference
-            where("orgId", "==", orgId),
-        );
+        const userQuery = query(UsersCollection, where("orgId", "==", orgId));
 
         const userSnapshot = await getDocs(userQuery);
         return userSnapshot.docs
@@ -48,13 +45,15 @@ export async function getUsers(orgId: string): Promise<User[]> {
             .filter((u): u is User => u !== null);
     } catch (error) {
         console.error(`Error getting users for org ${orgId}:`, error);
-        throw error; // Re-throw the error for handling upstream
+        throw error;
     }
 }
 
 export async function getUser(id: string): Promise<User | null> {
     if (!id) {
-        console.error("getUser error: Attempted to fetch with an invalid ID.");
+        console.error(
+            `getUser error: Attempted to fetch with an invalid ID. ${id}`,
+        );
         return null;
     }
 

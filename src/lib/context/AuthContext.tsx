@@ -24,11 +24,11 @@ import {
     confirmPasswordReset,
 } from "firebase/auth";
 import { auth } from "@/config/firebase";
-import { useRouter } from "next/navigation"; // Adjust path if needed
+import { useRouter } from "next/navigation";
 import { updateLastLogin } from "@/services/userService";
 import { toast } from "sonner";
 
-const EMAIL_FOR_SIGN_IN_KEY = "emailForSignIn"; // Key for localStorage
+const EMAIL_FOR_SIGN_IN_KEY = "emailForSignIn";
 
 interface AuthContextType {
     user: User | null;
@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.log(
                 "Checking for sign-in link. Current URL:",
                 window.location.href,
-            ); // Log URL
+            );
             if (isSignInWithEmailLink(auth, window.location.href)) {
                 console.log("Sign-in link detected."); // Log detection
                 setIsProcessingAuthAction(true);
@@ -108,8 +108,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     }
 
                     // *** THE REDIRECT ***
-                    console.log("Attempting redirect to /user..."); // Log redirect attempt
-                    setTimeout(() => router.push("/user"), 1000);
+                    console.log("Attempting redirect to /main..."); // Log redirect attempt
+                    setTimeout(() => router.push("/main"), 1000);
 
                     window.history.replaceState(
                         {},
@@ -198,12 +198,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             await sendSignInLinkToEmail(auth, email, actionCodeSettings);
             window.localStorage.setItem(EMAIL_FOR_SIGN_IN_KEY, email);
-            setIsProcessingAuthAction(false); // Sending action is done
-            // Inform user: "Check your email"
+            setIsProcessingAuthAction(false);
         } catch (error) {
             console.error("Failed to send sign-in link:", error);
-            window.localStorage.removeItem(EMAIL_FOR_SIGN_IN_KEY); // Clean up storage on error
-            setIsProcessingAuthAction(false); // Reset on error
+            window.localStorage.removeItem(EMAIL_FOR_SIGN_IN_KEY);
+            setIsProcessingAuthAction(false);
             throw error as AuthError;
         }
     }, []);
@@ -212,9 +211,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const sendPasswordResetLink = useCallback(async (email: string) => {
         setIsProcessingAuthAction(true);
-        // IMPORTANT: The URL here MUST point to the page where the user
-        // will enter their new password (the page with PasswordResetForm).
-        // Firebase will append the oobCode (token) and other params to this URL.
         const actionCodeSettings = {
             url: `${window.location.origin}/reset-password`, // Or your specific deployed URL base + route
             handleCodeInApp: true,
