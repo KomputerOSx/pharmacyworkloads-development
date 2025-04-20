@@ -2,16 +2,15 @@
 
 import * as React from "react";
 import { usePathname, useParams } from "next/navigation";
-import { CombinedNavItem } from "./admin-sidebar"; // Import types from AppSidebar or a shared types file
+import { CombinedNavItem } from "./admin-sidebar";
 import {
     Accordion,
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
-} from "@/components/ui/accordion"; // Adjust path
-import { Button } from "@/components/ui/button"; // Adjust path
-
-import { cn } from "@/lib/utils"; // Adjust path
+} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface CombinedNavProps {
     items: CombinedNavItem[];

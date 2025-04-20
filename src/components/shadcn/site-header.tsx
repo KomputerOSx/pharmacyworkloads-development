@@ -6,6 +6,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 function formatRouteSegments(segments: string[]): string {
     if (segments.length === 0) {
@@ -29,12 +30,17 @@ function formatRouteSegments(segments: string[]): string {
 export function SiteHeader() {
     const pathname = usePathname(); // Get the current path
     const [title, setTitle] = useState<string>(""); // State to hold the title
+    const isAdminRoute = pathname.startsWith("/admin/");
 
     // Update the title based on the current path
     useEffect(() => {
         const allSegments = pathname.split("/").filter(Boolean);
         if (allSegments.length >= 2 && allSegments[0] === "admin") {
             const relevantSegments = allSegments.slice(2);
+            const formattedTitle = formatRouteSegments(relevantSegments);
+            setTitle(formattedTitle);
+        } else if (allSegments.length >= 2 && allSegments[0] === "main") {
+            const relevantSegments = allSegments.slice(3);
             const formattedTitle = formatRouteSegments(relevantSegments);
             setTitle(formattedTitle);
         } else {
@@ -52,37 +58,24 @@ export function SiteHeader() {
                 />
                 <h1 className="text-base font-medium">{title}</h1>
                 <div className="ml-auto flex items-center gap-2">
-                    <Button
-                        variant="ghost"
-                        asChild
-                        size="sm"
-                        className="hidden sm:flex"
-                    >
-                        <Link
-                            href="/user"
-                            rel="noopener noreferrer"
-                            target="_blank"
-                            className="dark:text-foreground"
+                    {isAdminRoute && (
+                        <Button
+                            variant="ghost"
+                            asChild
+                            size="sm"
+                            className="hidden sm:flex"
                         >
-                            Users Portal
-                        </Link>
-                    </Button>
-
-                    <Button
-                        variant="ghost"
-                        asChild
-                        size="sm"
-                        className="hidden sm:flex"
-                    >
-                        <Link
-                            href="/manager"
-                            rel="noopener noreferrer"
-                            target="_blank"
-                            className="dark:text-foreground"
-                        >
-                            Manager Portal
-                        </Link>
-                    </Button>
+                            <Link
+                                href="/main"
+                                rel="noopener noreferrer"
+                                target="_blank"
+                                className="dark:text-foreground"
+                            >
+                                Users Portal
+                            </Link>
+                        </Button>
+                    )}
+                    <ThemeToggle />
                 </div>
             </div>
         </header>

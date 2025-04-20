@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation"; // Added useRouter
+import { usePathname } from "next/navigation";
 import {
     LayoutDashboard,
     UserCircle,
@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-import { NavUser } from "@/components/shadcn/nav-user"; // Adjust path if needed
+import { NavUser } from "@/components/shadcn/nav-user";
 import {
     Sidebar,
     SidebarContent,
@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/context/AuthContext";
 import { useUser } from "@/hooks/useUsers";
 import { useDepModuleAssignments } from "@/hooks/useDepModuleAss";
-import { useModulesByIds } from "@/hooks/useModules"; // Ensure correct import/implementation
+import { useModulesByIds } from "@/hooks/useModules";
 import { Module } from "@/types/moduleTypes";
 import { useOrg } from "@/hooks/useOrgs";
 import { useDep } from "@/hooks/useDeps";
@@ -47,7 +47,6 @@ const iconMap: Record<string, LucideIcon> = {
     "pharmacy-orders": Pill,
 };
 const DefaultModuleIcon = Package;
-// --- End Icon Mapping ---
 
 // Interface for Nav Link items
 interface NavLinkItem {
@@ -122,7 +121,7 @@ export function UserSidebar({
                     (iconKey && iconMap[iconKey]) || DefaultModuleIcon;
                 return {
                     title: module.displayName,
-                    url: `/main/module/${module.id}/${module.urlPath}`, // Use urlPath for the link path segment
+                    url: `/main/module/${module.id}/${module.urlPath}`,
                     icon: IconComponent,
                     disabled: !module.active,
                 };
@@ -149,17 +148,6 @@ export function UserSidebar({
         }
         return (
             <div className="p-4 border-b border-border space-y-0.5">
-                {/*<p*/}
-                {/*    className="text-sm font-semibold truncate"*/}
-                {/*    title={*/}
-                {/*        userProfile.firstName + " " + userProfile.lastName ||*/}
-                {/*        userProfile.email ||*/}
-                {/*        ""*/}
-                {/*    }*/}
-                {/*>*/}
-                {/*    {userProfile.firstName + " " + userProfile.lastName ||*/}
-                {/*        userProfile.email}*/}
-                {/*</p>*/}
                 {userOrgName && (
                     <p
                         className="text-xl font-semibold truncate"
@@ -229,7 +217,7 @@ export function UserSidebar({
                 {navigationLinks.map((item) => {
                     const linkUrl = item.url.endsWith("/")
                         ? item.url
-                        : `${item.url}/`;
+                        : `/${item.url}/`;
                     const currentPath = pathname.endsWith("/")
                         ? pathname
                         : `${pathname}/`;
@@ -280,22 +268,14 @@ export function UserSidebar({
 
     // --- Main Sidebar Structure ---
     return (
-        // Adjust 'collapsible' based on whether user sidebar should collapse
         <Sidebar collapsible="offcanvas" {...props}>
             <SidebarHeader>{renderSidebarHeader()}</SidebarHeader>
             <SidebarContent className="p-0 flex-1 flex flex-col">
                 <div className="flex-1 overflow-y-auto">{renderNavLinks()}</div>
             </SidebarContent>
             <SidebarFooter>
-                {/* You might want a simplified NavUser or just a logout button */}
                 <NavUser />
-                {/* Or just a Logout Button: */}
-                {/* <Button variant="ghost" size="sm" className="w-full justify-start gap-2" onClick={() => signOut(auth)}>
-                    <LogOut className="h-4 w-4" /> Logout
-                 </Button> */}
             </SidebarFooter>
-            {/* Remove SidebarRail if not used in user layout */}
-            {/* <SidebarRail /> */}
         </Sidebar>
     );
 }

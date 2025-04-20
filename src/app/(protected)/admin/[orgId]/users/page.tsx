@@ -218,7 +218,7 @@ export default function UsersPage() {
         <div className="mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 {/* Page Title (Optional but nice) */}
-                <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
+                <h1 className="text-2xl font-semibold flex items-center gap-2">
                     <UsersIcon className="h-6 w-6" /> Manage Users
                 </h1>
 

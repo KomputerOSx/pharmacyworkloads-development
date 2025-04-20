@@ -4,15 +4,7 @@ import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/lib/context/AuthContext";
-import {
-    AlertTriangle,
-    CheckCircle,
-    Info,
-    Loader,
-    X,
-    XCircle,
-} from "lucide-react";
-
+import { ThemeProvider } from "@/components/common/theme-provider";
 // Function to create a QueryClient instance
 function makeQueryClient() {
     return new QueryClient({
@@ -40,18 +32,25 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     const queryClient = getQueryClient();
 
     return (
-        <AuthProvider>
-            <QueryClientProvider client={queryClient}>
-                {children}
-                <Toaster
-                    richColors={true}
-                    toastOptions={{
-                        closeButton: true,
-                        closeButtonAriaLabel: "Close",
-                        duration: 3000,
-                    }}
-                />
-            </QueryClientProvider>
-        </AuthProvider>
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+        >
+            <AuthProvider>
+                <QueryClientProvider client={queryClient}>
+                    {children}
+                    <Toaster
+                        richColors={true}
+                        toastOptions={{
+                            closeButton: true,
+                            closeButtonAriaLabel: "Close",
+                            duration: 3000,
+                        }}
+                    />
+                </QueryClientProvider>
+            </AuthProvider>
+        </ThemeProvider>
     );
 }

@@ -13,6 +13,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Edit, Settings2, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface ModuleTableProps {
     modules: Module[];
@@ -79,12 +80,15 @@ export function ModuleTable({
                             {module.accessLevel}
                         </TableCell>
                         <TableCell>
-                            {/* Status Badge remains the same */}
-                            <span
-                                className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${module.active ? "..." : "..."}`}
+                            <Badge
+                                variant={
+                                    module.active ? "success" : "destructive"
+                                }
+                                className="text-xs"
                             >
-                                {module.active ? "Active" : "Inactive"}
-                            </span>
+                                {" "}
+                                {module.active ? "Active" : "Inactive"}{" "}
+                            </Badge>
                         </TableCell>
                         <TableCell className="text-right space-x-1">
                             {/* Manage Assignments Button */}

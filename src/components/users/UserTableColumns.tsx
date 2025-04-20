@@ -18,7 +18,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { User } from "@/types/userTypes";
 
-// Define the type for your custom meta data
 interface UserTableMeta {
     departmentNameMap: Map<string, string>;
     isLoadingDepartmentMap: boolean;

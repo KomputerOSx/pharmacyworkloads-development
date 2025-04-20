@@ -1,10 +1,9 @@
 // src/app/layout.tsx
 import "./globals.css";
-import "@/styles/themes.css"; // Ensure path is correct
-
+import "@/styles/themes.css";
 import React, { ReactNode } from "react";
 import Providers from "./providers";
-import { Metadata } from "next"; // Import the client wrapper
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
     title: "Pharmacy Workloads",
@@ -12,9 +11,8 @@ export const metadata: Metadata = {
 };
 export default function RootLayout({ children }: { children: ReactNode }) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
             <body>
-                {/* Render the Providers Client Component here */}
                 <Providers>{children}</Providers>
             </body>
         </html>
