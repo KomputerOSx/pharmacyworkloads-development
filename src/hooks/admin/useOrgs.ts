@@ -11,7 +11,7 @@ import {
     updateOrg,
     deleteOrg,
     // Assuming Org type is exported from orgTypes.ts
-} from "@/services/orgService";
+} from "@/services/admin/orgService";
 import { Org } from "@/types/orgTypes";
 import { toast } from "sonner"; // Adjust path if needed
 

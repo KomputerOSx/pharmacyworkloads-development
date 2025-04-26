@@ -52,18 +52,21 @@ import {
     useDeleteWeekAssignments,
     useRotaAssignmentsByWeekAndTeam,
     useSaveWeekAssignments,
-} from "@/hooks/useRotaAssignments";
+} from "@/hooks/weekly-rota/useRotaAssignments";
 import {
     rotaWeekStatusKeys,
     useDeleteWeekStatus,
     useSetWeekStatus,
     useWeekStatus,
-} from "@/hooks/useRotaWeekStatus";
+} from "@/hooks/weekly-rota/useRotaWeekStatus";
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useQueryClient } from "@tanstack/react-query";
-import { useDepTeam } from "@/hooks/useDepTeams";
-import { getAssignmentsByWeekAndTeam } from "@/services/rotaAssignmentsService";
+import { useDepTeam } from "@/hooks/admin/useDepTeams";
+import { getAssignmentsByWeekAndTeam } from "@/services/weekly-rota/rotaAssignmentsService";
+import { useAuth } from "@/lib/context/AuthContext";
+import { useUser } from "@/hooks/admin/useUsers";
+import { createMail, emailTemplates } from "@/services/mail/mailService";
 
 interface UserRotaManagerProps {
     users: User[];
@@ -84,6 +87,9 @@ export function UserRotaManager({
 }: UserRotaManagerProps) {
     const queryClient = useQueryClient();
 
+    const { user: authUser } = useAuth();
+    const { data: currentUser } = useUser(authUser?.uid);
+
     const [date, setDate] = useState<Date>(new Date());
     const [assignments, setAssignments] = useState<
         Record<string, StoredAssignment[]>
@@ -102,6 +108,9 @@ export function UserRotaManager({
     const [notificationDialog, setNotificationDialog] = useState<{
         open: boolean;
     }>({ open: false });
+    const [notificationHandler, setNotificationHandler] = useState<
+        ((userIds: string[]) => void) | null
+    >(null);
     const [exportDialog, setExportDialog] = useState<{
         open: boolean;
         isExporting: boolean;
@@ -176,7 +185,6 @@ export function UserRotaManager({
         teamId,
     ]);
 
-    //new use effect
     useEffect(() => {
         if (fetchedAssignments && !isLoadingAssignments) {
             // Combine initial users and users found in fetched assignments
@@ -379,59 +387,6 @@ export function UserRotaManager({
         });
     }, []);
 
-    // const addCustomLocationToList = useCallback(
-    //     (name: string): HospLoc | null => {
-    //         if (name.trim() === "") return null;
-    //         const trimmedName = name.trim();
-    //         const nameLower = trimmedName.toLowerCase();
-    //
-    //         // Check against ALL available locations (dept + existing custom state)
-    //         if (
-    //             allAvailableLocations.some(
-    //                 (loc) => loc.name.toLowerCase() === nameLower,
-    //             )
-    //         ) {
-    //             toast.error(`Location "${trimmedName}" already exists.`);
-    //             // Find and return the existing one if needed? Or just return null?
-    //             return (
-    //                 allAvailableLocations.find(
-    //                     (loc) => loc.name.toLowerCase() === nameLower,
-    //                 ) || null
-    //             );
-    //             // return null;
-    //         }
-    //
-    //         // Create the new custom location object
-    //         const newId = `custom-${Date.now()}-${Math.random().toString(16).substring(2, 8)}`;
-    //         const newCustomLoc: HospLoc = {
-    //             id: newId,
-    //             name: trimmedName,
-    //             type: "custom",
-    //             hospId: "",
-    //             orgId: orgId,
-    //             description: "Custom added location",
-    //             address: null,
-    //             contactEmail: null,
-    //             contactPhone: null,
-    //             active: true,
-    //             isDeleted: false,
-    //             createdAt: Timestamp.now(),
-    //             updatedAt: Timestamp.now(),
-    //             createdById: currentUserId,
-    //             updatedById: currentUserId,
-    //         };
-    //
-    //         // Add to the customLocations state
-    //         setCustomLocations((prev) => [...prev, newCustomLoc]);
-    //         console.log(
-    //             "Added custom location to temporary list:",
-    //             newCustomLoc,
-    //         );
-    //         return newCustomLoc; // Return the newly created object
-    //     },
-    //     [allAvailableLocations, orgId, currentUserId],
-    // );
-
     const handleAddCustomLocationAssignment = useCallback(
         (
             userId: string,
@@ -539,6 +494,81 @@ export function UserRotaManager({
         );
     }, [usersToDisplay, weekDays, weekId, assignments, teamId]);
 
+    const sendNotifications = useCallback(
+        async (userIds: string[], type: "published" | "updated") => {
+            if (!currentUser) {
+                toast.error("Cannot send notifications: User data not loaded.");
+                return;
+            }
+
+            const usersToNotify = usersToDisplay.filter((user) =>
+                userIds.includes(user.id),
+            );
+            const arrayOfEmails = usersToNotify.map((user) => user.email);
+            //  teamName   ,   weekNumber  ,   weekYear   ,  ${currentUser?.firstName} ${currentUser?.lastName}
+
+            let template: { subject: string; body: string } = {
+                subject: "",
+                body: "",
+            };
+            if (type === "published") {
+                template = emailTemplates.published_rota(
+                    currentUser,
+                    teamName,
+                    weekNumber,
+                    parseInt(weekYear, 10),
+                );
+            } else if (type === "updated") {
+                template = emailTemplates.updates_to_rota(
+                    currentUser,
+                    teamName,
+                    weekNumber,
+                    parseInt(weekYear, 10),
+                );
+            }
+
+            // const subject = `${teamName} Rota - Week ${weekNumber} (${weekYear})`;
+            // const body = `Hello,\n\nThe rota for ${teamName} for Week ${weekNumber} (${weekYear}) has been published. Please check your assignments.\n\nBest regards,\n${currentUser?.firstName} ${currentUser?.lastName}`;
+            // await createMail(arrayOfEmails, subject, body);
+            // toast.success(
+            //     `Notifications Sent to ${userToNotify.length} User(s).`,
+            // );
+            try {
+                await createMail(
+                    arrayOfEmails,
+                    template.subject,
+                    template.body,
+                );
+                toast.success(
+                    `${type === "published" ? "Publication" : "Update"} Notifications Sent to ${usersToNotify.length} User(s).`,
+                );
+            } catch (error) {
+                console.error("Error sending mail:", error);
+                toast.error("Failed to send notifications.");
+            }
+        },
+        [currentUser, teamName, usersToDisplay, weekNumber, weekYear],
+    );
+
+    const handleSendPublishedNotification = useCallback(
+        (selectedUserIds: string[]) => {
+            void sendNotifications(selectedUserIds, "published");
+        },
+        [sendNotifications],
+    );
+
+    const handleSendUpdateNotification = useCallback(
+        (selectedUserIds: string[]) => {
+            void sendNotifications(selectedUserIds, "updated");
+        },
+        [sendNotifications],
+    );
+
+    const handleSendNotifications = useCallback(() => {
+        setNotificationHandler(() => handleSendUpdateNotification);
+        setNotificationDialog({ open: true });
+    }, [handleSendUpdateNotification]);
+
     const handleSetStatus = useCallback(
         (newStatus: "draft" | "published") => {
             const actionToConfirm = () => {
@@ -554,6 +584,9 @@ export function UserRotaManager({
                             },
                             {
                                 onSuccess: () => {
+                                    setNotificationHandler(
+                                        () => handleSendPublishedNotification,
+                                    );
                                     setNotificationDialog({ open: true });
                                 },
                                 onError: () => {},
@@ -593,14 +626,15 @@ export function UserRotaManager({
             }
         },
         [
+            usersWithNoAssignments.length,
+            performSave,
+            setStatusMutate,
             weekId,
             teamId,
             orgId,
             currentUserId,
-            setStatusMutate,
-            usersWithNoAssignments,
+            handleSendPublishedNotification,
             showConfirmation,
-            performSave,
         ],
     );
 
@@ -648,23 +682,6 @@ export function UserRotaManager({
         deleteStatusMutate,
         showConfirmation,
     ]);
-
-    const sendNotifications = useCallback(
-        (userIds: string[]) => {
-            const userToNotify = usersToDisplay.filter((user) =>
-                userIds.includes(user.id),
-            );
-            toast.success(
-                `Notifications Sent (Simulated) to ${userToNotify.length} User(s).`,
-            );
-        },
-        [usersToDisplay],
-    );
-
-    const handleSendNotifications = useCallback(
-        () => setNotificationDialog({ open: true }),
-        [],
-    );
 
     const handleExport = useCallback(
         async (
@@ -1131,7 +1148,6 @@ export function UserRotaManager({
             <div className="w-full overflow-x-auto border rounded-md">
                 <Table className="w-full table-fixed min-w-[1080px]">
                     <TableCaption className="mt-4 mb-2">
-                        {" "}
                         {/* Added margin bottom */}
                         {teamName} Rota - Week {weekNumber} ({weekYear})
                     </TableCaption>
@@ -1245,13 +1261,31 @@ export function UserRotaManager({
                 description={confirmationDialog.description}
                 onConfirm={confirmationDialog.onConfirm}
             />
+            {/*<NotificationDialog*/}
+            {/*    open={notificationDialog.open}*/}
+            {/*    onOpenChange={(open) =>*/}
+            {/*        setNotificationDialog({ ...notificationDialog, open: open })*/}
+            {/*    }*/}
+            {/*    allUsers={usersToDisplay}*/}
+            {/*    onSendNotifications={sendNotifications}*/}
+            {/*/>*/}
             <NotificationDialog
                 open={notificationDialog.open}
-                onOpenChange={(open) =>
-                    setNotificationDialog({ ...notificationDialog, open: open })
-                }
+                onOpenChange={(open) => {
+                    setNotificationDialog({ open: open });
+                    if (!open) setNotificationHandler(null);
+                }}
                 allUsers={usersToDisplay}
-                onSendNotifications={sendNotifications}
+                onSendNotifications={(selectedUserIds) => {
+                    if (notificationHandler) {
+                        notificationHandler(selectedUserIds);
+                    } else {
+                        console.error("Notification handler not set!");
+                        toast.error(
+                            "Could not send notifications. Handler missing.",
+                        );
+                    }
+                }}
             />
             <ExportDialog
                 open={exportDialog.open}

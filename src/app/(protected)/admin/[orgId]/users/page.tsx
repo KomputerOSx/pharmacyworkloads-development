@@ -19,8 +19,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, Terminal, Users as UsersIcon } from "lucide-react"; // Added UsersIcon
 
 // Custom Hooks and Components
-import { useUsers, useDeleteUser } from "@/hooks/useUsers"; // Ensure path is correct
-import { useDeps } from "@/hooks/useDeps"; // Ensure path is correct for fetching departments
+import { useUsers, useDeleteUser } from "@/hooks/admin/useUsers"; // Ensure path is correct
+import { useDeps } from "@/hooks/admin/useDeps"; // Ensure path is correct for fetching departments
 import { AddUserForm } from "@/components/users/AddUserForm"; // Create this component
 import { EditUserForm } from "@/components/users/EditUserForm"; // Create this component
 import { UserDataTable } from "@/components/users/UserDataTable"; // Create this component

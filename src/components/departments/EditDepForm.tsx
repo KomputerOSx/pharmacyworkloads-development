@@ -23,7 +23,7 @@ import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Project Imports
-import { useUpdateDep } from "@/hooks/useDeps"; // *** IMPORTANT: Assuming useUpdateDep hook exists ***
+import { useUpdateDep } from "@/hooks/admin/useDeps"; // *** IMPORTANT: Assuming useUpdateDep hook exists ***
 import { Department } from "@/types/depTypes";
 
 // Zod Schema for Department Edit

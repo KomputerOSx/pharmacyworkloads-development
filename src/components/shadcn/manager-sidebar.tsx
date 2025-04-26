@@ -25,7 +25,7 @@ import {
     SidebarRail,
 } from "@/components/ui/sidebar";
 import { useParams, useRouter } from "next/navigation";
-import { useOrgs } from "@/hooks/useOrgs";
+import { useOrgs } from "@/hooks/admin/useOrgs";
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 // Import the types if defined here, or from a shared file
 export interface NavLinkItem {

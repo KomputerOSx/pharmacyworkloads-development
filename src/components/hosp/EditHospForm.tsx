@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useUpdateHosp } from "@/hooks/useHosps"; // Import the update hook
+import { useUpdateHosp } from "@/hooks/admin/useHosps"; // Import the update hook
 import { Hosp } from "@/types/hospTypes";
 
 // Schema remains the same

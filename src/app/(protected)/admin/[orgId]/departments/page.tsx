@@ -18,7 +18,7 @@ import { AddDepFrom } from "@/components/departments/AddDepFrom";
 import { DepCard } from "@/components/departments/DepCard";
 import { EditDepForm } from "@/components/departments/EditDepForm";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
-import { useDeps, useDeleteDep } from "@/hooks/useDeps";
+import { useDeps, useDeleteDep } from "@/hooks/admin/useDeps";
 import { Department } from "@/types/depTypes";
 
 export default function DepartmentsPage() {

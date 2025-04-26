@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ADMIN_USER_ROLES, MANAGER_USER_ROLES } from "@/config/roles";
-import { useUpdateUser, useUser } from "@/hooks/useUsers"; // Adjust path
+import { useUpdateUser, useUser } from "@/hooks/admin/useUsers"; // Adjust path
 import { Department } from "@/types/depTypes"; // Adjust path
 import { User } from "@/types/userTypes"; // Adjust path
 import {

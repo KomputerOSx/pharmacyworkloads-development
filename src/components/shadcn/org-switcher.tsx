@@ -20,7 +20,7 @@ import { useState } from "react";
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 import Link from "next/link";
 import { useAuth } from "@/lib/context/AuthContext";
-import { useUser } from "@/hooks/useUsers";
+import { useUser } from "@/hooks/admin/useUsers";
 
 export function OrgSwitcher({
     orgs,

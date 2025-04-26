@@ -4,7 +4,7 @@ import {
     createUserTeamAssignment,
     deleteUserTeamAssignment,
     updateUserTeamAssignmentDates,
-} from "@/services/userTeamAssService";
+} from "@/services/admin/userTeamAssService";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";

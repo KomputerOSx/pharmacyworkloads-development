@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import type { HospLoc } from "@/types/subDepTypes";
-import { useHospLocs } from "@/hooks/useHospLoc";
+import { useHospLocs } from "@/hooks/admin/useHospLoc";
 import { useParams } from "next/navigation";
 
 interface LocationSelectorProps {

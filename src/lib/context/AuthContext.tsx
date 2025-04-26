@@ -25,7 +25,7 @@ import {
 } from "firebase/auth";
 import { auth } from "@/config/firebase";
 import { useRouter } from "next/navigation";
-import { updateLastLogin } from "@/services/userService";
+import { updateLastLogin } from "@/services/admin/userService";
 import { toast } from "sonner";
 
 const EMAIL_FOR_SIGN_IN_KEY = "emailForSignIn";

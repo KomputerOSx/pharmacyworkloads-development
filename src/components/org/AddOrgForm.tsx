@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox"; // Import Checkbox
 
-import { useOrgs, useCreateOrg } from "@/hooks/useOrgs";
+import { useOrgs, useCreateOrg } from "@/hooks/admin/useOrgs";
 import { getOrganisationTypes } from "@/types/orgTypes";
 
 const formSchema = z.object({

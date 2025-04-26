@@ -6,7 +6,7 @@ import {
     getDepHospLocAssignment,
     getDepHospLocAssignments,
     updateDepHospLocAssignment,
-} from "@/services/depHospLocAssService";
+} from "@/services/admin/depHospLocAssService";
 import { toast } from "sonner";
 
 export const depAssKeys = {

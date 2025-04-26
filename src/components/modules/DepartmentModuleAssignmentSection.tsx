@@ -2,12 +2,12 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { useAllModules } from "@/hooks/useModules";
+import { useAllModules } from "@/hooks/admin/useModules";
 import {
     useDepModuleAssignments,
     useCreateDepModuleAssignment,
     useDeleteDepModuleAssignment,
-} from "@/hooks/useDepModuleAss";
+} from "@/hooks/admin/useDepModuleAss";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import {

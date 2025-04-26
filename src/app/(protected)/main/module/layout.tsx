@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useModule } from "@/hooks/useModules"; // Hook to fetch single module details
+import { useModule } from "@/hooks/admin/useModules"; // Hook to fetch single module details
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";

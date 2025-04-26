@@ -26,12 +26,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/context/AuthContext";
-import { useUser } from "@/hooks/useUsers";
-import { useDepModuleAssignments } from "@/hooks/useDepModuleAss";
-import { useModulesByIds } from "@/hooks/useModules";
+import { useUser } from "@/hooks/admin/useUsers";
+import { useDepModuleAssignments } from "@/hooks/admin/useDepModuleAss";
+import { useModulesByIds } from "@/hooks/admin/useModules";
 import { Module } from "@/types/moduleTypes";
-import { useOrg } from "@/hooks/useOrgs";
-import { useDep } from "@/hooks/useDeps";
+import { useOrg } from "@/hooks/admin/useOrgs";
+import { useDep } from "@/hooks/admin/useDeps";
 
 // --- Icon Mapping (Same as before) ---
 const iconMap: Record<string, LucideIcon> = {

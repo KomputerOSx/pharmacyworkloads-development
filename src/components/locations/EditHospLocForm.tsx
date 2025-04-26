@@ -33,8 +33,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Your project imports
 // *** IMPORTANT: Create and import the update hook ***
-import { useUpdateHospLoc } from "@/hooks/useHospLoc"; // Assuming you have this hook
-import { useHosps } from "@/hooks/useHosps";
+import { useUpdateHospLoc } from "@/hooks/admin/useHospLoc"; // Assuming you have this hook
+import { useHosps } from "@/hooks/admin/useHosps";
 
 import { getHospLocTypes, HospLoc } from "@/types/subDepTypes";
 

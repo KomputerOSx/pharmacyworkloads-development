@@ -8,12 +8,12 @@ import { useParams, useRouter } from "next/navigation";
 import { AdminSidebar } from "@/components/shadcn/admin-sidebar";
 import { SiteHeader } from "@/components/shadcn/site-header";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { useOrgs } from "@/hooks/useOrgs";
+import { useOrgs } from "@/hooks/admin/useOrgs";
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 
 // --- Imports for Authorization ---
 import { useAuth } from "@/lib/context/AuthContext";
-import { useUser } from "@/hooks/useUsers";
+import { useUser } from "@/hooks/admin/useUsers";
 
 export default function AdminOrgLayout({ children }: { children: ReactNode }) {
     // --- Hooks ---

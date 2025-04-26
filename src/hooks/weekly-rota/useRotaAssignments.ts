@@ -12,10 +12,10 @@ import {
     saveWeekAssignmentsBatch,
     getAssignmentsByWeekAndTeam,
     deleteWeekAssignmentsBatch,
-} from "@/services/rotaAssignmentsService";
+} from "@/services/weekly-rota/rotaAssignmentsService";
 
 import { StoredAssignment } from "@/types/rotaTypes";
-import { rotaWeekStatusKeys } from "@/hooks/useRotaWeekStatus";
+import { rotaWeekStatusKeys } from "@/hooks/weekly-rota/useRotaWeekStatus";
 
 export const assignmentKeys = {
     all: ["assignments"] as const,

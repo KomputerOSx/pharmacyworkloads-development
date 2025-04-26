@@ -16,7 +16,7 @@ import {
 // Remove unused AlertDialog imports from here if they were only for delete
 import { Button } from "@/components/ui/button"; // Adjust path
 import { AddHospForm } from "@/components/hosp/AddHospForm"; // Adjust path
-import { useDeleteHosp, useHosps } from "@/hooks/useHosps"; // Adjust path
+import { useDeleteHosp, useHosps } from "@/hooks/admin/useHosps"; // Adjust path
 import { Hosp } from "@/types/hospTypes"; // Adjust path
 import { EditHospForm } from "@/components/hosp/EditHospForm"; // Adjust path
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";

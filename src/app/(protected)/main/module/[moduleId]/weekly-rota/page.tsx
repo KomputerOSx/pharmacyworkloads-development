@@ -3,8 +3,8 @@
 import React, { useMemo } from "react";
 import Link from "next/link";
 // Removed useDeps hook
-import { useDep } from "@/hooks/useDeps";
-import { useDepTeams } from "@/hooks/useDepTeams";
+import { useDep } from "@/hooks/admin/useDeps";
+import { useDepTeams } from "@/hooks/admin/useDepTeams";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import {
     Users, // Example icon
 } from "lucide-react";
 import { useAuth } from "@/lib/context/AuthContext";
-import { useUser } from "@/hooks/useUsers";
+import { useUser } from "@/hooks/admin/useUsers";
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 import { signOut } from "firebase/auth";
 import { auth } from "@/config/firebase";

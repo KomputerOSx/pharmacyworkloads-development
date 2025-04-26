@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
 // Hooks
-import { useDep, useUpdateDep, useDeleteDep } from "@/hooks/useDeps";
+import { useDep, useUpdateDep, useDeleteDep } from "@/hooks/admin/useDeps";
 
 // Common Components
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";

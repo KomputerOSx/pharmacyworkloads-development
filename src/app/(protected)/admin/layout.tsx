@@ -4,7 +4,7 @@
 import React, { ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/context/AuthContext"; // Adjust path if needed
-import { useUser } from "@/hooks/useUsers"; // Adjust path if needed
+import { useUser } from "@/hooks/admin/useUsers"; // Adjust path if needed
 import { LoadingSpinner } from "@/components/ui/loadingSpinner"; // Adjust path if needed
 
 export default function GeneralAdminLayout({

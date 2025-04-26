@@ -4,7 +4,7 @@
 import "../../../../styles/console/orgConsole.css";
 import { OrgCard } from "@/components/org/OrgCard"; // Assuming this exists
 import { AddOrgForm } from "@/components/org/AddOrgForm"; // Assuming this exists and uses useAddOrganisation internally
-import { useOrgs } from "@/hooks/useOrgs"; // Import the new hook!
+import { useOrgs } from "@/hooks/admin/useOrgs"; // Import the new hook!
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 import {

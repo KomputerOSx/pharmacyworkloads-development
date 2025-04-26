@@ -18,8 +18,8 @@ import { db } from "@/config/firebase";
 import { mapFirestoreDocToDep } from "@/lib/firestoreUtil";
 import { Department } from "@/types/depTypes";
 
-import { deleteDepTeamHospLocAssignmentsByDepartment } from "@/services/depTeamHospLocAssService";
-import { deleteDepModuleAssignmentsByDepartment } from "@/services/depModulesAssService";
+import { deleteDepTeamHospLocAssignmentsByDepartment } from "@/services/admin/depTeamHospLocAssService";
+import { deleteDepModuleAssignmentsByDepartment } from "@/services/admin/depModulesAssService";
 
 const DepartmentsCollection = collection(db, "departments");
 

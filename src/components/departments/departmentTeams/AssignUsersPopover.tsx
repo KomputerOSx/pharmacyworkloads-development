@@ -7,7 +7,7 @@ import {
     useUserTeamAssignmentsByTeam,
     useCreateUserTeamAssignment,
     useDeleteUserTeamAssignment,
-} from "@/hooks/useUserTeamAss";
+} from "@/hooks/admin/useUserTeamAss";
 import { Button } from "@/components/ui/button";
 import {
     Popover,

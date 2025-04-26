@@ -23,7 +23,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Your project imports
 
-import { useCreateDep, useDeps } from "@/hooks/useDeps";
+import { useCreateDep, useDeps } from "@/hooks/admin/useDeps";
 import { Department } from "@/types/depTypes"; // Assuming description is in HospLoc
 
 // --- Zod Schema Definition ---

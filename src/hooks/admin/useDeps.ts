@@ -5,7 +5,7 @@ import {
     getDep,
     getDeps,
     updateDep,
-} from "@/services/depService";
+} from "@/services/admin/depService";
 import { Department } from "@/types/depTypes";
 import { toast } from "sonner";
 

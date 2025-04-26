@@ -3,8 +3,8 @@
 import React, { useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { useDeps } from "@/hooks/useDeps";
-import { useAllOrgTeams } from "@/hooks/useDepTeams"; // Use the correct hook
+import { useDeps } from "@/hooks/admin/useDeps";
+import { useAllOrgTeams } from "@/hooks/admin/useDepTeams"; // Use the correct hook
 import { DepTeam } from "@/types/subDepTypes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";

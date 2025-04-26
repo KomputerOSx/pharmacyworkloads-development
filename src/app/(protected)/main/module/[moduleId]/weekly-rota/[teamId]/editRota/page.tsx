@@ -4,11 +4,11 @@
 import { useParams } from "next/navigation";
 import React, { useMemo } from "react";
 import { UserRotaManager } from "@/components/rota/user-rota-manager";
-import { useUser, useUsers } from "@/hooks/useUsers";
-import { useHospLocs } from "@/hooks/useHospLoc";
-import { useDepTeam } from "@/hooks/useDepTeams";
-import { useDepHospLocAssignments } from "@/hooks/useDepHospLocAss";
-import { useUserTeamAssignmentsByTeam } from "@/hooks/useUserTeamAss";
+import { useUser, useUsers } from "@/hooks/admin/useUsers";
+import { useHospLocs } from "@/hooks/admin/useHospLoc";
+import { useDepTeam } from "@/hooks/admin/useDepTeams";
+import { useDepHospLocAssignments } from "@/hooks/admin/useDepHospLocAss";
+import { useUserTeamAssignmentsByTeam } from "@/hooks/admin/useUserTeamAss";
 import { useAuth } from "@/lib/context/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";

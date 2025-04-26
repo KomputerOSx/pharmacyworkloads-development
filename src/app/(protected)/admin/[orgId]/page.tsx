@@ -8,7 +8,7 @@ import { DataTable } from "@/components/shadcn/data-table";
 import { SectionCards } from "@/components/shadcn/section-cards";
 
 import data from "./data.json";
-import { useOrgs } from "@/hooks/useOrgs";
+import { useOrgs } from "@/hooks/admin/useOrgs";
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 import { Redirector } from "@/components/shadcn/Redirector";
 

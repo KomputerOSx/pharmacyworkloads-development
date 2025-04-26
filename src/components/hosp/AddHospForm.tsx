@@ -237,7 +237,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import { useCreateHosp } from "@/hooks/useHosps";
+import { useCreateHosp } from "@/hooks/admin/useHosps";
 
 const formSchema = z.object({
     name: z.string().min(2, {

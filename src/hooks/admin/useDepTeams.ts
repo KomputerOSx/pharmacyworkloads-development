@@ -5,7 +5,7 @@ import {
     updateDepTeam,
     deleteDepTeam,
     getAllOrgTeams,
-} from "@/services/depTeamsService";
+} from "@/services/admin/depTeamsService";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";

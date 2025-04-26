@@ -23,7 +23,7 @@ import {
     SidebarRail,
 } from "@/components/ui/sidebar";
 import { useParams, useRouter } from "next/navigation";
-import { useOrgs } from "@/hooks/useOrgs";
+import { useOrgs } from "@/hooks/admin/useOrgs";
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 export interface NavLinkItem {
     type: "link";

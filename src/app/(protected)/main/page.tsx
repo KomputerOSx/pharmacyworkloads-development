@@ -5,9 +5,9 @@ import Link from "next/link";
 import { signOut } from "firebase/auth";
 import { auth } from "@/config/firebase";
 import { useAuth } from "@/lib/context/AuthContext";
-import { useUser } from "@/hooks/useUsers";
-import { useDepModuleAssignments } from "@/hooks/useDepModuleAss";
-import { useModulesByIds } from "@/hooks/useModules";
+import { useUser } from "@/hooks/admin/useUsers";
+import { useDepModuleAssignments } from "@/hooks/admin/useDepModuleAss";
+import { useModulesByIds } from "@/hooks/admin/useModules";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -22,7 +22,7 @@ import {
     Terminal,
     Users,
 } from "lucide-react";
-import { useDep } from "@/hooks/useDeps";
+import { useDep } from "@/hooks/admin/useDeps";
 
 const iconMap: Record<string, LucideIcon> = {
     Package: Package,

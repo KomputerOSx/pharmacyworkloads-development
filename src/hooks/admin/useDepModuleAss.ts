@@ -6,7 +6,7 @@ import {
     deleteDepModuleAssignment,
     getAssignmentsByModule,
     getModuleAssignmentsByDepartment,
-} from "@/services/depModulesAssService";
+} from "@/services/admin/depModulesAssService";
 import { toast } from "sonner";
 import { DepModuleAssignment } from "@/types/moduleTypes";
 

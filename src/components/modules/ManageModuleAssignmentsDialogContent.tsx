@@ -2,8 +2,8 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
-import { useAssignmentsByModule } from "@/hooks/useDepModuleAss";
-import { useOrgs } from "@/hooks/useOrgs";
+import { useAssignmentsByModule } from "@/hooks/admin/useDepModuleAss";
+import { useOrgs } from "@/hooks/admin/useOrgs";
 import { Module, ModuleAssignmentWithDetails } from "@/types/moduleTypes";
 import { Department } from "@/types/depTypes";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/table";
 import { Terminal, Building, Users } from "lucide-react";
 import { Org } from "@/types/orgTypes";
-import { getDeps } from "@/services/depService"; // Building, Users icons
+import { getDeps } from "@/services/admin/depService"; // Building, Users icons
 
 interface ManageModuleAssignmentsDialogContentProps {
     module: Module;

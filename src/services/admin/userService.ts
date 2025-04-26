@@ -17,7 +17,7 @@ import {
 import { db } from "@/config/firebase"; // Assuming your firebase config is here
 import { User } from "@/types/userTypes"; // Assuming your User type is here
 import { mapFirestoreDocToUser } from "@/lib/firestoreUtil";
-import { deleteUserTeamAssignmentsByUser } from "@/services/userTeamAssService";
+import { deleteUserTeamAssignmentsByUser } from "@/services/admin/userTeamAssService";
 
 const UsersCollection = collection(db, "users");
 

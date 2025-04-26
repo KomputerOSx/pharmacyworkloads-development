@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { UserTeamAss } from "@/types/userTypes";
-import { useUpdateUserTeamAssignmentDates } from "@/hooks/useUserTeamAss";
+import { useUpdateUserTeamAssignmentDates } from "@/hooks/admin/useUserTeamAss";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";

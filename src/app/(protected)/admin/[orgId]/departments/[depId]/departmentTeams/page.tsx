@@ -3,19 +3,19 @@
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useDep } from "@/hooks/useDeps";
+import { useDep } from "@/hooks/admin/useDeps";
 import {
     useDepTeams,
     useDeleteDepTeam,
     useUpdateDepTeam,
-} from "@/hooks/useDepTeams";
-import { useHospLocs } from "@/hooks/useHospLoc";
-import { useDepHospLocAssignments } from "@/hooks/useDepHospLocAss"; // ASSUMED HOOK
+} from "@/hooks/admin/useDepTeams";
+import { useHospLocs } from "@/hooks/admin/useHospLoc";
+import { useDepHospLocAssignments } from "@/hooks/admin/useDepHospLocAss"; // ASSUMED HOOK
 import {
     useAssignmentsByTeam,
     useCreateTeamLocAssignment,
     useDeleteTeamLocAssignment,
-} from "@/hooks/useDepTeamHospLocAss";
+} from "@/hooks/admin/useDepTeamHospLocAss";
 import { DepTeam } from "@/types/subDepTypes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -51,7 +51,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { useUsers } from "@/hooks/useUsers";
+import { useUsers } from "@/hooks/admin/useUsers";
 
 const editFormSchema = z.object({
     name: z.string().min(1, "Team name is required"),

@@ -2,9 +2,9 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { useDep } from "@/hooks/useDeps";
-import { useHosps } from "@/hooks/useHosps";
-import { useHospLocs } from "@/hooks/useHospLoc";
+import { useDep } from "@/hooks/admin/useDeps";
+import { useHosps } from "@/hooks/admin/useHosps";
+import { useHospLocs } from "@/hooks/admin/useHospLoc";
 import { AssignedLocationData } from "@/types/depTypes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -16,7 +16,7 @@ import { HospLoc } from "@/types/subDepTypes";
 import {
     useDeleteDepHospLocAssignment,
     useDepHospLocAssignments,
-} from "@/hooks/useDepHospLocAss";
+} from "@/hooks/admin/useDepHospLocAss";
 import { AddDepAssForm } from "@/components/departments/depHospLocAss/AddDepHospLocAssForm";
 import { DepAssignedLocTable } from "@/components/departments/depHospLocAss/DepHospLocAssTable";
 

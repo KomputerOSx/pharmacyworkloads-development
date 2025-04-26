@@ -6,7 +6,7 @@ import {
     getUser,
     getUsers,
     updateUser,
-} from "@/services/userService";
+} from "@/services/admin/userService";
 import { User } from "@/types/userTypes";
 import { toast } from "sonner";
 

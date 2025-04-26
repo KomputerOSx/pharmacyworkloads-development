@@ -4,7 +4,7 @@ import {
     getDepTeamHospLocAssignmentsByDepartment,
     createDepTeamHospLocAssignment,
     deleteDepTeamHospLocAssignment,
-} from "@/services/depTeamHospLocAssService";
+} from "@/services/admin/depTeamHospLocAssService";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";

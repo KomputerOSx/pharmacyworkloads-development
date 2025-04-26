@@ -1,12 +1,12 @@
 // Define the form schema
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import { useHosps } from "@/hooks/useHosps";
-import { useHospLocs } from "@/hooks/useHospLoc";
+import { useHosps } from "@/hooks/admin/useHosps";
+import { useHospLocs } from "@/hooks/admin/useHospLoc";
 import {
     useCreateDepHospLocAssignment,
     useDepHospLocAssignments,
-} from "@/hooks/useDepHospLocAss";
+} from "@/hooks/admin/useDepHospLocAss";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";

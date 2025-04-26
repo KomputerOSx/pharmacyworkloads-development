@@ -182,7 +182,7 @@ import { User } from "@/types/userTypes";
 import {
     useUserTeamAssignmentsByTeam,
     useUpdateUserTeamAssignmentDates,
-} from "@/hooks/useUserTeamAss";
+} from "@/hooks/admin/useUserTeamAss";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";

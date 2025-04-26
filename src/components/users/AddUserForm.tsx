@@ -24,7 +24,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-import { useCreateUser, useUser } from "@/hooks/useUsers";
+import { useCreateUser, useUser } from "@/hooks/admin/useUsers";
 import { Department } from "@/types/depTypes";
 import {
     addUserSchema,

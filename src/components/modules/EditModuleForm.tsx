@@ -5,7 +5,7 @@ import React, { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { useUpdateModule } from "@/hooks/useModules";
+import { useUpdateModule } from "@/hooks/admin/useModules";
 import { Module } from "@/types/moduleTypes";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";

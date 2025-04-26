@@ -18,7 +18,7 @@ interface NotificationDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     allUsers: User[];
-    onSendNotifications: (staffIds: string[]) => void;
+    onSendNotifications: (userIds: string[]) => void;
 }
 
 export function NotificationDialog({

@@ -15,13 +15,13 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, Terminal } from "lucide-react";
-import { useDeleteHospLoc, useHospLocs } from "@/hooks/useHospLoc";
+import { useDeleteHospLoc, useHospLocs } from "@/hooks/admin/useHospLoc";
 import { AddHospLocForm } from "@/components/locations/AddHospLocForm";
 import { HospLocDataTable } from "@/components/locations/HospLocDataTable";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
 import { EditHospLocForm } from "@/components/locations/EditHospLocForm";
 import { Hosp } from "@/types/hospTypes";
-import { useHosps } from "@/hooks/useHosps";
+import { useHosps } from "@/hooks/admin/useHosps";
 import { HospLoc } from "@/types/subDepTypes";
 
 export default function LocationsPage() {

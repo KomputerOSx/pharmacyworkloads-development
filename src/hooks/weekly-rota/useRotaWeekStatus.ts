@@ -11,7 +11,7 @@ import {
     deleteWeekStatus,
     getWeekStatus,
     setWeekStatus,
-} from "@/services/rotaWeekStatusService"; // Adjust path
+} from "@/services/weekly-rota/rotaWeekStatusService"; // Adjust path
 import { WeekStatus } from "@/types/rotaTypes"; // Adjust path
 
 // --- Query Keys ---

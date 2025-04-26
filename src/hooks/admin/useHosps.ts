@@ -4,7 +4,7 @@ import {
     getHospital,
     getHospitals,
     updateHospital,
-} from "@/services/hospitalService";
+} from "@/services/admin/hospitalService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Hosp } from "@/types/hospTypes";
 import { toast } from "sonner";

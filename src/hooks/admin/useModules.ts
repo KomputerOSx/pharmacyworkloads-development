@@ -8,7 +8,7 @@ import {
     getAllModules,
     updateModule,
     getModulesByIds,
-} from "@/services/modulesService";
+} from "@/services/admin/modulesService";
 import { Module } from "@/types/moduleTypes";
 import { toast } from "sonner";
 import { useMemo } from "react";

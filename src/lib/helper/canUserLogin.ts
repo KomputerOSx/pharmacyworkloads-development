@@ -1,6 +1,6 @@
-import { getUser } from "@/services/userService";
-import { getOrg } from "@/services/orgService";
-import { getDep } from "@/services/depService";
+import { getUser } from "@/services/admin/userService";
+import { getOrg } from "@/services/admin/orgService";
+import { getDep } from "@/services/admin/depService";
 
 export async function canUserLogin(authUid: string): Promise<boolean> {
     if (!authUid) {

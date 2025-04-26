@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect, FormEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useOrg, useUpdateOrg, useDeleteOrg } from "@/hooks/useOrgs";
+import { useOrg, useUpdateOrg, useDeleteOrg } from "@/hooks/admin/useOrgs";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
 import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 import { Button, buttonVariants } from "@/components/ui/button";

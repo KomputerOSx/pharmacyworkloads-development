@@ -4,7 +4,7 @@ import {
     createHospLoc,
     updateHospLoc,
     deleteHospLoc,
-} from "@/services/hospLocService";
+} from "@/services/admin/hospLocService";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";

@@ -32,8 +32,8 @@ import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Your project imports
-import { useCreateHospLoc } from "@/hooks/useHospLoc";
-import { useHosps } from "@/hooks/useHosps";
+import { useCreateHospLoc } from "@/hooks/admin/useHospLoc";
+import { useHosps } from "@/hooks/admin/useHosps";
 
 import { getHospLocTypes, HospLoc } from "@/types/subDepTypes"; // Assuming description is in HospLoc
 

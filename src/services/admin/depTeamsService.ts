@@ -15,8 +15,8 @@ import {
 import { db } from "@/config/firebase";
 import { mapFirestoreDocToDepTeam } from "@/lib/firestoreUtil";
 import { DepTeam } from "@/types/subDepTypes";
-import { deleteTeamHospLocAssignmentsByTeam } from "@/services/depTeamHospLocAssService";
-import { deleteUserTeamAssignmentsByTeam } from "@/services/userTeamAssService";
+import { deleteTeamHospLocAssignmentsByTeam } from "@/services/admin/depTeamHospLocAssService";
+import { deleteUserTeamAssignmentsByTeam } from "@/services/admin/userTeamAssService";
 
 const depTeamsCollection = collection(db, "department_teams");
 

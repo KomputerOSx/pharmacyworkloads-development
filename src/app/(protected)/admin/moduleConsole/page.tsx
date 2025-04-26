@@ -3,7 +3,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useAllModules, useDeleteModule } from "@/hooks/useModules";
+import { useAllModules, useDeleteModule } from "@/hooks/admin/useModules";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
