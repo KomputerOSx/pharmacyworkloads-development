@@ -1,5 +1,9 @@
 {
   "projects": {
-    "default": "pharmacyworkloads"
-  }
+    "default": "pharmacyworkloads-development",
+    "prod": "pharmacyworkloads",
+    "dev": "pharmacyworkloads-development"
+  },
+  "targets": {},
+  "etags": {}
 }
