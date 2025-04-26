@@ -230,8 +230,7 @@ export function AssignUsersPopover({
                     <Command>
                         <CommandInput placeholder="Search users by name/email..." />
                         <CommandList>
-                            <ScrollArea className="max-h-[300px]">
-                                {" "}
+                            <ScrollArea className="h-72">
                                 {/* Make list scrollable */}
                                 <CommandEmpty>No users found.</CommandEmpty>
                                 <CommandGroup>
