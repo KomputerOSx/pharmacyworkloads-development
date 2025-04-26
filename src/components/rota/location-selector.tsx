@@ -129,7 +129,7 @@ export function LocationSelector({
                             {allLocations.map((location) => (
                                 <CommandItem
                                     key={location.id}
-                                    value={location.id}
+                                    value={location.name}
                                     onSelect={() => {
                                         onLocationSelect(location.id);
                                         onPopoverOpenChange(false);

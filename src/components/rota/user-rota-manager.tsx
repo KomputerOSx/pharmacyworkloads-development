@@ -232,15 +232,11 @@ export function UserRotaManager({
         return (allOrgUsers ?? []).filter((user) => !activeIdSet.has(user.id));
     }, [activeUserIds, allOrgUsers]);
 
-    // const allAvailableLocations = useMemo(() => {
-    //     const locationMap = new Map<string, HospLoc>();
-    //     departmentLocations.forEach((loc) => locationMap.set(loc.id, loc));
-    //     customLocations.forEach((loc) => locationMap.set(loc.id, loc));
-    //     return Array.from(locationMap.values());
-    // }, [departmentLocations, customLocations]);
-
     const allAvailableLocations = useMemo(() => {
-        return departmentLocations;
+        //only return active locations
+        return (departmentLocations ?? []).filter(
+            (location) => location.active,
+        );
     }, [departmentLocations]);
 
     const currentStatus = useMemo(
