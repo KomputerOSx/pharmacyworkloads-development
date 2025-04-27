@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "deploy:dev": "firebase deploy --only hosting -P dev",
+    "deploy:prod": "firebase deploy --only hosting -P prod"
   },
   "dependencies": {
     "@ag-grid-community/client-side-row-model": "^32.3.4",
