@@ -120,6 +120,48 @@ export async function getAssignmentsByWeekAndTeam( // Renamed for clarity
     }
 }
 
+export async function getAssignmentsByWeekAndUser(
+    weekId: string,
+    userId: string,
+): Promise<StoredAssignment[]> {
+    if (!userId) {
+        console.error("RrMn9Gs4 - getAssignmentsByUser: userId is required.");
+        return [];
+    }
+    try {
+        const assignmentsQuery = query(
+            assignmentsCollection,
+            where("weekId", "==", weekId),
+            where("userId", "==", userId),
+        );
+
+        const assignmentsSnapshot = await getDocs(assignmentsQuery);
+
+        return assignmentsSnapshot.docs
+            .map((doc) => {
+                try {
+                    return mapFirestoreDocToStoredAssignment(
+                        doc.id,
+                        doc.data(),
+                    );
+                } catch (mapError) {
+                    console.error(
+                        `eYfr48V3 - Error mapping assignment document ${doc.id}:`,
+                        mapError,
+                    );
+                    return null;
+                }
+            })
+            .filter((a): a is StoredAssignment => a !== null);
+    } catch (error) {
+        console.error(
+            `8XVRL2a8 - Error fetching assignments for user ${userId}:`,
+            error,
+        );
+        throw new Error(`Failed to retrieve assignments for user ${userId}.`);
+    }
+}
+
 /**
  * Fetches a single assignment by its unique document ID.
  * @param assignmentId The unique Firestore document ID of the assignment.

@@ -62,7 +62,7 @@ export function LoginForm({
         try {
             await loginWithEmail(passwordEmail, password);
             console.log("Password login successful!");
-            router.push(redirectUrl || "/user");
+            router.push(redirectUrl || "/main");
         } catch (err: unknown) {
             console.error("Password login error:", err);
             if (isFirebaseAuthError(err)) {

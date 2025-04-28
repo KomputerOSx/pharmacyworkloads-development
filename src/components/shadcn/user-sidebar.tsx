@@ -11,6 +11,7 @@ import {
     Pill,
     Users,
     ClipboardList,
+    User,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -42,7 +43,9 @@ const iconMap: Record<string, LucideIcon> = {
     Pill,
     Users,
     ClipboardList,
+    User,
     "weekly-rota": CalendarDays,
+    "my-rota": User,
     "daily-workload": ClipboardList,
     "pharmacy-orders": Pill,
 };
@@ -119,6 +122,10 @@ export function UserSidebar({
                 const iconKey = module.icon || module.urlPath;
                 const IconComponent =
                     (iconKey && iconMap[iconKey]) || DefaultModuleIcon;
+
+                console.log(
+                    `Module: ${module.displayName}, Icon Key Used: '${iconKey}', Found in map: ${!!(iconKey && iconMap[iconKey])}, Final Icon: ${IconComponent.displayName || "Default"}`,
+                );
                 return {
                     title: module.displayName,
                     url: `/main/module/${module.id}/${module.urlPath}`,
@@ -225,6 +232,8 @@ export function UserSidebar({
                         currentPath.startsWith(linkUrl) ||
                         pathname === item.url;
 
+                    const Icon = item.icon;
+
                     if (item.disabled) {
                         return (
                             <span
@@ -238,7 +247,7 @@ export function UserSidebar({
                                 )}
                                 title={`${item.title} (Inactive)`}
                             >
-                                <item.icon className="h-4 w-4" /> {item.title}
+                                <Icon className="h-4 w-4" /> {item.title}
                             </span>
                         );
                     }
@@ -258,7 +267,7 @@ export function UserSidebar({
                             )}
                             aria-current={isActive ? "page" : undefined}
                         >
-                            <item.icon className="h-4 w-4" /> {item.title}
+                            <Icon className="h-4 w-4" /> {item.title}
                         </Link>
                     );
                 })}

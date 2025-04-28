@@ -67,9 +67,9 @@ export const shiftPresets: ShiftPreset[] = [
         endTime: "17:00",
         description: "8:30am - 5pm",
         colorClasses: {
-            bg: "bg-sky-100",
-            border: "border-l-sky-400",
-            text: "text-sky-800",
+            bg: "bg-green-100",
+            border: "border-l-green-400",
+            text: "text-green-800",
         },
     },
     {
@@ -128,9 +128,9 @@ export const shiftPresets: ShiftPreset[] = [
         endTime: "",
         description: "Custom hours",
         colorClasses: {
-            bg: "bg-gray-100",
-            border: "border-l-gray-400",
-            text: "text-gray-700",
+            bg: "bg-rose-100",
+            border: "border-l-rose-400",
+            text: "text-rose-700",
         },
     },
 ];

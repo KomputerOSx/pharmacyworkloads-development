@@ -14,7 +14,7 @@ export default function LoginPage() {
         if (!loading) {
             if (user) {
                 console.log(
-                    "User is already logged in. Redirecting from /login to /user...",
+                    "User is already logged in. Redirecting from /login to /main...",
                 );
                 router.replace("/main");
             }

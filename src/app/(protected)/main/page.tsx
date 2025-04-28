@@ -20,6 +20,7 @@ import {
     Package,
     Pill,
     Terminal,
+    User,
     Users,
 } from "lucide-react";
 import { useDep } from "@/hooks/admin/useDeps";
@@ -29,9 +30,11 @@ const iconMap: Record<string, LucideIcon> = {
     CalendarDays: CalendarDays,
     Pill: Pill,
     Users: Users,
+    User: User,
     ClipboardList: ClipboardList,
     "weekly-rota": CalendarDays,
     pharmacy: Pill,
+    "my-rota": User,
 };
 
 export default function UserPage() {

@@ -12,6 +12,7 @@ import {
     saveWeekAssignmentsBatch,
     getAssignmentsByWeekAndTeam,
     deleteWeekAssignmentsBatch,
+    getAssignmentsByWeekAndUser,
 } from "@/services/weekly-rota/rotaAssignmentsService";
 
 import { StoredAssignment } from "@/types/rotaTypes";
@@ -26,12 +27,14 @@ export const assignmentKeys = {
         weekId: string,
         teamId: string, // New key structure
     ) => [...assignmentKeys.lists(), { weekId, teamId }] as const,
+    listByWeekAndUser: (weekId: string, userId: string) =>
+        [...assignmentKeys.lists(), { weekId, userId }] as const,
     details: () => [...assignmentKeys.all, "detail"] as const,
     detail: (assignmentId: string) =>
         [...assignmentKeys.details(), assignmentId] as const,
 };
 
-export function useAssignmentsByWeek(weekId?: string | null) {
+export function useRotaAssignmentsByWeek(weekId?: string | null) {
     return useQuery<StoredAssignment[], Error>({
         queryKey: assignmentKeys.listByWeek(weekId!),
         queryFn: () => {
@@ -72,6 +75,23 @@ export function useRotaAssignmentsByWeekAndTeam(
         retry: 1, // Example: retry once on error
         // Keep previous data while loading new week/team data for smoother transitions
         // keepPreviousData: true, // Consider adding this
+    });
+}
+
+export function useRotaAssignmentsByWeekAndUser(
+    weekId?: string | null,
+    userId?: string | null,
+) {
+    return useQuery<StoredAssignment[], Error>({
+        queryKey: assignmentKeys.listByWeekAndUser(weekId!, userId!),
+        queryFn: () => {
+            if (!weekId || !userId) throw new Error("User ID is required");
+            return getAssignmentsByWeekAndUser(weekId, userId);
+        },
+        enabled: !!userId && !!weekId,
+        staleTime: 5 * 60 * 1000,
+        retry: 3,
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     });
 }
 
