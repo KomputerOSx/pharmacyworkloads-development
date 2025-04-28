@@ -2,7 +2,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState, useCallback } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,6 +15,7 @@ import { CombinedTimePicker } from "./combined-time-picker";
 import { getShiftPreset } from "@/lib/rota-utils";
 import { shiftPresets } from "@/types/rotaTypes";
 import { cn } from "@/lib/utils";
+import { getColorObjectWithDefault } from "@/lib/helper/hospLoc/hospLocColors";
 
 interface AssignmentCardProps {
     assignment: StoredAssignment;
@@ -65,14 +65,26 @@ export function AssignmentCard({
         assignment.customEndTime || "17:00",
     );
 
+    const location = assignment.locationId
+        ? allLocations.find((loc) => loc.id === assignment.locationId)
+        : null;
+
+    const locationColorObj = getColorObjectWithDefault(location?.color);
+
     const shiftPreset = assignment.shiftType
         ? getShiftPreset(assignment.shiftType)
         : null;
-    const colorClasses = shiftPreset?.colorClasses || {
-        bg: "bg-gray-50",
-        border: "border-l-gray-300",
-        text: "text-gray-700",
-    };
+
+    const shiftHasColor = shiftPreset?.colorClasses;
+
+    // Calculate border class - used for the card's left border AND passed to time picker
+    const borderClass = shiftHasColor
+        ? `${shiftPreset.colorClasses?.border ?? ""} ${shiftPreset.colorClasses?.darkBorder ?? ""}`
+        : `${locationColorObj.colorClasses.border ?? ""} ${locationColorObj.colorClasses.darkBorder ?? ""}`;
+
+    // Calculate background and text classes based only on location
+    const bgClass = `${locationColorObj.colorClasses.bg ?? ""} ${locationColorObj.colorClasses.darkBg ?? ""}`;
+    const textClass = `${locationColorObj.colorClasses.text ?? ""} ${locationColorObj.colorClasses.darkText ?? ""}`;
 
     const handleLocationSelect = (
         locationId: string | null,
@@ -137,8 +149,9 @@ export function AssignmentCard({
         <div
             className={cn(
                 "border-l-4 rounded-md p-2 relative flex flex-col",
-                colorClasses.bg,
-                colorClasses.border,
+                bgClass,
+                borderClass,
+                textClass,
             )}
             onContextMenu={handleContextMenu}
         >
@@ -159,7 +172,6 @@ export function AssignmentCard({
                 </Button>
             </div>
 
-            {/* Location Selector */}
             <LocationSelector
                 allLocations={allLocations}
                 selectedLocationId={assignment.locationId}
@@ -170,7 +182,6 @@ export function AssignmentCard({
                 onPopoverOpenChange={setLocationPopoverOpen}
             />
 
-            {/* Shift Selector */}
             <div className={"mt-1"}>
                 <ShiftSelector
                     shiftPresets={shiftPresets}
@@ -181,7 +192,8 @@ export function AssignmentCard({
                 />
             </div>
 
-            {/* Custom Time Inputs (shown only when CUSTOM is selected) */}
+            {/* Pass the calculated borderClass to CombinedTimePicker */}
+            {/* NOTE: CombinedTimePicker needs to be updated to accept and use `accentClassName` */}
             {assignment.shiftType === "custom" && (
                 <div className="mt-1">
                     <CombinedTimePicker
@@ -195,12 +207,11 @@ export function AssignmentCard({
                 </div>
             )}
 
-            {/* Display shift time if a shift is selected */}
             {assignment.shiftType && assignment.shiftType !== "custom" && (
                 <div
                     className={cn(
                         "text-xs text-muted-foreground mt-1",
-                        colorClasses.text,
+                        // textClass // Inherits text color from parent div now
                     )}
                 >
                     {formatShiftTime(assignment)}

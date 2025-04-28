@@ -181,6 +181,7 @@ export const mapFirestoreDocToHospLoc = (
         address: (data.address as string) ?? "",
         contactEmail: (data.contactEmail as string) ?? "",
         contactPhone: (data.contactPhone as string) ?? "",
+        color: (data.color as string) ?? "",
         active: (data.active as boolean) ?? false,
         isDeleted: (data.isDeleted as boolean) ?? false,
         createdById: (data.createdById as string) ?? "system",

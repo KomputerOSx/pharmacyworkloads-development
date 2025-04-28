@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-// Shadcn UI Imports
 import { Button } from "@/components/ui/button";
 import {
     Form,
@@ -26,16 +25,15 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea"; // <-- Import Textarea
+import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-// Your project imports
 import { useCreateHospLoc } from "@/hooks/admin/useHospLoc";
 import { useHosps } from "@/hooks/admin/useHosps";
 
-import { getHospLocTypes, HospLoc } from "@/types/subDepTypes"; // Assuming description is in HospLoc
+import { getHospLocTypes, HospLoc, shadcnColors } from "@/types/subDepTypes";
 
 // --- Zod Schema Definition ---
 const formSchema = z.object({
@@ -66,6 +64,7 @@ const formSchema = z.object({
         .min(5, "Phone number seems too short.")
         .optional()
         .or(z.literal("")),
+    color: z.string().optional().default("gray"),
     active: z.boolean().default(true),
 });
 
@@ -99,6 +98,7 @@ export function AddHospLocForm({
             address: "",
             contactEmail: "",
             contactPhone: "",
+            color: "gray",
             active: true,
         },
     });
@@ -115,6 +115,7 @@ export function AddHospLocForm({
             address: values.address || null,
             contactEmail: values.contactEmail || null,
             contactPhone: values.contactPhone || null,
+            color: values.color || "gray",
             active: values.active,
         };
 
@@ -136,6 +137,253 @@ export function AddHospLocForm({
             },
         );
     }
+    //
+    //     return (
+    //         <Form {...form}>
+    //             {createHospLocMutation.isError && (
+    //                 <Alert variant="destructive" className="mb-4">
+    //                     <AlertCircle className="h-4 w-4" />
+    //                     <AlertTitle>Creation Failed</AlertTitle>
+    //                     <AlertDescription>
+    //                         {createHospLocMutation.error?.message ||
+    //                             "An unexpected error occurred."}
+    //                     </AlertDescription>
+    //                 </Alert>
+    //             )}
+    //
+    //             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+    //                 {/* Location Name */}
+    //                 <FormField
+    //                     control={form.control}
+    //                     name="name"
+    //                     render={({ field }) => (
+    //                         <FormItem>
+    //                             <FormLabel>Location Name *</FormLabel>
+    //                             <FormControl>
+    //                                 <Input
+    //                                     placeholder="e.g., Ward 10B, Main Pharmacy"
+    //                                     {...field}
+    //                                     disabled={createHospLocMutation.isPending}
+    //                                 />
+    //                             </FormControl>
+    //                             <FormMessage />
+    //                         </FormItem>
+    //                     )}
+    //                 />
+    //
+    //                 {/* Parent Hospital Selection */}
+    //                 <FormField
+    //                     control={form.control}
+    //                     name="hospId"
+    //                     render={({ field }) => (
+    //                         <FormItem>
+    //                             <FormLabel>Parent Hospital *</FormLabel>
+    //                             {isLoadingHosps && (
+    //                                 <Skeleton className="h-10 w-full" />
+    //                             )}
+    //                             {isErrorHosps && !isLoadingHosps && (
+    //                                 <p className="text-sm text-red-600">
+    //                                     Error loading hospitals:{" "}
+    //                                     {hospsError?.message}
+    //                                 </p>
+    //                             )}
+    //                             {!isLoadingHosps && !isErrorHosps && hospitals && (
+    //                                 <Select
+    //                                     onValueChange={field.onChange}
+    //                                     defaultValue={field.value}
+    //                                     disabled={
+    //                                         createHospLocMutation.isPending ||
+    //                                         isLoadingHosps ||
+    //                                         !hospitals?.length
+    //                                     }
+    //                                 >
+    //                                     <FormControl>
+    //                                         <SelectTrigger>
+    //                                             <SelectValue placeholder="Select parent hospital" />
+    //                                         </SelectTrigger>
+    //                                     </FormControl>
+    //                                     <SelectContent>
+    //                                         {hospitals?.length === 0 && (
+    //                                             <SelectItem value="" disabled>
+    //                                                 No hospitals found for this org
+    //                                             </SelectItem>
+    //                                         )}
+    //                                         {hospitals?.map((hosp) => (
+    //                                             <SelectItem
+    //                                                 key={hosp.id}
+    //                                                 value={hosp.id}
+    //                                             >
+    //                                                 {hosp.name}
+    //                                             </SelectItem>
+    //                                         ))}
+    //                                     </SelectContent>
+    //                                 </Select>
+    //                             )}
+    //                             <FormMessage />
+    //                         </FormItem>
+    //                     )}
+    //                 />
+    //
+    //                 {/* Location Type Selection */}
+    //                 <FormField
+    //                     control={form.control}
+    //                     name="type"
+    //                     render={({ field }) => (
+    //                         <FormItem>
+    //                             <FormLabel>Location Type *</FormLabel>
+    //                             <Select
+    //                                 onValueChange={field.onChange}
+    //                                 defaultValue={field.value}
+    //                                 disabled={createHospLocMutation.isPending}
+    //                             >
+    //                                 <FormControl>
+    //                                     <SelectTrigger>
+    //                                         <SelectValue placeholder="Select type" />
+    //                                     </SelectTrigger>
+    //                                 </FormControl>
+    //                                 <SelectContent>
+    //                                     {locationTypes.map((type) => (
+    //                                         <SelectItem
+    //                                             key={type.id}
+    //                                             value={type.id}
+    //                                         >
+    //                                             {type.name}
+    //                                         </SelectItem>
+    //                                     ))}
+    //                                 </SelectContent>
+    //                             </Select>
+    //                             <FormMessage />
+    //                         </FormItem>
+    //                     )}
+    //                 />
+    //
+    //                 {/* *** Description Field (Using Textarea) *** */}
+    //                 <FormField
+    //                     control={form.control}
+    //                     name="description"
+    //                     render={({ field }) => (
+    //                         <FormItem>
+    //                             <FormLabel>Description (Optional)</FormLabel>
+    //                             <FormControl>
+    //                                 <Textarea
+    //                                     placeholder="Description"
+    //                                     className="resize-y" // Allow vertical resize
+    //                                     {...field}
+    //                                     disabled={createHospLocMutation.isPending}
+    //                                 />
+    //                             </FormControl>
+    //                             <FormDescription>
+    //                                 Additional details about this location.
+    //                             </FormDescription>
+    //                             <FormMessage />
+    //                         </FormItem>
+    //                     )}
+    //                 />
+    //                 {/* ******************************************* */}
+    //
+    //                 {/* Address (Optional) */}
+    //                 <FormField
+    //                     control={form.control}
+    //                     name="address"
+    //                     render={({ field }) => (
+    //                         <FormItem>
+    //                             <FormLabel>Address (Optional)</FormLabel>
+    //                             <FormControl>
+    //                                 <Input
+    //                                     placeholder="Full address..."
+    //                                     {...field}
+    //                                     disabled={createHospLocMutation.isPending}
+    //                                 />
+    //                             </FormControl>
+    //                             <FormDescription>
+    //                                 Specific address within the hospital, if
+    //                                 different.
+    //                             </FormDescription>
+    //                             <FormMessage />
+    //                         </FormItem>
+    //                     )}
+    //                 />
+    //
+    //                 {/* Contact Email (Optional) */}
+    //                 <FormField
+    //                     control={form.control}
+    //                     name="contactEmail"
+    //                     render={({ field }) => (
+    //                         <FormItem>
+    //                             <FormLabel>Contact Email (Optional)</FormLabel>
+    //                             <FormControl>
+    //                                 <Input
+    //                                     placeholder="mail@mail.com"
+    //                                     {...field}
+    //                                     type="email"
+    //                                     disabled={createHospLocMutation.isPending}
+    //                                 />
+    //                             </FormControl>
+    //                             <FormMessage />
+    //                         </FormItem>
+    //                     )}
+    //                 />
+    //
+    //                 {/* Contact Phone (Optional) */}
+    //                 <FormField
+    //                     control={form.control}
+    //                     name="contactPhone"
+    //                     render={({ field }) => (
+    //                         <FormItem>
+    //                             <FormLabel>Contact Phone (Optional)</FormLabel>
+    //                             <FormControl>
+    //                                 <Input
+    //                                     placeholder="0191 000 0000"
+    //                                     {...field}
+    //                                     type="tel"
+    //                                     disabled={createHospLocMutation.isPending}
+    //                                 />
+    //                             </FormControl>
+    //                             <FormMessage />
+    //                         </FormItem>
+    //                     )}
+    //                 />
+    //
+    //                 {/* Active Checkbox */}
+    //                 <FormField
+    //                     control={form.control}
+    //                     name="active"
+    //                     render={({ field }) => (
+    //                         <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+    //                             <FormControl>
+    //                                 <Checkbox
+    //                                     checked={field.value}
+    //                                     onCheckedChange={field.onChange}
+    //                                     disabled={createHospLocMutation.isPending}
+    //                                     id="add-active-checkbox" // Unique ID
+    //                                 />
+    //                             </FormControl>
+    //                             <div className="space-y-1 leading-none">
+    //                                 <FormLabel htmlFor="add-active-checkbox">
+    //                                     Active Location
+    //                                 </FormLabel>
+    //                                 <FormDescription>
+    //                                     Is this location currently active?
+    //                                 </FormDescription>
+    //                             </div>
+    //                             <FormMessage />
+    //                         </FormItem>
+    //                     )}
+    //                 />
+    //
+    //                 <Button
+    //                     type="submit"
+    //                     disabled={createHospLocMutation.isPending || isLoadingHosps}
+    //                     className="w-full sm:w-auto" // Responsive width
+    //                 >
+    //                     {createHospLocMutation.isPending
+    //                         ? "Creating..."
+    //                         : "Create Location"}
+    //                 </Button>
+    //             </form>
+    //         </Form>
+    //     );
+    // }
 
     return (
         <Form {...form}>
@@ -256,7 +504,48 @@ export function AddHospLocForm({
                     )}
                 />
 
-                {/* *** Description Field (Using Textarea) *** */}
+                {/* Color Selection */}
+                <FormField
+                    control={form.control}
+                    name="color"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Color (Optional)</FormLabel>
+                            <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                                disabled={createHospLocMutation.isPending}
+                            >
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select color" />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {shadcnColors.map((color) => (
+                                        <SelectItem
+                                            key={color.id}
+                                            value={color.id}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <div
+                                                    className={`h-4 w-4 rounded-full ${color.colorClasses.swatchBg} border`}
+                                                />
+                                                {color.name}
+                                            </div>
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <FormDescription>
+                                Choose a display color for this location
+                            </FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                {/* Description Field */}
                 <FormField
                     control={form.control}
                     name="description"
@@ -266,7 +555,7 @@ export function AddHospLocForm({
                             <FormControl>
                                 <Textarea
                                     placeholder="Description"
-                                    className="resize-y" // Allow vertical resize
+                                    className="resize-y"
                                     {...field}
                                     disabled={createHospLocMutation.isPending}
                                 />
@@ -278,7 +567,6 @@ export function AddHospLocForm({
                         </FormItem>
                     )}
                 />
-                {/* ******************************************* */}
 
                 {/* Address (Optional) */}
                 <FormField
@@ -354,7 +642,7 @@ export function AddHospLocForm({
                                     checked={field.value}
                                     onCheckedChange={field.onChange}
                                     disabled={createHospLocMutation.isPending}
-                                    id="add-active-checkbox" // Unique ID
+                                    id="add-active-checkbox"
                                 />
                             </FormControl>
                             <div className="space-y-1 leading-none">
@@ -373,7 +661,7 @@ export function AddHospLocForm({
                 <Button
                     type="submit"
                     disabled={createHospLocMutation.isPending || isLoadingHosps}
-                    className="w-full sm:w-auto" // Responsive width
+                    className="w-full sm:w-auto"
                 >
                     {createHospLocMutation.isPending
                         ? "Creating..."

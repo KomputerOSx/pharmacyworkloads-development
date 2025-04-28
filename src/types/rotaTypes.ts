@@ -28,6 +28,11 @@ export type ShiftPreset = {
         bg: string;
         border: string;
         text: string;
+        swatchBg: string;
+        darkBg: string;
+        darkBorder: string;
+        darkText: string;
+        darkSwatchBg: string;
     };
 };
 
@@ -66,11 +71,6 @@ export const shiftPresets: ShiftPreset[] = [
         startTime: "08:30",
         endTime: "17:00",
         description: "8:30am - 5pm",
-        colorClasses: {
-            bg: "bg-green-100",
-            border: "border-l-green-400",
-            text: "text-green-800",
-        },
     },
     {
         id: "am",
@@ -82,6 +82,11 @@ export const shiftPresets: ShiftPreset[] = [
             bg: "bg-emerald-100",
             border: "border-l-emerald-400",
             text: "text-emerald-800",
+            swatchBg: "bg-emerald-500",
+            darkBg: "dark:bg-emerald-900",
+            darkBorder: "dark:border-l-emerald-600",
+            darkText: "dark:text-emerald-200",
+            darkSwatchBg: "dark:bg-emerald-700",
         },
     },
     {
@@ -94,6 +99,11 @@ export const shiftPresets: ShiftPreset[] = [
             bg: "bg-amber-100",
             border: "border-l-amber-400",
             text: "text-amber-800",
+            swatchBg: "bg-amber-500",
+            darkBg: "dark:bg-amber-900",
+            darkBorder: "dark:border-l-amber-600",
+            darkText: "dark:text-amber-200",
+            darkSwatchBg: "dark:bg-amber-700",
         },
     },
 
@@ -104,9 +114,14 @@ export const shiftPresets: ShiftPreset[] = [
         endTime: "20:00",
         description: "12pm - 8pm",
         colorClasses: {
-            bg: "bg-blue-100",
-            border: "border-l-blue-400",
-            text: "text-blue-800",
+            bg: "bg-sky-100",
+            border: "border-l-sky-400",
+            text: "text-sky-800",
+            swatchBg: "bg-sky-500",
+            darkBg: "dark:bg-sky-900",
+            darkBorder: "dark:border-l-sky-600",
+            darkText: "dark:text-sky-200",
+            darkSwatchBg: "dark:bg-sky-700",
         },
     },
     {
@@ -116,9 +131,14 @@ export const shiftPresets: ShiftPreset[] = [
         endTime: "20:00",
         description: "8:30am - 8pm",
         colorClasses: {
-            bg: "bg-purple-100",
-            border: "border-l-purple-400",
-            text: "text-purple-800",
+            bg: "bg-violet-100",
+            border: "border-l-violet-400",
+            text: "text-violet-800",
+            swatchBg: "bg-violet-500",
+            darkBg: "dark:bg-violet-900",
+            darkBorder: "dark:border-l-violet-600",
+            darkText: "dark:text-violet-200",
+            darkSwatchBg: "dark:bg-violet-700",
         },
     },
     {
@@ -128,9 +148,14 @@ export const shiftPresets: ShiftPreset[] = [
         endTime: "",
         description: "Custom hours",
         colorClasses: {
-            bg: "bg-rose-100",
-            border: "border-l-rose-400",
-            text: "text-rose-700",
+            bg: "bg-slate-100",
+            border: "border-l-slate-900",
+            text: "text-slate-800",
+            swatchBg: "bg-slate-500",
+            darkBg: "dark:bg-slate-800",
+            darkBorder: "dark:border-l-slate-500",
+            darkText: "dark:text-slate-200",
+            darkSwatchBg: "dark:bg-slate-700",
         },
     },
 ];
